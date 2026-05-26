@@ -1452,7 +1452,8 @@ function renderRanking() {
   ];
   var tabsHtml = '<div class="rank-tabs">' +
     tabs.map(function(t) {
-      return '<div class="rank-tab' + (t.key === _rankTab ? ' active' : '') + '" onclick="setRankTab('' + t.key + '')">' + t.label + '</div>';
+      var activeCls = t.key === _rankTab ? ' active' : '';
+      return '<div class="rank-tab' + activeCls + '" onclick="setRankTab(\'' + t.key + '\')">' + t.label + '</div>';
     }).join('') +
   '</div>';
 
