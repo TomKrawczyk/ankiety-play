@@ -2,239 +2,250 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>4ECO Field Agent</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--card:#16161f;--card2:#1e1e2a;
-  --green:#00ff88;--green2:#00cc6a;--purple:#8b5cf6;--blue:#3b82f6;--orange:#f97316;--red:#ef4444;--yellow:#eab308;
-  --text:#f0f0ff;--muted:#6b7280;--border:#2a2a38;
+  --bg:#08080e;--bg2:#0f0f18;--bg3:#16161f;--card:#1a1a25;--card2:#20202d;
+  --green:#00ff88;--green2:#00cc6a;--purple:#a78bfa;--blue:#60a5fa;--orange:#fb923c;--red:#f87171;--yellow:#fbbf24;
+  --text:#f0f0ff;--muted:#64748b;--border:#252535;
 }
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 
-/* ===== PARTICLES BG ===== */
-#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
-.particle{position:absolute;width:2px;height:2px;background:var(--green);border-radius:50%;animation:float linear infinite;opacity:0}
-@keyframes float{0%{transform:translateY(100vh) rotate(0deg);opacity:0}10%{opacity:0.6}90%{opacity:0.2}100%{transform:translateY(-100px) rotate(720deg);opacity:0}}
+/* PARTICLES */
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.pt{position:absolute;border-radius:50%;animation:ptFloat linear infinite;opacity:0}
+@keyframes ptFloat{0%{transform:translateY(100vh);opacity:0}10%{opacity:0.5}90%{opacity:0.1}100%{transform:translateY(-50px);opacity:0}}
 
-/* ===== AUTH ===== */
-#authScreen{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
-.auth-glow{position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(0,255,136,0.15) 0%,transparent 70%);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
-.auth-logo-wrap{text-align:center;margin-bottom:32px;position:relative}
-.auth-logo-icon{font-size:3.5em;display:block;margin-bottom:8px;filter:drop-shadow(0 0 20px var(--green))}
-.auth-logo-title{font-size:1.8em;font-weight:900;background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1px}
-.auth-logo-sub{font-size:0.82em;color:var(--muted);margin-top:4px;letter-spacing:2px;text-transform:uppercase}
-.auth-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;position:relative;box-shadow:0 0 40px rgba(0,255,136,0.05)}
-.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),var(--purple));border-radius:20px 20px 0 0}
-.auth-tabs{display:flex;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:24px;gap:4px}
-.auth-tab{flex:1;padding:9px;border:none;background:transparent;border-radius:8px;font-size:0.84em;font-weight:700;color:var(--muted);cursor:pointer;transition:all 0.2s}
-.auth-tab.active{background:var(--green);color:#000}
-.auth-form{display:none}.auth-form.active{display:block}
-.auth-field{margin-bottom:14px}
-.auth-field label{display:block;font-size:0.75em;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
-.auth-field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.95em;color:var(--text);background:var(--bg3);transition:border 0.2s;-webkit-appearance:none}
-.auth-field input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(0,255,136,0.1)}
-.remember-row{display:flex;align-items:center;gap:8px;margin-bottom:18px;cursor:pointer}
-.remember-row input{width:17px;height:17px;accent-color:var(--green);cursor:pointer}
-.remember-row span{font-size:0.84em;color:var(--muted)}
-.btn-auth{width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--green2));color:#000;border:none;border-radius:12px;font-size:1em;font-weight:800;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 4px 20px rgba(0,255,136,0.3)}
-.btn-auth:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(0,255,136,0.4)}
-.auth-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 12px;font-size:0.82em;color:var(--red);margin-bottom:14px;display:none}
-.auth-success{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:8px;padding:10px 12px;font-size:0.82em;color:var(--green);margin-bottom:14px;display:none}
-.auth-hint{text-align:center;font-size:0.78em;color:var(--muted);margin-top:14px}
+/* ============ AUTH ============ */
+#authScreen{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px}
+.auth-bg-glow{position:fixed;width:400px;height:400px;background:radial-gradient(circle,rgba(0,255,136,0.12) 0%,transparent 65%);border-radius:50%;top:40%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.logo-wrap{text-align:center;margin-bottom:28px}
+.logo-icon{font-size:3.8em;animation:logoPulse 2.5s ease-in-out infinite;display:inline-block;filter:drop-shadow(0 0 18px rgba(0,255,136,0.6))}
+@keyframes logoPulse{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.08) rotate(3deg)}}
+.logo-title{font-size:1.9em;font-weight:900;background:linear-gradient(135deg,var(--green) 0%,var(--blue) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1.5px;margin-top:6px}
+.logo-sub{font-size:0.75em;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:4px}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:26px 22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:slideUp 0.5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.auth-card::before{content:'';position:absolute;top:0;left:20px;right:20px;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.atabs{display:flex;background:var(--bg3);border-radius:12px;padding:3px;gap:3px;margin-bottom:20px}
+.atab{flex:1;padding:9px;border:none;background:transparent;border-radius:10px;font-size:0.82em;font-weight:800;color:var(--muted);cursor:pointer;transition:all 0.2s;font-family:'Inter',sans-serif}
+.atab.active{background:var(--green);color:#000;box-shadow:0 2px 10px rgba(0,255,136,0.3)}
+.aform{display:none}.aform.active{display:block}
+.afield{margin-bottom:14px}
+.afield label{display:block;font-size:0.72em;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.afield input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:0.92em;color:var(--text);background:var(--bg3);transition:all 0.2s;font-family:'Inter',sans-serif;-webkit-appearance:none}
+.afield input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(0,255,136,0.12);background:var(--card2)}
+.remember{display:flex;align-items:center;gap:8px;margin-bottom:18px;cursor:pointer}
+.remember input{width:16px;height:16px;accent-color:var(--green)}
+.remember span{font-size:0.8em;color:var(--muted)}
+.btn-auth{width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--green2));color:#000;border:none;border-radius:14px;font-size:0.98em;font-weight:900;cursor:pointer;box-shadow:0 6px 24px rgba(0,255,136,0.35);transition:all 0.2s;font-family:'Inter',sans-serif;letter-spacing:0.3px}
+.btn-auth:active{transform:scale(0.97)}
+.aerr{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);border-radius:10px;padding:9px 12px;font-size:0.8em;color:var(--red);margin-bottom:12px;display:none}
+.aok{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.25);border-radius:10px;padding:9px 12px;font-size:0.8em;color:var(--green);margin-bottom:12px;display:none}
+.ahint{text-align:center;font-size:0.76em;color:var(--muted);margin-top:12px}
 
-/* ===== APP ===== */
-#appScreen{display:none;position:relative;z-index:10}
+/* ============ APP ============ */
+#appScreen{display:none;position:relative;z-index:10;min-height:100vh}
 
 /* HEADER */
-.hdr{background:var(--card);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hdr{background:rgba(10,10,20,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;overflow:hidden}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.4),transparent);animation:scan 3s linear infinite}
+@keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 .hdr-left{display:flex;align-items:center;gap:10px}
-.hdr-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.85em;color:#000;flex-shrink:0}
-.hdr-name{font-weight:800;font-size:0.9em}
-.hdr-level{font-size:0.72em;color:var(--green);font-weight:700}
-.hdr-right{display:flex;align-items:center;gap:8px}
-.xp-pill{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:0.78em;font-weight:700;color:var(--green);display:flex;align-items:center;gap:5px}
-.btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:5px 10px;font-size:0.73em;cursor:pointer}
-
-/* STATS BAR */
-.stats-bar{background:var(--card2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:12px;overflow-x:auto}
-.stat-chip{flex-shrink:0;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px 12px;text-align:center;min-width:70px}
-.stat-chip .sv{font-size:1.2em;font-weight:900;color:var(--text)}
-.stat-chip .sl{font-size:0.65em;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px}
-.stat-chip.green .sv{color:var(--green)}
-.stat-chip.purple .sv{color:var(--purple)}
-.stat-chip.orange .sv{color:var(--orange)}
-.stat-chip.yellow .sv{color:var(--yellow)}
+.hdr-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.9em;color:#000;flex-shrink:0;box-shadow:0 0 12px rgba(0,255,136,0.3)}
+.hdr-name{font-weight:800;font-size:0.88em;line-height:1.2}
+.hdr-lv{font-size:0.7em;color:var(--green);font-weight:700}
+.xp-pill{background:var(--bg3);border:1px solid rgba(0,255,136,0.2);border-radius:20px;padding:5px 12px;font-size:0.76em;font-weight:800;color:var(--green);display:flex;align-items:center;gap:5px;box-shadow:0 0 8px rgba(0,255,136,0.1)}
+.btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:5px 9px;font-size:0.7em;cursor:pointer;font-family:'Inter',sans-serif}
 
 /* XP BAR */
-.xp-bar-wrap{background:var(--card2);padding:8px 16px;border-bottom:1px solid var(--border)}
-.xp-bar-info{display:flex;justify-content:space-between;font-size:0.72em;color:var(--muted);margin-bottom:5px}
-.xp-bar-info span:first-child{color:var(--green);font-weight:700}
-.xp-bar{height:6px;background:var(--bg3);border-radius:6px;overflow:hidden}
-.xp-bar-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:6px;transition:width 0.6s cubic-bezier(.34,1.56,.64,1)}
+.xpbar-wrap{background:var(--bg2);padding:7px 14px;border-bottom:1px solid var(--border)}
+.xpbar-info{display:flex;justify-content:space-between;font-size:0.7em;color:var(--muted);margin-bottom:4px}
+.xpbar-info span:first-child{color:var(--green);font-weight:700}
+.xpbar{height:5px;background:var(--bg3);border-radius:5px;overflow:hidden}
+.xpbar-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:5px;box-shadow:0 0 8px rgba(0,255,136,0.4);transition:width 0.7s cubic-bezier(.34,1.56,.64,1)}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 12px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 6px;text-align:center}
+.sc .sv{font-size:1.15em;font-weight:900;line-height:1}
+.sc .sl{font-size:0.6em;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.5px}
+.sc.g .sv{color:var(--green)}.sc.o .sv{color:var(--orange)}.sc.p .sv{color:var(--purple)}.sc.y .sv{color:var(--yellow)}
 
 /* MISSIONS */
-.missions-row{padding:12px 16px;display:flex;gap:10px;overflow-x:auto;border-bottom:1px solid var(--border)}
-.mission-card{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;min-width:160px;position:relative;overflow:hidden}
-.mission-card.done{border-color:var(--green);background:rgba(0,255,136,0.05)}
-.mission-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--blue))}
-.mission-card.done::before{background:linear-gradient(90deg,var(--green),var(--green2))}
-.mission-icon{font-size:1.4em;margin-bottom:4px}
-.mission-title{font-size:0.78em;font-weight:700;margin-bottom:6px;line-height:1.3}
-.mission-prog{height:4px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:4px}
-.mission-prog-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue));border-radius:4px;transition:width 0.4s}
-.mission-card.done .mission-prog-fill{background:linear-gradient(90deg,var(--green),var(--green2))}
-.mission-xp{font-size:0.68em;color:var(--green);font-weight:700}
+.missions{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.mc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;position:relative;overflow:hidden;transition:all 0.2s}
+.mc.done{border-color:rgba(0,255,136,0.4);background:rgba(0,255,136,0.04)}
+.mc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--blue))}
+.mc.done::before{background:linear-gradient(90deg,var(--green),var(--green2))}
+.mc-icon{font-size:1.3em;margin-bottom:3px}
+.mc-title{font-size:0.72em;font-weight:700;line-height:1.3;margin-bottom:5px}
+.mc-bar{height:3px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:3px}
+.mc-bar-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue));border-radius:3px;transition:width 0.5s}
+.mc.done .mc-bar-fill{background:var(--green)}
+.mc-xp{font-size:0.65em;color:var(--green);font-weight:800}
 
-/* MODE SWITCHER */
-.mode-sw{display:flex;background:var(--card);border-bottom:1px solid var(--border)}
-.mode-btn{flex:1;padding:12px 10px;border:none;background:transparent;cursor:pointer;font-size:0.82em;font-weight:700;color:var(--muted);border-bottom:2px solid transparent;transition:all 0.2s;font-family:'Inter',sans-serif}
-.mode-btn.active{color:var(--green);border-bottom-color:var(--green)}
-.mode-btn span{display:block;font-size:0.7em;font-weight:400;color:var(--muted);margin-top:2px}
-.mode-btn.active span{color:var(--green2)}
-.mode-panel{display:none}.mode-panel.active{display:block}
+/* MODE SWITCH */
+.msw{display:flex;background:var(--card);border-bottom:1px solid var(--border)}
+.msb{flex:1;padding:12px 8px;border:none;background:transparent;cursor:pointer;font-size:0.8em;font-weight:700;color:var(--muted);border-bottom:2px solid transparent;transition:all 0.2s;font-family:'Inter',sans-serif;line-height:1.3}
+.msb.active{color:var(--green);border-bottom-color:var(--green)}
+.msb span{display:block;font-size:0.68em;font-weight:400;color:var(--muted);margin-top:1px}
+.msb.active span{color:rgba(0,255,136,0.6)}
+.mpanel{display:none}.mpanel.active{display:block}
+
+/* ============ QUESTION FLOW (Typeform style) ============ */
+.qflow{padding:0;max-width:600px;margin:0 auto}
+.qflow-header{padding:14px 16px 0;display:flex;align-items:center;justify-content:space-between}
+.qflow-prog-wrap{flex:1;height:4px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-right:12px}
+.qflow-prog{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:4px;transition:width 0.4s}
+.qflow-count{font-size:0.72em;color:var(--muted);font-weight:700;white-space:nowrap}
+.qslide{display:none;padding:16px;animation:qIn 0.35s cubic-bezier(.34,1.56,.64,1)}
+.qslide.active{display:block}
+@keyframes qIn{from{opacity:0;transform:translateX(40px) scale(0.97)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes qOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-40px)}}
+.qcard{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 18px;position:relative;overflow:hidden}
+.qcard::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--green);border-radius:4px 0 0 4px}
+.qcard.blue::before{background:var(--blue)}.qcard.purple::before{background:var(--purple)}.qcard.orange::before{background:var(--orange)}
+.qnum{font-size:0.68em;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.qtitle{font-size:1.1em;font-weight:800;line-height:1.35;margin-bottom:4px}
+.qhint{font-size:0.77em;color:var(--muted);margin-bottom:16px;line-height:1.4}
+
+/* BIG CHOICE BUTTONS */
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{display:flex;align-items:center;gap:12px;padding:13px 15px;background:var(--bg3);border:2px solid var(--border);border-radius:14px;cursor:pointer;transition:all 0.2s;font-size:0.88em;font-weight:600;color:var(--text);-webkit-appearance:none;width:100%;text-align:left;font-family:'Inter',sans-serif}
+.choice:hover,.choice.selected{border-color:var(--green);background:rgba(0,255,136,0.06);color:var(--green)}
+.choice.selected{box-shadow:0 0 0 1px var(--green),0 4px 16px rgba(0,255,136,0.15)}
+.choice:active{transform:scale(0.98)}
+.choice-icon{font-size:1.4em;flex-shrink:0;width:32px;text-align:center}
+.choice-text{flex:1}
+.choice-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;font-size:0.7em}
+.choice.selected .choice-check{background:var(--green);border-color:var(--green);color:#000}
+.choices.multi .choice.selected{border-color:var(--purple);background:rgba(167,139,250,0.06);color:var(--purple);box-shadow:0 0 0 1px var(--purple)}
+.choices.multi .choice.selected .choice-check{background:var(--purple);border-color:var(--purple);color:#fff}
+.choices.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.choices.grid2 .choice{flex-direction:column;align-items:center;text-align:center;padding:14px 10px;gap:6px}
+.choices.grid2 .choice-check{display:none}
+.choices.grid2 .choice-icon{font-size:1.8em;width:auto}
+
+/* EMOJI SCALE */
+.emoji-scale{display:flex;gap:6px;justify-content:space-between}
+.es-btn{flex:1;padding:12px 4px;background:var(--bg3);border:2px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;transition:all 0.2s;font-family:'Inter',sans-serif}
+.es-btn .es-emoji{font-size:1.6em;display:block;margin-bottom:4px}
+.es-btn .es-label{font-size:0.6em;color:var(--muted);display:block;font-weight:600}
+.es-btn:hover,.es-btn.selected{border-color:var(--green);background:rgba(0,255,136,0.08);transform:scale(1.05)}
+.es-btn.selected{box-shadow:0 4px 14px rgba(0,255,136,0.2)}
+
+/* TEXT INPUT */
+.q-input{width:100%;padding:13px 15px;border:2px solid var(--border);border-radius:14px;font-size:0.95em;color:var(--text);background:var(--bg3);transition:all 0.2s;font-family:'Inter',sans-serif;-webkit-appearance:none}
+.q-input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(0,255,136,0.1);background:var(--card2)}
+.q-input::placeholder{color:var(--muted)}
+
+/* TEMP SELECTOR */
+.temp-sel{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ts-btn{padding:14px 10px;background:var(--bg3);border:2px solid var(--border);border-radius:14px;cursor:pointer;text-align:center;font-family:'Inter',sans-serif;transition:all 0.25s cubic-bezier(.34,1.56,.64,1)}
+.ts-btn .ts-icon{font-size:1.6em;display:block;margin-bottom:4px}
+.ts-btn .ts-label{font-size:0.8em;font-weight:800;display:block}
+.ts-btn .ts-desc{font-size:0.66em;color:var(--muted);display:block;margin-top:2px}
+.ts-btn[data-v=Zimny].sel{border-color:var(--blue);background:rgba(96,165,250,0.1);box-shadow:0 4px 16px rgba(96,165,250,0.2)}
+.ts-btn[data-v=Letni].sel{border-color:var(--yellow);background:rgba(251,191,36,0.1);box-shadow:0 4px 16px rgba(251,191,36,0.2)}
+.ts-btn[data-v=Ciepły].sel{border-color:var(--orange);background:rgba(251,146,60,0.1);box-shadow:0 4px 16px rgba(251,146,60,0.2)}
+.ts-btn[data-v=Gorący].sel{border-color:var(--green);background:rgba(0,255,136,0.1);box-shadow:0 6px 20px rgba(0,255,136,0.25);transform:scale(1.03)}
+.ts-btn.sel{transform:scale(1.03)}
+
+/* NAV BUTTONS */
+.qnav{display:flex;gap:8px;margin-top:16px}
+.btn-next{flex:1;padding:14px;background:linear-gradient(135deg,var(--green),var(--green2));color:#000;border:none;border-radius:14px;font-size:0.95em;font-weight:900;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,255,136,0.3)}
+.btn-next:active{transform:scale(0.97)}
+.btn-next.blue{background:linear-gradient(135deg,var(--blue),#3b82f6);box-shadow:0 4px 16px rgba(96,165,250,0.3)}
+.btn-next.purple{background:linear-gradient(135deg,var(--purple),#8b5cf6);box-shadow:0 4px 16px rgba(167,139,250,0.3)}
+.btn-next.orange{background:linear-gradient(135deg,var(--orange),#f97316);box-shadow:0 4px 16px rgba(251,146,60,0.3)}
+.btn-back{padding:14px 18px;background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:14px;font-size:0.88em;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-submit{width:100%;padding:16px;background:linear-gradient(135deg,var(--green),var(--green2));color:#000;border:none;border-radius:16px;font-size:1em;font-weight:900;cursor:pointer;font-family:'Inter',sans-serif;box-shadow:0 6px 24px rgba(0,255,136,0.4);transition:all 0.2s;margin-top:16px;letter-spacing:0.3px}
+.btn-submit.blue{background:linear-gradient(135deg,var(--blue),#3b82f6)}
+.btn-submit.purple{background:linear-gradient(135deg,var(--purple),#8b5cf6)}
+.btn-submit.orange{background:linear-gradient(135deg,var(--orange),#f97316)}
+.btn-submit:active{transform:scale(0.98)}
+
+/* REVIEW */
+.review-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:14px 0}
+.rv{background:var(--bg3);border-radius:10px;padding:9px 11px}
+.rv-label{font-size:0.63em;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px}
+.rv-val{font-size:0.84em;font-weight:700;color:var(--text)}
+
+/* TOAST, CONFETTI, ACHIEVEMENTS */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:linear-gradient(135deg,#1a2e1a,#1a2e2e);border:1px solid var(--green);color:var(--green);padding:12px 22px;border-radius:14px;font-weight:800;font-size:0.88em;z-index:9999;transition:transform 0.4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 24px rgba(0,255,136,0.25)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.confetti-p{position:fixed;pointer-events:none;z-index:9998;border-radius:2px;animation:cfall linear forwards}
+@keyframes cfall{0%{opacity:1;transform:translateY(-10px) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
+.ach{position:fixed;bottom:20px;left:12px;right:12px;max-width:360px;margin:0 auto;background:var(--card);border:1.5px solid var(--green);border-radius:16px;padding:13px 16px;z-index:9997;display:flex;align-items:center;gap:12px;box-shadow:0 8px 28px rgba(0,255,136,0.2);transform:translateY(100px);transition:transform 0.4s cubic-bezier(.34,1.56,.64,1)}
+.ach.show{transform:translateY(0)}
+.ach-icon{font-size:2em;flex-shrink:0}
+.ach-badge{font-size:0.62em;color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:1px}
+.ach-name{font-size:0.86em;font-weight:800;margin:1px 0}
+.ach-xp{font-size:0.72em;color:var(--muted)}
+.xp-float{position:fixed;font-size:1.5em;font-weight:900;color:var(--green);pointer-events:none;z-index:9999;animation:xpup 1.2s ease forwards;text-shadow:0 0 10px rgba(0,255,136,0.5)}
+@keyframes xpup{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-90px) scale(1.6)}}
+.lv-flash{position:fixed;inset:0;background:linear-gradient(135deg,rgba(0,255,136,0.12),rgba(167,139,250,0.12));pointer-events:none;z-index:9996;animation:lvf 0.5s ease forwards}
+@keyframes lvf{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+
+/* SUCCESS */
+.success-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:var(--bg)}
+.success-icon{font-size:5em;animation:bounceIn 0.6s cubic-bezier(.34,1.56,.64,1);margin-bottom:10px}
+@keyframes bounceIn{0%{transform:scale(0.2);opacity:0}60%{transform:scale(1.1)}80%{transform:scale(0.95)}100%{transform:scale(1);opacity:1}}
+.success-xp{font-size:2.2em;font-weight:900;color:var(--green);letter-spacing:-1px;animation:slideUp 0.4s ease 0.2s both}
+.success-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;width:100%;max-width:380px;margin:14px 0}
+.success-card.glow{border-color:rgba(0,255,136,0.3);box-shadow:0 0 24px rgba(0,255,136,0.1)}
+.srow{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.srow:last-child{margin-bottom:0}
+.srow-label{font-size:0.74em;color:var(--muted)}
+.srow-val{font-size:0.84em;font-weight:800}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.sgrid-item{background:var(--bg3);border-radius:10px;padding:10px 6px;text-align:center}
+.sgrid-item .sv{font-size:1.2em;font-weight:900}
+.sgrid-item .sl{font-size:0.62em;color:var(--muted);margin-top:2px}
 
 /* TABS */
-.tabs{display:flex;overflow-x:auto;background:var(--card2);border-bottom:1px solid var(--border);padding:0 8px;gap:2px}
-.tab-btn{padding:10px 13px;border:none;background:transparent;cursor:pointer;font-size:0.77em;font-weight:700;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;font-family:'Inter',sans-serif}
-.tab-btn.active{color:var(--green);border-bottom-color:var(--green)}
-.tab-content{display:none;padding:14px;max-width:700px;margin:0 auto}.tab-content.active{display:block}
-
-/* WIZARD */
-.wizard-nav{background:var(--card);padding:10px 14px;border-bottom:1px solid var(--border)}
-.steps-row{display:flex;align-items:center;overflow-x:auto;padding-bottom:2px}
-.step-item{display:flex;flex-direction:column;align-items:center;flex:1;min-width:38px;cursor:pointer}
-.step-circle{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:0.75em;font-weight:800;color:var(--muted);transition:all 0.2s}
-.step-item.active .step-circle{background:var(--green);border-color:var(--green);color:#000;box-shadow:0 0 12px rgba(0,255,136,0.5)}
-.step-item.done .step-circle{background:rgba(0,255,136,0.2);border-color:var(--green);color:var(--green)}
-.step-label{font-size:0.58em;color:var(--muted);margin-top:3px;text-align:center;white-space:nowrap}
-.step-item.active .step-label{color:var(--green);font-weight:700}
-.step-connector{flex:1;height:2px;background:var(--border);min-width:6px;margin-top:-14px}
-.step-connector.done{background:var(--green)}
-.wizard-progress{height:3px;background:var(--bg3);margin-top:8px;border-radius:3px;overflow:hidden}
-.wizard-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));transition:width 0.4s}
-.step-content{display:none;padding:14px;max-width:700px;margin:0 auto}.step-content.active{display:block}
-
-/* CARDS */
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden}
-.card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--green);border-radius:4px 0 0 4px}
-.card.blue::before{background:var(--blue)}
-.card.purple::before{background:var(--purple)}
-.card.orange::before{background:var(--orange)}
-.card-title{font-size:1em;font-weight:800;margin-bottom:3px;display:flex;align-items:center;gap:8px}
-.card-sub{font-size:0.75em;color:var(--muted);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
-
-/* SECTION */
-.slabel{font-size:0.68em;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin:14px 0 8px;display:flex;align-items:center;gap:6px}
-.slabel.blue{color:var(--blue)}.slabel.purple{color:var(--purple)}.slabel.orange{color:var(--orange)}
-
-/* INPUTS */
-.q{margin-bottom:12px}
-.q label{display:block;font-size:0.82em;font-weight:700;margin-bottom:5px;color:#c0c0d0}
-.q label .req{color:var(--red)}
-input[type=text],input[type=tel],input[type=date],input[type=number],select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.84em;color:var(--text);background:var(--bg3);transition:border 0.2s;-webkit-appearance:none;font-family:'Inter',sans-serif}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(0,255,136,0.08);background:var(--card2)}
-select option{background:var(--bg3)}
-textarea{min-height:60px;resize:vertical}
-.opts{display:flex;flex-direction:column;gap:6px}
-.opt{display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--bg3);border-radius:9px;border:1.5px solid var(--border);cursor:pointer;transition:all 0.15s;font-size:0.84em;color:var(--text)}
-.opt:hover{border-color:var(--green);background:rgba(0,255,136,0.05)}
-.opt input[type=radio],.opt input[type=checkbox]{width:16px;height:16px;flex-shrink:0;accent-color:var(--green)}
-.opt input:checked + *{color:var(--green)}
-
-/* SCALE */
-.scale-row{display:flex;gap:5px}
-.scale-btn{flex:1;padding:9px 2px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg3);cursor:pointer;font-size:0.88em;font-weight:800;text-align:center;transition:all 0.15s;color:var(--muted);font-family:'Inter',sans-serif}
-.scale-btn:hover,.scale-btn.selected{background:var(--green);border-color:var(--green);color:#000;box-shadow:0 0 10px rgba(0,255,136,0.3)}
-.scale-labels{display:flex;justify-content:space-between;font-size:0.68em;color:var(--muted);margin-top:3px}
-
-/* TEMP */
-.temp-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px}
-.temp-btn{flex:1;min-width:66px;padding:10px 5px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg3);cursor:pointer;text-align:center;font-size:0.79em;font-weight:800;transition:all 0.2s;font-family:'Inter',sans-serif;color:var(--muted)}
-.temp-btn[data-val=Zimny].selected{background:rgba(59,130,246,0.2);border-color:var(--blue);color:var(--blue);box-shadow:0 0 12px rgba(59,130,246,0.2)}
-.temp-btn[data-val=Letni].selected{background:rgba(234,179,8,0.2);border-color:var(--yellow);color:var(--yellow);box-shadow:0 0 12px rgba(234,179,8,0.2)}
-.temp-btn[data-val=Ciepły].selected{background:rgba(249,115,22,0.2);border-color:var(--orange);color:var(--orange);box-shadow:0 0 12px rgba(249,115,22,0.2)}
-.temp-btn[data-val=Gorący].selected{background:rgba(0,255,136,0.2);border-color:var(--green);color:var(--green);box-shadow:0 0 12px rgba(0,255,136,0.3)}
-
-/* BUTTONS */
-.btn-main{width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--green2));color:#000;border:none;border-radius:12px;font-size:0.96em;font-weight:800;cursor:pointer;margin-top:14px;box-shadow:0 4px 20px rgba(0,255,136,0.25);transition:transform 0.15s;font-family:'Inter',sans-serif}
-.btn-main:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(0,255,136,0.35)}
-.btn-main.blue{background:linear-gradient(135deg,var(--blue),#2563eb);box-shadow:0 4px 20px rgba(59,130,246,0.25)}
-.btn-main.purple{background:linear-gradient(135deg,var(--purple),#7c3aed);box-shadow:0 4px 20px rgba(139,92,246,0.25)}
-.btn-main.orange{background:linear-gradient(135deg,var(--orange),#ea580c);box-shadow:0 4px 20px rgba(249,115,22,0.25)}
-.btn-next{width:100%;padding:12px;background:linear-gradient(135deg,var(--green),var(--green2));color:#000;border:none;border-radius:12px;font-size:0.92em;font-weight:800;cursor:pointer;margin-top:12px;font-family:'Inter',sans-serif}
-.btn-prev{width:100%;padding:10px;background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:12px;font-size:0.88em;font-weight:600;cursor:pointer;margin-top:7px;font-family:'Inter',sans-serif}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:420px){.grid2{grid-template-columns:1fr}}
-.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:0.68em;font-weight:800;margin-left:6px;vertical-align:middle}
-.badge.green{background:rgba(0,255,136,0.15);color:var(--green);border:1px solid rgba(0,255,136,0.3)}
-.badge.blue{background:rgba(59,130,246,0.15);color:var(--blue);border:1px solid rgba(59,130,246,0.3)}
-.badge.orange{background:rgba(249,115,22,0.15);color:var(--orange);border:1px solid rgba(249,115,22,0.3)}
-.badge.red{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3)}
-.info-box{background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.2);border-radius:10px;padding:10px 12px;font-size:0.79em;color:#d4a017;margin-bottom:12px;line-height:1.5}
-.info-box.blue{background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:#93c5fd}
-.info-box.green{background:rgba(0,255,136,0.08);border-color:rgba(0,255,136,0.2);color:var(--green)}
-hr.div{border:none;border-top:1px solid var(--border);margin:12px 0}
-.form-footer{text-align:center;font-size:0.7em;color:var(--muted);padding:18px 0 28px}
-
-/* CONFETTI */
-.confetti-piece{position:fixed;width:8px;height:8px;border-radius:2px;animation:confetti-fall 1.2s ease-out forwards;pointer-events:none;z-index:9999}
-@keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
-
-/* LEVEL UP TOAST */
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:linear-gradient(135deg,var(--green),var(--blue));color:#000;padding:14px 24px;border-radius:14px;font-weight:800;font-size:0.92em;z-index:9999;transition:transform 0.4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 32px rgba(0,255,136,0.4)}
-.toast.show{transform:translateX(-50%) translateY(0)}
-
-/* LEADERBOARD */
-.lb-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--card2);border-radius:10px;margin-bottom:8px;border:1px solid var(--border)}
-.lb-rank{font-size:1.1em;font-weight:900;width:28px;text-align:center}
-.lb-name{flex:1;font-weight:700;font-size:0.88em}
-.lb-xp{font-size:0.8em;color:var(--green);font-weight:800}
-.lb-streak{font-size:0.75em;color:var(--orange)}
-
-/* ACHIEVEMENT POPUP */
-.achievement-pop{position:fixed;bottom:80px;right:16px;background:var(--card);border:1px solid var(--green);border-radius:14px;padding:14px 18px;z-index:9998;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,255,136,0.2);transform:translateX(200px);transition:transform 0.4s cubic-bezier(.34,1.56,.64,1);max-width:280px}
-.achievement-pop.show{transform:translateX(0)}
-.ach-icon{font-size:2em;flex-shrink:0}
-.ach-text .ach-label{font-size:0.68em;color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:1px}
-.ach-text .ach-name{font-size:0.88em;font-weight:800}
-.ach-text .ach-xp{font-size:0.75em;color:var(--muted)}
+.tabs{display:flex;overflow-x:auto;background:var(--card2);border-bottom:1px solid var(--border);padding:0 8px;gap:2px;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tbtn{padding:10px 13px;border:none;background:transparent;cursor:pointer;font-size:0.76em;font-weight:700;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;font-family:'Inter',sans-serif}
+.tbtn.active{color:var(--green);border-bottom-color:var(--green)}
+.tpanel{display:none}.tpanel.active{display:block}
+.footer{text-align:center;font-size:0.68em;color:var(--muted);padding:20px 0 32px}
 </style>
 </head>
 <body>
-
-<!-- Particles -->
 <div id="particles"></div>
 
 <!-- ===== AUTH ===== -->
 <div id="authScreen">
-  <div class="auth-glow"></div>
-  <div class="auth-logo-wrap">
-    <span class="auth-logo-icon">⚡</span>
-    <div class="auth-logo-title">4ECO FIELD AGENT</div>
-    <div class="auth-logo-sub">Misja: Zbieraj leady. Zdobywaj XP.</div>
+  <div class="auth-bg-glow"></div>
+  <div class="logo-wrap">
+    <span class="logo-icon">⚡</span>
+    <div class="logo-title">4ECO FIELD AGENT</div>
+    <div class="logo-sub">Zbieraj leady · Zdobywaj XP</div>
   </div>
   <div class="auth-card">
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">🔐 Login</button>
-      <button class="auth-tab" onclick="switchAuthTab('register')">✏️ Rejestracja</button>
+    <div class="atabs">
+      <button class="atab active" onclick="switchTab('login',this)">🔐 Logowanie</button>
+      <button class="atab" onclick="switchTab('reg',this)">✏️ Rejestracja</button>
     </div>
-    <div id="loginForm" class="auth-form active">
-      <div id="loginError" class="auth-error"></div>
-      <div class="auth-field"><label>Imię i nazwisko</label><input type="text" id="loginName" placeholder="np. Jan Kowalski" autocomplete="username"></div>
-      <div class="auth-field"><label>PIN (4 cyfry)</label><input type="password" id="loginPin" placeholder="••••" maxlength="4" inputmode="numeric"></div>
-      <label class="remember-row"><input type="checkbox" id="rememberMe" checked><span>Zapamiętaj mnie</span></label>
+    <div id="loginForm" class="aform active">
+      <div id="loginErr" class="aerr"></div>
+      <div class="afield"><label>Imię i nazwisko</label><input id="lName" type="text" placeholder="np. Jan Kowalski" autocomplete="username"></div>
+      <div class="afield"><label>PIN (4 cyfry)</label><input id="lPin" type="password" placeholder="••••" maxlength="4" inputmode="numeric"></div>
+      <label class="remember"><input type="checkbox" id="lRemember" checked><span>Zapamiętaj mnie</span></label>
       <button class="btn-auth" onclick="doLogin()">Wejdź do gry →</button>
-      <div class="auth-hint">Nie masz konta? Kliknij Rejestracja</div>
+      <div class="ahint">Nie masz konta? Kliknij Rejestracja</div>
     </div>
-    <div id="registerForm" class="auth-form">
-      <div id="registerError" class="auth-error"></div>
-      <div id="registerSuccess" class="auth-success"></div>
-      <div class="auth-field"><label>Imię i nazwisko <span style="color:var(--red)">*</span></label><input type="text" id="regName" placeholder="np. Jan Kowalski"></div>
-      <div class="auth-field"><label>Ustaw PIN (4 cyfry) <span style="color:var(--red)">*</span></label><input type="password" id="regPin" placeholder="••••" maxlength="4" inputmode="numeric"></div>
-      <div class="auth-field"><label>Powtórz PIN</label><input type="password" id="regPin2" placeholder="••••" maxlength="4" inputmode="numeric"></div>
+    <div id="regForm" class="aform">
+      <div id="regErr" class="aerr"></div>
+      <div id="regOk" class="aok"></div>
+      <div class="afield"><label>Imię i nazwisko *</label><input id="rName" type="text" placeholder="np. Jan Kowalski"></div>
+      <div class="afield"><label>PIN 4-cyfrowy *</label><input id="rPin" type="password" placeholder="••••" maxlength="4" inputmode="numeric"></div>
+      <div class="afield"><label>Powtórz PIN</label><input id="rPin2" type="password" placeholder="••••" maxlength="4" inputmode="numeric"></div>
       <button class="btn-auth" onclick="doRegister()">Utwórz konto →</button>
     </div>
   </div>
@@ -242,718 +253,692 @@ hr.div{border:none;border-top:1px solid var(--border);margin:12px 0}
 
 <!-- ===== APP ===== -->
 <div id="appScreen">
-  <!-- Header -->
   <div class="hdr">
     <div class="hdr-left">
-      <div class="hdr-avatar" id="hdrAvatar">?</div>
-      <div><div class="hdr-name" id="hdrName">—</div><div class="hdr-level" id="hdrLevel">Level 1 · Rookie</div></div>
+      <div class="hdr-av" id="hdrAv">?</div>
+      <div><div class="hdr-name" id="hdrName">—</div><div class="hdr-lv" id="hdrLv">Level 1 · Rookie</div></div>
     </div>
-    <div class="hdr-right">
-      <div class="xp-pill">⚡ <span id="xpTotal">0</span> XP</div>
+    <div style="display:flex;align-items:center;gap:7px">
+      <div class="xp-pill">⚡<span id="xpTotal">0</span> XP</div>
       <button class="btn-logout" onclick="doLogout()">Wyloguj</button>
     </div>
   </div>
-
-  <!-- XP Bar -->
-  <div class="xp-bar-wrap">
-    <div class="xp-bar-info"><span id="xpBarLabel">Level 1</span><span id="xpBarNext">0 / 100 XP do next level</span></div>
-    <div class="xp-bar"><div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div></div>
+  <div class="xpbar-wrap">
+    <div class="xpbar-info"><span id="xpBarLabel">Level 1</span><span id="xpBarNext">0/100 XP</span></div>
+    <div class="xpbar"><div class="xpbar-fill" id="xpFill" style="width:0%"></div></div>
+  </div>
+  <div class="stats-grid">
+    <div class="sc g"><div class="sv" id="stTotal">0</div><div class="sl">Ankiety</div></div>
+    <div class="sc o"><div class="sv" id="stStreak">0🔥</div><div class="sl">Streak</div></div>
+    <div class="sc p"><div class="sv" id="stHot">0</div><div class="sl">Gorące</div></div>
+    <div class="sc y"><div class="sv" id="stToday">0</div><div class="sl">Dziś</div></div>
+  </div>
+  <div class="missions" id="missionRow"></div>
+  <div class="msw">
+    <button class="msb active" id="msb_quick" onclick="switchMode('quick')">⚡ Szybka<span>5 pytań · 2 min</span></button>
+    <button class="msb" id="msb_full" onclick="switchMode('full')">📋 Pełna<span>10 pytań · 5 min</span></button>
   </div>
 
-  <!-- Stats -->
-  <div class="stats-bar">
-    <div class="stat-chip green"><div class="sv" id="statTotal">0</div><div class="sl">Ankiety</div></div>
-    <div class="stat-chip orange"><div class="sv" id="statStreak">0🔥</div><div class="sl">Streak</div></div>
-    <div class="stat-chip purple"><div class="sv" id="statHot">0</div><div class="sl">Gorące</div></div>
-    <div class="stat-chip yellow"><div class="sv" id="statToday">0</div><div class="sl">Dziś</div></div>
-  </div>
-
-  <!-- Daily missions -->
-  <div class="missions-row" id="missionsRow"></div>
-
-  <!-- Mode switcher -->
-  <div class="mode-sw">
-    <button class="mode-btn active" onclick="switchMode('szybka')" id="modeBtn_szybka">⚡ Podstawowa<span>4 tematy · szybko</span></button>
-    <button class="mode-btn" onclick="switchMode('rozbudowana')" id="modeBtn_rozbudowana">📋 Rozbudowana<span>7 kroków · pełna</span></button>
-  </div>
-
-  <!-- ===== TRYB PODSTAWOWY ===== -->
-  <div id="panel_szybka" class="mode-panel active">
+  <!-- QUICK MODE TABS -->
+  <div id="panel_quick" class="mpanel active">
     <div class="tabs">
-      <button class="tab-btn active" onclick="showTab('s1',this)">☀️ PV</button>
-      <button class="tab-btn" onclick="showTab('s2',this)">🌡️ Pompa</button>
-      <button class="tab-btn" onclick="showTab('s3',this)">🔋 Magazyn</button>
-      <button class="tab-btn" onclick="showTab('s4',this)">🌿 OZE</button>
+      <button class="tbtn active" onclick="showTab('q_pv',this)">☀️ PV / Prąd</button>
+      <button class="tbtn" onclick="showTab('q_heat',this)">🌡️ Ogrzewanie</button>
+      <button class="tbtn" onclick="showTab('q_new',this)">🌿 Nowy klient</button>
     </div>
-
-    <div id="s1" class="tab-content active">
-      <div class="card">
-        <div class="card-title">☀️ Diagnoza PV <span class="badge green">Podstawowa</span></div>
-        <div class="card-sub">Identyfikacja problemów z rozliczeniem i efektywnością instalacji PV</div>
-        <div class="slabel">📍 Dane klienta</div>
-        <div class="grid2">
-          <div class="q"><label>Miejscowość <span class="req">*</span></label><input type="text" id="s1_miejscowosc" placeholder="np. Kłodawa"></div>
-          <div class="q"><label>Telefon <span class="req">*</span></label><input type="tel" id="s1_telefon" placeholder="600 000 000"></div>
-        </div>
-        <div class="q"><label>Typ obiektu</label><div class="opts">
-          <label class="opt"><input type="radio" name="s1_typ"> Dom jednorodzinny</label>
-          <label class="opt"><input type="radio" name="s1_typ"> Gospodarstwo rolne</label>
-          <label class="opt"><input type="radio" name="s1_typ"> Firma / agroturystyka</label>
-        </div></div>
-        <div class="slabel">🔆 Instalacja PV</div>
-        <div class="q"><label>Status <span class="req">*</span></label><div class="opts">
-          <label class="opt"><input type="radio" name="s1_pv"> ✅ Mam — czynna</label>
-          <label class="opt"><input type="radio" name="s1_pv"> ⚠️ Mam — problemy</label>
-          <label class="opt"><input type="radio" name="s1_pv"> 📅 Planuję montaż</label>
-          <label class="opt"><input type="radio" name="s1_pv"> ❌ Nie mam</label>
-        </div></div>
-        <div class="grid2">
-          <div class="q"><label>Rok montażu</label><select id="s1_rok_pv"><option value="">—</option><option>przed 2019</option><option>2019</option><option>2020</option><option>2021</option><option>2022</option><option>2023</option><option>2024</option><option>2025</option></select></div>
-          <div class="q"><label>Moc (kWp)</label><input type="text" id="s1_moc_pv" placeholder="np. 8.5"></div>
-        </div>
-        <div class="q"><label>Rozliczenie</label><div class="opts">
-          <label class="opt"><input type="radio" name="s1_rozl"> Net-billing (po 2022)</label>
-          <label class="opt"><input type="radio" name="s1_rozl"> Net-metering (do 2022)</label>
-          <label class="opt"><input type="radio" name="s1_rozl"> Nie wiem</label>
-        </div></div>
-        <div class="q"><label>Rachunek miesięczny (PLN)</label><input type="number" id="s1_rachunek" placeholder="np. 280"></div>
-        <div class="q"><label>Ocena efektywności PV (1–5)</label>
-          <div class="scale-row" id="sg_s1"><button class="scale-btn" onclick="selectScale('sg_s1',this)" data-v="1">1</button><button class="scale-btn" onclick="selectScale('sg_s1',this)" data-v="2">2</button><button class="scale-btn" onclick="selectScale('sg_s1',this)" data-v="3">3</button><button class="scale-btn" onclick="selectScale('sg_s1',this)" data-v="4">4</button><button class="scale-btn" onclick="selectScale('sg_s1',this)" data-v="5">5</button></div>
-          <div class="scale-labels"><span>Słaba</span><span>Doskonała</span></div>
-        </div>
-        <div class="slabel">🏷️ Temperatura leada</div>
-        <div class="temp-row" id="tg_s1"><button class="temp-btn" data-val="Zimny" onclick="selectTemp('tg_s1',this)">🔵 Zimny</button><button class="temp-btn" data-val="Letni" onclick="selectTemp('tg_s1',this)">🟡 Letni</button><button class="temp-btn" data-val="Ciepły" onclick="selectTemp('tg_s1',this)">🟠 Ciepły</button><button class="temp-btn" data-val="Gorący" onclick="selectTemp('tg_s1',this)">🔥 Gorący</button></div>
-        <div class="q" style="margin-top:12px"><label>Uwagi</label><textarea id="s1_uwagi" placeholder="notatki z rozmowy..."></textarea></div>
-        <button class="btn-main" onclick="submitSzybka('s1')">✅ Zapisz +50 XP</button>
-      </div>
+    <!-- PV Quick -->
+    <div id="q_pv" class="tpanel active">
+      <div id="flow_qpv" class="qflow"></div>
     </div>
-
-    <div id="s2" class="tab-content">
-      <div class="card blue">
-        <div class="card-title">🌡️ Pompa Ciepła <span class="badge blue">Podstawowa</span></div>
-        <div class="card-sub">Ocena aktualnego systemu grzewczego i potencjału wymiany</div>
-        <div class="slabel blue">📍 Dane klienta</div>
-        <div class="grid2">
-          <div class="q"><label>Miejscowość <span class="req">*</span></label><input type="text" id="s2_miejscowosc" placeholder="np. Kłodawa"></div>
-          <div class="q"><label>Telefon <span class="req">*</span></label><input type="tel" id="s2_telefon" placeholder="600 000 000"></div>
-        </div>
-        <div class="grid2">
-          <div class="q"><label>Powierzchnia (m²)</label><input type="number" id="s2_powierzchnia" placeholder="np. 140"></div>
-          <div class="q"><label>Rok budowy</label><input type="number" id="s2_rok" placeholder="np. 1998"></div>
-        </div>
-        <div class="slabel blue">🔥 Ogrzewanie</div>
-        <div class="q"><label>Obecne źródło ciepła</label><div class="opts">
-          <label class="opt"><input type="radio" name="s2_zrodlo"> Kocioł węglowy / ekogroszek</label>
-          <label class="opt"><input type="radio" name="s2_zrodlo"> Kocioł gazowy</label>
-          <label class="opt"><input type="radio" name="s2_zrodlo"> Ogrzewanie elektryczne</label>
-          <label class="opt"><input type="radio" name="s2_zrodlo"> Pompa ciepła</label>
-          <label class="opt"><input type="radio" name="s2_zrodlo"> Inne</label>
-        </div></div>
-        <div class="grid2">
-          <div class="q"><label>Roczny koszt (PLN)</label><input type="number" id="s2_koszt" placeholder="np. 7000"></div>
-          <div class="q"><label>Wiek kotła</label><select id="s2_wiek_kotla"><option value="">—</option><option>do 5 lat</option><option>5–10 lat</option><option>10–15 lat</option><option>powyżej 15 lat</option></select></div>
-        </div>
-        <div class="q"><label>Typ instalacji</label><div class="opts">
-          <label class="opt"><input type="radio" name="s2_instal"> Grzejniki</label>
-          <label class="opt"><input type="radio" name="s2_instal"> Ogrzewanie podłogowe</label>
-          <label class="opt"><input type="radio" name="s2_instal"> Mieszane</label>
-        </div></div>
-        <div class="q"><label>Zainteresowanie PC</label><div class="opts">
-          <label class="opt"><input type="radio" name="s2_zaint"> Tak, aktywne</label>
-          <label class="opt"><input type="radio" name="s2_zaint"> Możliwe za 1–2 lata</label>
-          <label class="opt"><input type="radio" name="s2_zaint"> Nie teraz</label>
-        </div></div>
-        <div class="slabel blue">🏷️ Temperatura leada</div>
-        <div class="temp-row" id="tg_s2"><button class="temp-btn" data-val="Zimny" onclick="selectTemp('tg_s2',this)">🔵 Zimny</button><button class="temp-btn" data-val="Letni" onclick="selectTemp('tg_s2',this)">🟡 Letni</button><button class="temp-btn" data-val="Ciepły" onclick="selectTemp('tg_s2',this)">🟠 Ciepły</button><button class="temp-btn" data-val="Gorący" onclick="selectTemp('tg_s2',this)">🔥 Gorący</button></div>
-        <div class="q" style="margin-top:12px"><label>Uwagi</label><textarea id="s2_uwagi" placeholder="notatki..."></textarea></div>
-        <button class="btn-main blue" onclick="submitSzybka('s2')">✅ Zapisz +50 XP</button>
-      </div>
+    <!-- HEAT Quick -->
+    <div id="q_heat" class="tpanel">
+      <div id="flow_qheat" class="qflow"></div>
     </div>
-
-    <div id="s3" class="tab-content">
-      <div class="card orange">
-        <div class="card-title">🔋 Magazyn energii <span class="badge orange">Podstawowa</span></div>
-        <div class="card-sub">Kwalifikacja do programu „Mój Magazyn" i oferty własnej</div>
-        <div class="slabel orange">📍 Dane klienta</div>
-        <div class="grid2">
-          <div class="q"><label>Miejscowość <span class="req">*</span></label><input type="text" id="s3_miejscowosc" placeholder="np. Kłodawa"></div>
-          <div class="q"><label>Telefon <span class="req">*</span></label><input type="tel" id="s3_telefon" placeholder="600 000 000"></div>
-        </div>
-        <div class="q"><label>Posiada PV?</label><div class="opts">
-          <label class="opt"><input type="radio" name="s3_pv"> Tak</label>
-          <label class="opt"><input type="radio" name="s3_pv"> Nie</label>
-          <label class="opt"><input type="radio" name="s3_pv"> Planuje</label>
-        </div></div>
-        <div class="grid2">
-          <div class="q"><label>Moc PV (kWp)</label><input type="text" id="s3_moc_pv" placeholder="np. 8.5"></div>
-          <div class="q"><label>Autokonsumpcja (%)</label><input type="number" id="s3_autokonsum" placeholder="np. 30"></div>
-        </div>
-        <div class="q"><label>Zainteresowanie magazynem</label><div class="opts">
-          <label class="opt"><input type="radio" name="s3_zaint_mag"> Tak — Mój Magazyn</label>
-          <label class="opt"><input type="radio" name="s3_zaint_mag"> Tak — oferta własna</label>
-          <label class="opt"><input type="radio" name="s3_zaint_mag"> Może w przyszłości</label>
-          <label class="opt"><input type="radio" name="s3_zaint_mag"> Nie</label>
-        </div></div>
-        <div class="q"><label>Przerwy w prądzie?</label><div class="opts">
-          <label class="opt"><input type="radio" name="s3_przerwy"> Częste</label>
-          <label class="opt"><input type="radio" name="s3_przerwy"> Rzadko</label>
-          <label class="opt"><input type="radio" name="s3_przerwy"> Brak</label>
-        </div></div>
-        <div class="slabel orange">🏷️ Temperatura leada</div>
-        <div class="temp-row" id="tg_s3"><button class="temp-btn" data-val="Zimny" onclick="selectTemp('tg_s3',this)">🔵 Zimny</button><button class="temp-btn" data-val="Letni" onclick="selectTemp('tg_s3',this)">🟡 Letni</button><button class="temp-btn" data-val="Ciepły" onclick="selectTemp('tg_s3',this)">🟠 Ciepły</button><button class="temp-btn" data-val="Gorący" onclick="selectTemp('tg_s3',this)">🔥 Gorący</button></div>
-        <div class="q" style="margin-top:12px"><label>Uwagi</label><textarea id="s3_uwagi" placeholder="notatki..."></textarea></div>
-        <button class="btn-main orange" onclick="submitSzybka('s3')">✅ Zapisz +50 XP</button>
-      </div>
-    </div>
-
-    <div id="s4" class="tab-content">
-      <div class="card purple">
-        <div class="card-title">🌿 Ogólna OZE <span class="badge red">Nowy klient</span></div>
-        <div class="card-sub">Pełna analiza potrzeb energetycznych nowego klienta</div>
-        <div class="slabel purple">📍 Dane klienta</div>
-        <div class="grid2">
-          <div class="q"><label>Miejscowość <span class="req">*</span></label><input type="text" id="s4_miejscowosc" placeholder="np. Kłodawa"></div>
-          <div class="q"><label>Telefon <span class="req">*</span></label><input type="tel" id="s4_telefon" placeholder="600 000 000"></div>
-        </div>
-        <div class="grid2">
-          <div class="q"><label>Pow. domu (m²)</label><input type="number" id="s4_powierzchnia" placeholder="np. 140"></div>
-          <div class="q"><label>Liczba osób</label><input type="number" id="s4_osoby" placeholder="np. 4"></div>
-        </div>
-        <div class="q"><label>Miesięczny rachunek (PLN)</label><input type="number" id="s4_rachunek" placeholder="np. 350"></div>
-        <div class="q"><label>Trend rachunków</label><div class="opts">
-          <label class="opt"><input type="radio" name="s4_trend"> Rosną</label>
-          <label class="opt"><input type="radio" name="s4_trend"> Stabilne</label>
-          <label class="opt"><input type="radio" name="s4_trend"> Spadają</label>
-        </div></div>
-        <div class="q"><label>Zainteresowania OZE</label><div class="opts">
-          <label class="opt"><input type="checkbox" id="s4_ch_pv"> ☀️ Fotowoltaika</label>
-          <label class="opt"><input type="checkbox" id="s4_ch_pc"> 🌡️ Pompa ciepła</label>
-          <label class="opt"><input type="checkbox" id="s4_ch_mag"> 🔋 Magazyn energii</label>
-          <label class="opt"><input type="checkbox" id="s4_ch_ter"> 🏠 Termoizolacja</label>
-        </div></div>
-        <div class="q"><label>Horyzont decyzji</label><select id="s4_horyz"><option value="">—</option><option>Do 3 miesięcy</option><option>3–6 miesięcy</option><option>6–12 miesięcy</option><option>Powyżej roku</option></select></div>
-        <div class="slabel purple">🏷️ Temperatura leada</div>
-        <div class="temp-row" id="tg_s4"><button class="temp-btn" data-val="Zimny" onclick="selectTemp('tg_s4',this)">🔵 Zimny</button><button class="temp-btn" data-val="Letni" onclick="selectTemp('tg_s4',this)">🟡 Letni</button><button class="temp-btn" data-val="Ciepły" onclick="selectTemp('tg_s4',this)">🟠 Ciepły</button><button class="temp-btn" data-val="Gorący" onclick="selectTemp('tg_s4',this)">🔥 Gorący</button></div>
-        <div class="q" style="margin-top:12px"><label>Uwagi</label><textarea id="s4_uwagi" placeholder="notatki..."></textarea></div>
-        <button class="btn-main purple" onclick="submitSzybka('s4')">✅ Zapisz +50 XP</button>
-      </div>
+    <!-- NEW Quick -->
+    <div id="q_new" class="tpanel">
+      <div id="flow_qnew" class="qflow"></div>
     </div>
   </div>
 
-  <!-- ===== TRYB ROZBUDOWANY ===== -->
-  <div id="panel_rozbudowana" class="mode-panel">
-    <div class="wizard-nav">
-      <div class="steps-row">
-        <div class="step-item active" onclick="goStep(1)" id="si1"><div class="step-circle">1</div><div class="step-label">Dane</div></div>
-        <div class="step-connector" id="sc1"></div>
-        <div class="step-item" onclick="goStep(2)" id="si2"><div class="step-circle">2</div><div class="step-label">Budynek</div></div>
-        <div class="step-connector" id="sc2"></div>
-        <div class="step-item" onclick="goStep(3)" id="si3"><div class="step-circle">3</div><div class="step-label">Energia</div></div>
-        <div class="step-connector" id="sc3"></div>
-        <div class="step-item" onclick="goStep(4)" id="si4"><div class="step-circle">4</div><div class="step-label">PV</div></div>
-        <div class="step-connector" id="sc4"></div>
-        <div class="step-item" onclick="goStep(5)" id="si5"><div class="step-circle">5</div><div class="step-label">Ogrzew.</div></div>
-        <div class="step-connector" id="sc5"></div>
-        <div class="step-item" onclick="goStep(6)" id="si6"><div class="step-circle">6</div><div class="step-label">Magazyn</div></div>
-        <div class="step-connector" id="sc6"></div>
-        <div class="step-item" onclick="goStep(7)" id="si7"><div class="step-circle">7</div><div class="step-label">Ocena</div></div>
-      </div>
-      <div class="wizard-progress"><div class="wizard-progress-fill" id="wizardProg" style="width:14%"></div></div>
-    </div>
-
-    <div id="step1" class="step-content active">
-      <div class="card"><div class="card-title">📍 Krok 1 — Dane klienta</div><div class="card-sub">Podstawowe informacje o rozmówcy</div>
-        <div class="grid2"><div class="q"><label>Miejscowość <span class="req">*</span></label><input type="text" id="r_miejscowosc" placeholder="np. Kłodawa"></div><div class="q"><label>Telefon <span class="req">*</span></label><input type="tel" id="r_telefon" placeholder="600 000 000"></div></div>
-        <div class="grid2"><div class="q"><label>Data wizyty</label><input type="date" id="r_data_wizyty"></div><div class="q"><label>Typ obiektu</label><select id="r_typ_obj"><option value="">—</option><option>Dom jednorodzinny</option><option>Gospodarstwo rolne</option><option>Firma / agroturystyka</option><option>Inne</option></select></div></div>
-        <button class="btn-next" onclick="goStep(2)">Dalej → Budynek</button>
-      </div>
-    </div>
-    <div id="step2" class="step-content">
-      <div class="card"><div class="card-title">🏠 Krok 2 — Budynek</div><div class="card-sub">Parametry techniczne obiektu</div>
-        <div class="grid2"><div class="q"><label>Rok budowy</label><input type="number" id="r_rok_budynku" placeholder="np. 1998"></div><div class="q"><label>Powierzchnia (m²)</label><input type="number" id="r_powierzchnia" placeholder="np. 150"></div></div>
-        <div class="q"><label>Liczba osób</label><input type="number" id="r_liczba_osob" placeholder="np. 4"></div>
-        <div class="q"><label>Stan ocieplenia</label><div class="opts"><label class="opt"><input type="radio" name="r_ociepl" value="Brak"> Brak ocieplenia</label><label class="opt"><input type="radio" name="r_ociepl" value="Częściowe"> Częściowe</label><label class="opt"><input type="radio" name="r_ociepl" value="Pełne"> Pełne</label></div></div>
-        <div class="q"><label>Samochód EV?</label><div class="opts"><label class="opt"><input type="radio" name="r_ev" value="Tak"> Tak</label><label class="opt"><input type="radio" name="r_ev" value="Nie"> Nie</label><label class="opt"><input type="radio" name="r_ev" value="Planuje"> Planuje</label></div></div>
-        <button class="btn-next" onclick="goStep(3)">Dalej → Energia</button><button class="btn-prev" onclick="goStep(1)">← Wróć</button>
-      </div>
-    </div>
-    <div id="step3" class="step-content">
-      <div class="card"><div class="card-title">⚡ Krok 3 — Rachunki</div><div class="card-sub">Analiza kosztów energii</div>
-        <div class="q"><label>Śr. miesięczny rachunek (PLN)</label><input type="number" id="r_rachunek_prad" placeholder="np. 300"></div>
-        <div class="q"><label>Trend rachunków</label><div class="opts"><label class="opt"><input type="radio" name="r_trend_prad" value="Wyraźnie rosną"> 📈 Wyraźnie rosną</label><label class="opt"><input type="radio" name="r_trend_prad" value="Nieznacznie rosną"> Nieznacznie rosną</label><label class="opt"><input type="radio" name="r_trend_prad" value="Stabilne"> ➡️ Stabilne</label><label class="opt"><input type="radio" name="r_trend_prad" value="Spadają"> ⬇️ Spadają</label></div></div>
-        <div class="q"><label>Roczny koszt ogrzewania (PLN)</label><input type="number" id="r_koszt_ogrzew" placeholder="np. 6000"></div>
-        <div class="q"><label>Motywacja główna</label><div class="opts"><label class="opt"><input type="radio" name="r_motyw" value="Oszczędności"> 💰 Oszczędności</label><label class="opt"><input type="radio" name="r_motyw" value="Niezależność"> 🔌 Niezależność</label><label class="opt"><input type="radio" name="r_motyw" value="Ekologia"> 🌿 Ekologia</label><label class="opt"><input type="radio" name="r_motyw" value="Dotacje"> 📋 Dotacje</label></div></div>
-        <button class="btn-next" onclick="goStep(4)">Dalej → PV</button><button class="btn-prev" onclick="goStep(2)">← Wróć</button>
-      </div>
-    </div>
-    <div id="step4" class="step-content">
-      <div class="card"><div class="card-title">☀️ Krok 4 — Fotowoltaika</div><div class="card-sub">Status i diagnostyka PV</div>
-        <div class="q"><label>Status PV</label><div class="opts"><label class="opt"><input type="radio" name="r_ma_pv" value="Tak — czynna"> ✅ Mam — czynna</label><label class="opt"><input type="radio" name="r_ma_pv" value="Tak — problemy"> ⚠️ Mam — problemy</label><label class="opt"><input type="radio" name="r_ma_pv" value="Planuję"> 📅 Planuję</label><label class="opt"><input type="radio" name="r_ma_pv" value="Nie mam"> ❌ Nie mam</label></div></div>
-        <div class="grid2"><div class="q"><label>Rok montażu</label><select id="r_rok_pv"><option value="">—</option><option>przed 2019</option><option>2019</option><option>2020</option><option>2021</option><option>2022</option><option>2023</option><option>2024</option><option>2025</option></select></div><div class="q"><label>Moc (kWp)</label><input type="text" id="r_moc_pv" placeholder="np. 8.5"></div></div>
-        <div class="q"><label>Rozliczenie</label><div class="opts"><label class="opt"><input type="radio" name="r_rozl_pv" value="Net-billing"> Net-billing</label><label class="opt"><input type="radio" name="r_rozl_pv" value="Net-metering"> Net-metering</label><label class="opt"><input type="radio" name="r_rozl_pv" value="Nie wiem"> Nie wiem</label></div></div>
-        <div class="q"><label>Problemy</label><div class="opts"><label class="opt"><input type="checkbox" id="r_prob_alerty"> Alarmy inwertera</label><label class="opt"><input type="checkbox" id="r_prob_rachunki"> Wysokie rachunki</label><label class="opt"><input type="checkbox" id="r_prob_brak"> Brak monitoringu</label><label class="opt"><input type="checkbox" id="r_prob_nic"> Brak problemów</label></div></div>
-        <div class="q"><label>Ocena efektywności (1–5)</label><div class="scale-row" id="sg_r_ocena"><button class="scale-btn" onclick="selectScale('sg_r_ocena',this)" data-v="1">1</button><button class="scale-btn" onclick="selectScale('sg_r_ocena',this)" data-v="2">2</button><button class="scale-btn" onclick="selectScale('sg_r_ocena',this)" data-v="3">3</button><button class="scale-btn" onclick="selectScale('sg_r_ocena',this)" data-v="4">4</button><button class="scale-btn" onclick="selectScale('sg_r_ocena',this)" data-v="5">5</button></div></div>
-        <button class="btn-next" onclick="goStep(5)">Dalej → Ogrzewanie</button><button class="btn-prev" onclick="goStep(3)">← Wróć</button>
-      </div>
-    </div>
-    <div id="step5" class="step-content">
-      <div class="card"><div class="card-title">🔥 Krok 5 — System grzewczy</div><div class="card-sub">Ocena aktualnego źródła ciepła</div>
-        <div class="q"><label>Źródło ciepła</label><div class="opts"><label class="opt"><input type="radio" name="r_zrodlo_ciepla" value="Węgiel"> 🪨 Węgiel / ekogroszek</label><label class="opt"><input type="radio" name="r_zrodlo_ciepla" value="Gaz"> 🔵 Kocioł gazowy</label><label class="opt"><input type="radio" name="r_zrodlo_ciepla" value="Elektryczne"> ⚡ Elektryczne</label><label class="opt"><input type="radio" name="r_zrodlo_ciepla" value="Pompa ciepła"> 🌡️ Pompa ciepła</label><label class="opt"><input type="radio" name="r_zrodlo_ciepla" value="Inne"> Inne</label></div></div>
-        <div class="grid2"><div class="q"><label>Wiek urządzenia</label><select id="r_wiek_kotla"><option value="">—</option><option>do 5 lat</option><option>5–10 lat</option><option>10–15 lat</option><option>powyżej 15 lat</option></select></div><div class="q"><label>Typ instalacji</label><select id="r_typ_instal"><option value="">—</option><option>Grzejniki</option><option>Podłogowe</option><option>Mieszane</option></select></div></div>
-        <div class="q"><label>Zainteresowanie PC</label><div class="opts"><label class="opt"><input type="radio" name="r_zaint_pc" value="Tak"> Tak, aktywne</label><label class="opt"><input type="radio" name="r_zaint_pc" value="Może"> Może 1–2 lata</label><label class="opt"><input type="radio" name="r_zaint_pc" value="Nie"> Nie teraz</label></div></div>
-        <button class="btn-next" onclick="goStep(6)">Dalej → Magazyn</button><button class="btn-prev" onclick="goStep(4)">← Wróć</button>
-      </div>
-    </div>
-    <div id="step6" class="step-content">
-      <div class="card"><div class="card-title">🔋 Krok 6 — Magazyn energii</div><div class="card-sub">Kwalifikacja do programu Mój Magazyn</div>
-        <div class="info-box">💡 Mój Magazyn — min. 12 kWh, EMS, tryb wyspowy.</div>
-        <div class="q"><label>Zainteresowanie magazynem</label><div class="opts"><label class="opt"><input type="radio" name="r_zaint_mag" value="Mój Magazyn"> ✅ Mój Magazyn</label><label class="opt"><input type="radio" name="r_zaint_mag" value="Oferta własna"> ✅ Oferta własna</label><label class="opt"><input type="radio" name="r_zaint_mag" value="Przyszłość"> 🕐 W przyszłości</label><label class="opt"><input type="radio" name="r_zaint_mag" value="Nie"> ❌ Nie</label></div></div>
-        <div class="q"><label>Autokonsumpcja PV (%)</label><input type="number" id="r_autokonsum" placeholder="np. 30"></div>
-        <div class="q"><label>Przerwy w prądzie</label><div class="opts"><label class="opt"><input type="radio" name="r_przerwy" value="Częste"> Częste</label><label class="opt"><input type="radio" name="r_przerwy" value="Rzadko"> Rzadko</label><label class="opt"><input type="radio" name="r_przerwy" value="Brak"> Brak</label></div></div>
-        <div class="q"><label>Inne zainteresowania</label><div class="opts"><label class="opt"><input type="checkbox" id="r_int_pv"> ☀️ PV</label><label class="opt"><input type="checkbox" id="r_int_pc"> 🌡️ Pompa ciepła</label><label class="opt"><input type="checkbox" id="r_int_ter"> 🏠 Termoizolacja</label><label class="opt"><input type="checkbox" id="r_int_klim"> ❄️ Klimatyzacja</label></div></div>
-        <button class="btn-next" onclick="goStep(7)">Dalej → Ocena finalna</button><button class="btn-prev" onclick="goStep(5)">← Wróć</button>
-      </div>
-    </div>
-    <div id="step7" class="step-content">
-      <div class="card"><div class="card-title">🏆 Krok 7 — Finalna ocena</div><div class="card-sub">Temperatura leada i ustalenie terminu</div>
-        <div class="slabel">🏷️ Temperatura leada</div>
-        <div class="temp-row" id="tg_rozb"><button class="temp-btn" data-val="Zimny" onclick="selectTemp('tg_rozb',this)">🔵 Zimny</button><button class="temp-btn" data-val="Letni" onclick="selectTemp('tg_rozb',this)">🟡 Letni</button><button class="temp-btn" data-val="Ciepły" onclick="selectTemp('tg_rozb',this)">🟠 Ciepły</button><button class="temp-btn" data-val="Gorący" onclick="selectTemp('tg_rozb',this)">🔥 Gorący</button></div>
-        <div class="q" style="margin-top:14px"><label>Termin kontaktu / wizyty</label><input type="text" id="r_termin" placeholder="np. środa 28.05 o 14:00 lub 16:00"></div>
-        <div class="q"><label>Horyzont decyzji</label><select id="r_horyz"><option value="">—</option><option>Do 3 miesięcy</option><option>3–6 miesięcy</option><option>6–12 miesięcy</option><option>Powyżej roku</option></select></div>
-        <div class="q"><label>Uwagi z rozmowy</label><textarea id="r_uwagi" placeholder="Co powiedział? Obiekcje? Co go interesuje?"></textarea></div>
-        <hr class="div">
-        <div class="info-box blue">📋 Sprawdź: telefon klienta (krok 1) + temperatura leada.</div>
-        <button class="btn-main" onclick="submitRozbudowana()">🏆 Zapisz pełną ankietę +100 XP</button>
-        <button class="btn-prev" onclick="goStep(6)">← Wróć</button>
-      </div>
-    </div>
+  <!-- FULL MODE -->
+  <div id="panel_full" class="mpanel">
+    <div id="flow_full" class="qflow"></div>
   </div>
 
-  <div class="form-footer">4ECO Field Agent · ankiety.4-eco.pl</div>
+  <div class="footer">4ECO Field Agent · ankiety.4-eco.pl</div>
 </div>
 
-<!-- Toast & Achievement -->
+<!-- Overlays -->
 <div class="toast" id="toast"></div>
-<div class="achievement-pop" id="achievePop">
+<div class="ach" id="achPop">
   <div class="ach-icon" id="achIcon">🏅</div>
-  <div class="ach-text"><div class="ach-label">Odznaka odblokowana!</div><div class="ach-name" id="achName">—</div><div class="ach-xp" id="achXp">+50 XP</div></div>
+  <div><div class="ach-badge">Odznaka odblokowana!</div><div class="ach-name" id="achName">—</div><div class="ach-xp" id="achXp">+50 XP</div></div>
 </div>
 
 <script>
-// ============================================================
+// ======================================================
 // CONFIG
-// ============================================================
-var WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwpr5IPKpv0n9AQr7dvEJwB0CO2UIrRLmVZ1o39AzW5KtsbOExFvS8jiszzLiE_GFMK/exec";
+// ======================================================
+var WEBHOOK = "https://script.google.com/macros/s/AKfycbwpr5IPKpv0n9AQr7dvEJwB0CO2UIrRLmVZ1o39AzW5KtsbOExFvS8jiszzLiE_GFMK/exec";
 
-var LEVELS = [
-  {min:0,    name:"Rookie",      icon:"🌱"},
-  {min:100,  name:"Prospector",  icon:"⛏️"},
-  {min:300,  name:"Hunter",      icon:"🎯"},
-  {min:600,  name:"Closer",      icon:"🔥"},
-  {min:1000, name:"Elite",       icon:"⚡"},
-  {min:1800, name:"Legend",      icon:"👑"},
-  {min:3000, name:"GOD MODE",    icon:"🌟"}
+var LEVELS=[
+  {min:0,name:"Rookie",icon:"🌱"},
+  {min:100,name:"Prospector",icon:"⛏️"},
+  {min:300,name:"Hunter",icon:"🎯"},
+  {min:600,name:"Closer",icon:"🔥"},
+  {min:1000,name:"Elite",icon:"⚡"},
+  {min:1800,name:"Legend",icon:"👑"},
+  {min:3000,name:"GOD MODE",icon:"🌟"}
 ];
 
-var ACHIEVEMENTS = [
-  {id:"first",   icon:"🎉", name:"Pierwsze kroki",    xp:25,  check:function(s){return s.total>=1}},
-  {id:"hot5",    icon:"🔥", name:"5x Gorący lead",    xp:100, check:function(s){return s.hot>=5}},
-  {id:"streak3", icon:"🔗", name:"3 dni z rzędu",     xp:75,  check:function(s){return s.streak>=3}},
-  {id:"speed",   icon:"⚡", name:"Speedrunner: 3 dziś",xp:50, check:function(s){return s.today>=3}},
-  {id:"ten",     icon:"💎", name:"10 ankiet total",   xp:150, check:function(s){return s.total>=10}},
-  {id:"twenty",  icon:"🏆", name:"20 ankiet total",   xp:300, check:function(s){return s.total>=20}},
-  {id:"legend",  icon:"👑", name:"50 ankiet total",   xp:500, check:function(s){return s.total>=50}}
+var ACHS=[
+  {id:"first",icon:"🎉",name:"Pierwsze kroki",xp:25,check:function(s){return s.total>=1}},
+  {id:"hot5",icon:"🔥",name:"5x Gorący lead",xp:100,check:function(s){return s.hot>=5}},
+  {id:"streak3",icon:"🔗",name:"3 dni z rzędu",xp:75,check:function(s){return s.streak>=3}},
+  {id:"speed3",icon:"⚡",name:"3 ankiety dziś",xp:50,check:function(s){return s.today>=3}},
+  {id:"ten",icon:"💎",name:"10 ankiet total",xp:150,check:function(s){return s.total>=10}},
+  {id:"twenty",icon:"🏆",name:"20 ankiet total",xp:300,check:function(s){return s.total>=20}},
+  {id:"fifty",icon:"👑",name:"50 ankiet total",xp:500,check:function(s){return s.total>=50}}
 ];
 
-// ============================================================
+// ======================================================
+// FLOW DEFINITIONS
+// ======================================================
+
+// --- QUICK PV ---
+var FLOW_QPV = [
+  {id:"tel", type:"text", title:"Numer telefonu klienta?", hint:"Wpisz numer — to jedyne pole obowiązkowe", placeholder:"600 000 000", req:true},
+  {id:"msc", type:"text", title:"Skąd jesteś?", hint:"Nazwa miejscowości", placeholder:"np. Kłodawa", req:true},
+  {id:"pv_status", type:"choice", title:"Masz już panele na dachu?", choices:[
+    {icon:"✅",text:"Tak, działają"},
+    {icon:"⚠️",text:"Tak, ale coś nie gra"},
+    {icon:"🔜",text:"Planuję w tym roku"},
+    {icon:"❌",text:"Nie mam"}
+  ]},
+  {id:"rachunek", type:"choice", title:"Ile mniej więcej płacisz miesięcznie za prąd?", hint:"Orientacyjnie", choices:[
+    {icon:"💸",text:"Ponad 500 zł"},
+    {icon:"💰",text:"300–500 zł"},
+    {icon:"💵",text:"150–300 zł"},
+    {icon:"🪙",text:"Poniżej 150 zł"}
+  ]},
+  {id:"bol", type:"choice", title:"Co najbardziej boli Cię w rachunkach?", choices:[
+    {icon:"📈",text:"Cały czas rosną"},
+    {icon:"🤷",text:"Nie rozumiem za co płacę"},
+    {icon:"😴",text:"Nie śledzę — płacę i tyle"},
+    {icon:"👍",text:"Jestem zadowolony/a"}
+  ]},
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"uwagi", type:"textarea", title:"Coś jeszcze warto wiedzieć?", hint:"Opcjonalne notatki", placeholder:"np. ma stary kocioł, pyta o dotacje..."}
+];
+
+// --- QUICK HEAT ---
+var FLOW_QHEAT = [
+  {id:"tel", type:"text", title:"Numer telefonu klienta?", placeholder:"600 000 000", req:true},
+  {id:"msc", type:"text", title:"Miejscowość?", placeholder:"np. Kłodawa", req:true},
+  {id:"ogrzew", type:"choice", title:"Czym teraz ogrzewasz dom?", choices:[
+    {icon:"🪨",text:"Węgiel / ekogroszek"},
+    {icon:"🔵",text:"Gaz ziemny"},
+    {icon:"⚡",text:"Prąd / bojler"},
+    {icon:"🌡️",text:"Mam już pompę ciepła"},
+    {icon:"🪵",text:"Drewno / inne"}
+  ]},
+  {id:"koszt", type:"choice", title:"Ile rocznie wydajesz na ogrzewanie?", choices:[
+    {icon:"🥵",text:"Ponad 10 000 zł"},
+    {icon:"😰",text:"6 000–10 000 zł"},
+    {icon:"😐",text:"3 000–6 000 zł"},
+    {icon:"😊",text:"Poniżej 3 000 zł"}
+  ]},
+  {id:"wiek_budynku", type:"choice", title:"Kiedy mniej więcej wybudowany jest dom?", choices:[
+    {icon:"🏚️",text:"Przed 1990"},
+    {icon:"🏠",text:"1990–2005"},
+    {icon:"🏡",text:"2005–2015"},
+    {icon:"🏗️",text:"Po 2015"}
+  ]},
+  {id:"temp", type:"temp", title:"Temperatura leada?"},
+  {id:"uwagi", type:"textarea", title:"Notatki", placeholder:"np. zainteresowany dotacjami, żona decyduje...", hint:"Opcjonalne"}
+];
+
+// --- QUICK NEW ---
+var FLOW_QNEW = [
+  {id:"tel", type:"text", title:"Numer telefonu klienta?", placeholder:"600 000 000", req:true},
+  {id:"msc", type:"text", title:"Miejscowość?", placeholder:"np. Kłodawa", req:true},
+  {id:"typ", type:"choice", title:"Jaki typ nieruchomości?", choices:[
+    {icon:"🏠",text:"Dom jednorodzinny"},
+    {icon:"🌾",text:"Gospodarstwo rolne"},
+    {icon:"🏢",text:"Firma / lokal"},
+    {icon:"🏘️",text:"Inne"}
+  ]},
+  {id:"rachunki_ogol", type:"emoji", title:"Jak oceniasz swoje rachunki za energię?", opts:[
+    {emoji:"😌",label:"Spokojnie"},
+    {emoji:"😐",label:"Średnio"},
+    {emoji:"😟",label:"Drogo"},
+    {emoji:"😡",label:"Horror"}
+  ]},
+  {id:"int", type:"multi", title:"Co Cię interesuje? (możesz zaznaczyć kilka)", choices:[
+    {icon:"☀️",text:"Panele słoneczne"},
+    {icon:"🌡️",text:"Pompa ciepła"},
+    {icon:"🔋",text:"Magazyn energii"},
+    {icon:"🏠",text:"Ocieplenie domu"},
+    {icon:"❄️",text:"Klimatyzacja"}
+  ]},
+  {id:"decyzja", type:"choice", title:"Kiedy planujesz decyzję?", choices:[
+    {icon:"🚀",text:"Jak najszybciej"},
+    {icon:"📅",text:"W ciągu pół roku"},
+    {icon:"🕐",text:"Za rok lub dłużej"},
+    {icon:"🤔",text:"Jeszcze nie wiem"}
+  ]},
+  {id:"temp", type:"temp", title:"Temperatura leada?"},
+  {id:"uwagi", type:"textarea", title:"Notatki", placeholder:"np. oboje domownicy zainteresowani...", hint:"Opcjonalne"}
+];
+
+// --- FULL SURVEY ---
+var FLOW_FULL = [
+  {id:"tel", type:"text", title:"Telefon klienta", placeholder:"600 000 000", req:true},
+  {id:"msc", type:"text", title:"Miejscowość", placeholder:"np. Kłodawa", req:true},
+  {id:"typ", type:"choice", title:"Typ nieruchomości?", choices:[
+    {icon:"🏠",text:"Dom jednorodzinny"},
+    {icon:"🌾",text:"Gospodarstwo rolne"},
+    {icon:"🏢",text:"Firma / lokal"},
+    {icon:"🏘️",text:"Inne"}
+  ]},
+  {id:"pv", type:"choice", title:"Czy masz panele fotowoltaiczne?", choices:[
+    {icon:"✅",text:"Tak, działają dobrze"},
+    {icon:"⚠️",text:"Tak, ale mam problemy"},
+    {icon:"🔜",text:"Planuję instalację"},
+    {icon:"❌",text:"Nie mam"}
+  ]},
+  {id:"rachunek", type:"choice", title:"Miesięczny rachunek za prąd?", choices:[
+    {icon:"💸",text:"Ponad 500 zł"},
+    {icon:"💰",text:"300–500 zł"},
+    {icon:"💵",text:"150–300 zł"},
+    {icon:"🪙",text:"Poniżej 150 zł"}
+  ]},
+  {id:"ogrzew", type:"choice", title:"Czym ogrzewasz dom?", choices:[
+    {icon:"🪨",text:"Węgiel / ekogroszek"},
+    {icon:"🔵",text:"Gaz"},
+    {icon:"⚡",text:"Prąd"},
+    {icon:"🌡️",text:"Pompa ciepła"},
+    {icon:"🪵",text:"Drewno / inne"}
+  ]},
+  {id:"koszt_ogrzew", type:"choice", title:"Roczny koszt ogrzewania?", choices:[
+    {icon:"🥵",text:"Ponad 10 000 zł"},
+    {icon:"😰",text:"6 000–10 000 zł"},
+    {icon:"😐",text:"3 000–6 000 zł"},
+    {icon:"😊",text:"Poniżej 3 000 zł"}
+  ]},
+  {id:"int", type:"multi", title:"Co Cię interesuje?", choices:[
+    {icon:"☀️",text:"Panele słoneczne"},
+    {icon:"🌡️",text:"Pompa ciepła"},
+    {icon:"🔋",text:"Magazyn energii"},
+    {icon:"🏠",text:"Ocieplenie domu"},
+    {icon:"❄️",text:"Klimatyzacja"}
+  ]},
+  {id:"motyw", type:"emoji", title:"Co jest główną motywacją?", opts:[
+    {emoji:"💰",label:"Oszczędności"},
+    {emoji:"🔌",label:"Niezależność"},
+    {emoji:"🌿",label:"Ekologia"},
+    {emoji:"📋",label:"Dotacje"}
+  ]},
+  {id:"decyzja", type:"choice", title:"Kiedy planuje decyzję?", choices:[
+    {icon:"🚀",text:"Jak najszybciej"},
+    {icon:"📅",text:"W ciągu pół roku"},
+    {icon:"🕐",text:"Za rok lub dłużej"},
+    {icon:"🤔",text:"Jeszcze nie wiem"}
+  ]},
+  {id:"temp", type:"temp", title:"Temperatura leada?"},
+  {id:"uwagi", type:"textarea", title:"Notatki z rozmowy", placeholder:"Obiekcje, pytania, ciekawostki...", hint:"Opcjonalne"}
+];
+
+// ======================================================
+// FLOW ENGINE
+// ======================================================
+var flows = {};
+
+function buildFlow(containerId, questions, sheetName, color, xpAmount) {
+  var container = document.getElementById(containerId);
+  var state = { current: 0, answers: {}, questions: questions, sheetName: sheetName, color: color||'', xpAmount: xpAmount||50 };
+  flows[containerId] = state;
+  renderQ(containerId);
+}
+
+function renderQ(fid) {
+  var s = flows[fid];
+  var container = document.getElementById(fid);
+  var q = s.questions[s.current];
+  var total = s.questions.length;
+  var pct = Math.round((s.current / total) * 100);
+  var isLast = s.current === total - 1;
+
+  var html = '<div class="qflow-header"><div class="qflow-prog-wrap"><div class="qflow-prog" style="width:'+pct+'%"></div></div><div class="qflow-count">'+(s.current+1)+'/'+total+'</div></div>';
+  html += '<div class="qslide active"><div class="qcard '+(s.color||'')+'">';
+  html += '<div class="qnum">Pytanie '+(s.current+1)+'</div>';
+  html += '<div class="qtitle">'+q.title+'</div>';
+  if(q.hint) html += '<div class="qhint">'+q.hint+'</div>';
+
+  var savedVal = s.answers[q.id];
+
+  if(q.type==='text') {
+    html += '<input class="q-input" id="qi_'+fid+'" type="'+(q.id==='tel'?'tel':'text')+'" placeholder="'+(q.placeholder||'')+'" value="'+(savedVal||'')+'" inputmode="'+(q.id==='tel'?'tel':'text')+'">';
+  } else if(q.type==='textarea') {
+    html += '<textarea class="q-input" id="qi_'+fid+'" rows="3" placeholder="'+(q.placeholder||'')+'" style="resize:none">'+(savedVal||'')+'</textarea>';
+  } else if(q.type==='choice') {
+    html += '<div class="choices">';
+    q.choices.forEach(function(c,i){
+      var sel = savedVal===c.text?' selected':'';
+      html += '<button class="choice'+sel+'" onclick="selectChoice(\''+fid+'\',\''+c.text.replace(/'/g,'\\\'')+'\')" >';
+      html += '<span class="choice-icon">'+c.icon+'</span><span class="choice-text">'+c.text+'</span>';
+      html += '<span class="choice-check">'+(sel?' ✓':'')+'</span></button>';
+    });
+    html += '</div>';
+  } else if(q.type==='multi') {
+    var savedArr = savedVal || [];
+    html += '<div class="choices multi">';
+    q.choices.forEach(function(c){
+      var sel = savedArr.indexOf(c.text)>-1?' selected':'';
+      html += '<button class="choice'+sel+'" onclick="toggleMulti(\''+fid+'\',\''+c.text.replace(/'/g,'\\\'')+'\')">';
+      html += '<span class="choice-icon">'+c.icon+'</span><span class="choice-text">'+c.text+'</span>';
+      html += '<span class="choice-check">'+(sel?' ✓':'')+'</span></button>';
+    });
+    html += '</div>';
+  } else if(q.type==='emoji') {
+    html += '<div class="emoji-scale">';
+    q.opts.forEach(function(o){
+      var sel = savedVal===o.label?' selected':'';
+      html += '<button class="es-btn'+sel+'" onclick="selectEmoji(\''+fid+'\',\''+o.label+'\')"><span class="es-emoji">'+o.emoji+'</span><span class="es-label">'+o.label+'</span></button>';
+    });
+    html += '</div>';
+  } else if(q.type==='temp') {
+    html += '<div class="temp-sel">';
+    [{v:'Zimny',icon:'🔵',desc:'Mało zainteresowany'},{v:'Letni',icon:'🟡',desc:'Słucha, zastanawia się'},{v:'Ciepły',icon:'🟠',desc:'Wyraźnie zainteresowany'},{v:'Gorący',icon:'🔥',desc:'Chce spotkania!'}].forEach(function(t){
+      var sel = savedVal===t.v?' sel':'';
+      html += '<button class="ts-btn'+sel+'" data-v="'+t.v+'" onclick="selectTemp2(\''+fid+'\',\''+t.v+'\')">';
+      html += '<span class="ts-icon">'+t.icon+'</span><span class="ts-label">'+t.v+'</span><span class="ts-desc">'+t.desc+'</span></button>';
+    });
+    html += '</div>';
+  }
+
+  // Nav
+  html += '<div class="qnav">';
+  if(s.current > 0) html += '<button class="btn-back" onclick="prevQ(\''+fid+'\')">← Wróć</button>';
+  if(isLast) {
+    html += '<button class="btn-submit '+(s.color||'')+'" onclick="submitFlow(\''+fid+'\')">✅ Zapisz +'+s.xpAmount+' XP</button>';
+  } else {
+    html += '<button class="btn-next '+(s.color||'')+'" onclick="nextQ(\''+fid+'\')">Dalej →</button>';
+  }
+  html += '</div>';
+
+  html += '</div></div>';
+  container.innerHTML = html;
+  // Focus input
+  setTimeout(function(){ var inp=document.getElementById('qi_'+fid); if(inp) inp.focus(); },300);
+}
+
+function selectChoice(fid, val) {
+  flows[fid].answers[flows[fid].questions[flows[fid].current].id] = val;
+  renderQ(fid);
+  setTimeout(function(){ nextQ(fid); }, 220);
+}
+
+function toggleMulti(fid, val) {
+  var q = flows[fid].questions[flows[fid].current];
+  var arr = flows[fid].answers[q.id] || [];
+  var idx = arr.indexOf(val);
+  if(idx>-1) arr.splice(idx,1); else arr.push(val);
+  flows[fid].answers[q.id] = arr;
+  renderQ(fid);
+}
+
+function selectEmoji(fid, val) {
+  flows[fid].answers[flows[fid].questions[flows[fid].current].id] = val;
+  renderQ(fid);
+  setTimeout(function(){ nextQ(fid); }, 220);
+}
+
+function selectTemp2(fid, val) {
+  flows[fid].answers[flows[fid].questions[flows[fid].current].id] = val;
+  renderQ(fid);
+}
+
+function nextQ(fid) {
+  var s = flows[fid];
+  var q = s.questions[s.current];
+  // Save text/textarea
+  var inp = document.getElementById('qi_'+fid);
+  if(inp) s.answers[q.id] = inp.value;
+  // Validate required
+  if(q.req) {
+    var val = s.answers[q.id];
+    if(!val||val.toString().trim()===''){
+      var inpEl = document.getElementById('qi_'+fid);
+      if(inpEl){ inpEl.style.borderColor='var(--red)'; inpEl.focus(); }
+      showToast('⚠️ To pole jest wymagane!');
+      return;
+    }
+  }
+  if(s.current < s.questions.length-1){
+    s.current++;
+    renderQ(fid);
+    window.scrollTo(0, document.querySelector('#'+fid+' .qflow-header') ? document.querySelector('#'+fid).offsetTop - 10 : 0);
+  }
+}
+
+function prevQ(fid) {
+  var s = flows[fid];
+  var inp = document.getElementById('qi_'+fid);
+  if(inp) s.answers[s.questions[s.current].id] = inp.value;
+  if(s.current > 0){ s.current--; renderQ(fid); }
+}
+
+function submitFlow(fid) {
+  var s = flows[fid];
+  var inp = document.getElementById('qi_'+fid);
+  if(inp) s.answers[s.questions[s.current].id] = inp.value;
+  var a = s.answers;
+  // Build payload
+  var interesy = Array.isArray(a.int) ? a.int.join(', ') : (a.int||'');
+  var data = {
+    sheet_name: s.sheetName,
+    typ_ankiety: fid,
+    ankieter: window._user||'',
+    data_wizyty: new Date().toLocaleDateString('pl-PL'),
+    miejscowosc: a.msc||'',
+    telefon: a.tel||'',
+    typ_obj: a.typ||'',
+    rachunek_prad: a.rachunek||'',
+    koszt_ogrzew: a.koszt||a.koszt_ogrzew||'',
+    ma_pv: a.pv||a.pv_status||'',
+    zrodlo_ciepla: a.ogrzew||'',
+    wiek_kotla: a.wiek_budynku||'',
+    interesy: interesy,
+    motyw: a.motyw||'',
+    decyzja: a.decyzja||'',
+    bol: a.bol||'',
+    rachunki_ogol: a.rachunki_ogol||'',
+    temp_leada: a.temp||'',
+    uwagi: a.uwagi||''
+  };
+  if(!data.telefon){showToast('⚠️ Brak telefonu klienta!'); s.current=0; renderQ(fid); return;}
+  sendData(data, s.xpAmount, data.temp_leada==='Gorący', fid);
+}
+
+function sendData(data, xp, isHot, fid) {
+  var btns = document.querySelectorAll('#'+fid+' .btn-submit, #'+fid+' .btn-next');
+  btns.forEach(function(b){b.disabled=true;b.textContent='Zapisuję...';});
+  fetch(WEBHOOK,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+  .then(function(){
+    if(window._user) addXP(window._user, xp, isHot);
+    confettiBlast();
+    floatXP('+'+xp+' XP');
+    if(isHot) setTimeout(function(){floatXP('🔥 HOT!');},400);
+    showToast(isHot?'🔥 GORĄCY LEAD! +'+xp+' XP':'✅ Zapisano! +'+xp+' XP');
+    setTimeout(function(){showSuccess(data.typ_ankiety, data.temp_leada, xp, fid);},700);
+  })
+  .catch(function(err){
+    btns.forEach(function(b){b.disabled=false;b.textContent='Zapisz';});
+    alert('Błąd: '+err.message);
+  });
+}
+
+function showSuccess(typ, temp, xp, fid) {
+  var stats = getStats(window._user||'');
+  var lv = getLv(stats.xp);
+  var tCol = {Zimny:'#60a5fa',Letni:'#fbbf24',Ciepły:'#fb923c',Gorący:'#00ff88'}[temp]||'#aaa';
+  var tEm = {Zimny:'🔵',Letni:'🟡',Ciepły:'🟠',Gorący:'🔥'}[temp]||'';
+  var app = document.getElementById('appScreen');
+  app.innerHTML = '<div class="success-screen">'+
+    '<div class="success-icon">✅</div>'+
+    '<div class="success-xp">+'+xp+' XP!</div>'+
+    '<div class="success-card">'+
+      '<div class="srow"><span class="srow-label">Typ ankiety</span><span class="srow-val">'+typ+'</span></div>'+
+      '<div class="srow"><span class="srow-label">Lead</span><span class="srow-val" style="color:'+tCol+'">'+tEm+' '+(temp||'brak')+'</span></div>'+
+    '</div>'+
+    '<div class="success-card glow">'+
+      '<div style="font-size:0.68em;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Twój progres</div>'+
+      '<div style="font-size:1.1em;font-weight:900;color:var(--green)">'+lv.icon+' Level '+lv.level+' — '+lv.name+'</div>'+
+      '<div class="sgrid">'+
+        '<div class="sgrid-item"><div class="sv" style="color:var(--green)">'+stats.xp+'</div><div class="sl">XP</div></div>'+
+        '<div class="sgrid-item"><div class="sv">'+stats.total+'</div><div class="sl">Ankiet</div></div>'+
+        '<div class="sgrid-item"><div class="sv" style="color:var(--orange)">'+stats.streak+'🔥</div><div class="sl">Streak</div></div>'+
+      '</div>'+
+      '<div style="height:7px;background:var(--bg3);border-radius:7px;overflow:hidden">'+
+        '<div style="height:100%;width:'+lv.progress+'%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:7px;box-shadow:0 0 8px rgba(0,255,136,0.4)"></div>'+
+      '</div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:0.68em;color:var(--muted);margin-top:4px"><span>Level '+lv.level+'</span><span>'+stats.xp+' / '+lv.nextXp+' XP</span></div>'+
+    '</div>'+
+    '<button onclick="location.reload()" style="width:100%;max-width:380px;padding:16px;background:linear-gradient(135deg,var(--green),var(--green2));color:#000;border:none;border-radius:16px;font-size:1.05em;font-weight:900;cursor:pointer;font-family:Inter,sans-serif;box-shadow:0 6px 24px rgba(0,255,136,0.4)">➕ Następna ankieta</button>'+
+  '</div>';
+}
+
+// ======================================================
 // AUTH
-// ============================================================
-var USERS_KEY = "4eco_users";
-var SESSION_KEY = "4eco_session";
+// ======================================================
+var UK='4eco_u', SK='4eco_s';
+function getUsers(){try{return JSON.parse(localStorage.getItem(UK))||{};}catch(e){return {};}}
+function saveUsers(u){localStorage.setItem(UK,JSON.stringify(u));}
+function getSession(){try{return JSON.parse(localStorage.getItem(SK));}catch(e){return null;}}
+function saveSession(n){localStorage.setItem(SK,JSON.stringify({name:n}));}
+function clearSession(){localStorage.removeItem(SK);}
 
-function getUsers(){try{return JSON.parse(localStorage.getItem(USERS_KEY))||{};}catch(e){return {};}}
-function saveUsers(u){localStorage.setItem(USERS_KEY,JSON.stringify(u));}
-function getSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY))||null;}catch(e){return null;}}
-function saveSession(name){localStorage.setItem(SESSION_KEY,JSON.stringify({name:name,ts:Date.now()}));}
-function clearSession(){localStorage.removeItem(SESSION_KEY);}
-
-function switchAuthTab(tab){
-  document.querySelectorAll('.auth-tab').forEach(function(t){t.classList.remove('active');});
-  document.querySelectorAll('.auth-form').forEach(function(f){f.classList.remove('active');});
-  document.getElementById(tab+'Form').classList.add('active');
-  event.target.classList.add('active');
-  document.getElementById('loginError').style.display='none';
-  document.getElementById('registerError').style.display='none';
-  document.getElementById('registerSuccess').style.display='none';
+function switchTab(tab,btn){
+  document.querySelectorAll('.atab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.aform').forEach(function(f){f.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById(tab==='login'?'loginForm':'regForm').classList.add('active');
 }
 
 function doRegister(){
-  var name=document.getElementById('regName').value.trim();
-  var pin=document.getElementById('regPin').value.trim();
-  var pin2=document.getElementById('regPin2').value.trim();
-  var errEl=document.getElementById('registerError');
-  var okEl=document.getElementById('registerSuccess');
-  errEl.style.display='none'; okEl.style.display='none';
-  if(!name){errEl.textContent='Wpisz imie i nazwisko.';errEl.style.display='block';return;}
-  if(!/^\d{4}$/.test(pin)){errEl.textContent='PIN musi miec dokladnie 4 cyfry.';errEl.style.display='block';return;}
-  if(pin!==pin2){errEl.textContent='PIN-y sie nie zgadzaja.';errEl.style.display='block';return;}
-  var users=getUsers();
-  var key=name.toLowerCase();
-  if(users[key]){errEl.textContent='Konto juz istnieje. Zaloguj sie.';errEl.style.display='block';return;}
-  users[key]={name:name,pin:pin,xp:0,total:0,hot:0,streak:0,lastDay:'',achievements:[]};
-  saveUsers(users);
-  okEl.textContent='Konto utworzone! Mozesz sie zalogowac.';
-  okEl.style.display='block';
-  document.getElementById('regName').value='';
-  document.getElementById('regPin').value='';
-  document.getElementById('regPin2').value='';
-  setTimeout(function(){switchAuthTab('login');},1500);
+  var n=document.getElementById('rName').value.trim(),p=document.getElementById('rPin').value,p2=document.getElementById('rPin2').value;
+  var err=document.getElementById('regErr'),ok=document.getElementById('regOk');
+  err.style.display='none';ok.style.display='none';
+  if(!n){err.textContent='Wpisz imię i nazwisko.';err.style.display='block';return;}
+  if(!/^\d{4}$/.test(p)){err.textContent='PIN musi mieć 4 cyfry.';err.style.display='block';return;}
+  if(p!==p2){err.textContent='PINy się nie zgadzają.';err.style.display='block';return;}
+  var us=getUsers(),k=n.toLowerCase();
+  if(us[k]){err.textContent='Konto istnieje — zaloguj się.';err.style.display='block';return;}
+  us[k]={name:n,pin:p,xp:0,total:0,hot:0,streak:0,lastDay:'',achs:[]};
+  saveUsers(us);ok.textContent='Konto utworzone!';ok.style.display='block';
+  setTimeout(function(){document.getElementById('lName').value=n;switchTab('login',document.querySelector('.atab'));},1200);
 }
 
 function doLogin(){
-  var name=document.getElementById('loginName').value.trim();
-  var pin=document.getElementById('loginPin').value.trim();
-  var remember=document.getElementById('rememberMe').checked;
-  var errEl=document.getElementById('loginError');
-  errEl.style.display='none';
-  if(!name||!pin){errEl.textContent='Wypelnij imie i PIN.';errEl.style.display='block';return;}
-  var users=getUsers();
-  var user=users[name.toLowerCase()];
-  if(!user||user.pin!==pin){errEl.textContent='Nieprawidlowe imie lub PIN.';errEl.style.display='block';return;}
-  if(remember) saveSession(user.name);
-  launchApp(user.name);
+  var n=document.getElementById('lName').value.trim(),p=document.getElementById('lPin').value;
+  var err=document.getElementById('loginErr');err.style.display='none';
+  var us=getUsers(),u=us[n.toLowerCase()];
+  if(!u||u.pin!==p){err.textContent='Nieprawidłowe dane.';err.style.display='block';return;}
+  if(document.getElementById('lRemember').checked) saveSession(u.name);
+  launchApp(u.name);
 }
 
 function doLogout(){clearSession();location.reload();}
 
-// ============================================================
+// ======================================================
 // GAMIFICATION
-// ============================================================
+// ======================================================
 function getStats(name){
-  var users=getUsers();
-  var u=users[name.toLowerCase()];
-  if(!u) return {xp:0,total:0,hot:0,streak:0,today:0,lastDay:'',achievements:[]};
-  var todayStr=new Date().toLocaleDateString('pl-PL');
-  var today=0;
-  try{var td=JSON.parse(localStorage.getItem('4eco_today_'+name.toLowerCase()))||{};today=td.date===todayStr?(td.count||0):0;}catch(e){}
-  return {xp:u.xp||0,total:u.total||0,hot:u.hot||0,streak:u.streak||0,today:today,lastDay:u.lastDay||'',achievements:u.achievements||[]};
+  var u=getUsers()[name.toLowerCase()]||{};
+  var today=new Date().toLocaleDateString('pl-PL');
+  var td=0;try{var t=JSON.parse(localStorage.getItem('4eco_td_'+name.toLowerCase()))||{};td=t.d===today?(t.c||0):0;}catch(e){}
+  return {xp:u.xp||0,total:u.total||0,hot:u.hot||0,streak:u.streak||0,today:td,lastDay:u.lastDay||'',achs:u.achs||[]};
 }
 
 function addXP(name,amount,isHot){
-  var users=getUsers();
-  var key=name.toLowerCase();
-  if(!users[key]) return;
-  users[key].xp=(users[key].xp||0)+amount;
-  users[key].total=(users[key].total||0)+1;
-  if(isHot) users[key].hot=(users[key].hot||0)+1;
-  var todayStr=new Date().toLocaleDateString('pl-PL');
-  if(users[key].lastDay===todayStr){
-    // same day
-  } else if(isYesterday(users[key].lastDay)){
-    users[key].streak=(users[key].streak||0)+1;
-  } else {
-    users[key].streak=1;
-  }
-  users[key].lastDay=todayStr;
-  try{var td={date:todayStr,count:((JSON.parse(localStorage.getItem('4eco_today_'+key))||{}).date===todayStr?(JSON.parse(localStorage.getItem('4eco_today_'+key)).count||0):0)+1};localStorage.setItem('4eco_today_'+key,JSON.stringify(td));}catch(e){}
-  saveUsers(users);
-  checkAchievements(name);
+  var us=getUsers(),k=name.toLowerCase();
+  if(!us[k]) return;
+  var today=new Date().toLocaleDateString('pl-PL');
+  var oldLv=getLv(us[k].xp||0).level;
+  us[k].xp=(us[k].xp||0)+amount;
+  us[k].total=(us[k].total||0)+1;
+  if(isHot) us[k].hot=(us[k].hot||0)+1;
+  if(us[k].lastDay===today){}
+  else if(isYest(us[k].lastDay)) us[k].streak=(us[k].streak||0)+1;
+  else us[k].streak=1;
+  us[k].lastDay=today;
+  try{var td=JSON.parse(localStorage.getItem('4eco_td_'+k))||{};var cnt=(td.d===today?td.c:0)+1;localStorage.setItem('4eco_td_'+k,JSON.stringify({d:today,c:cnt}));}catch(e){}
+  saveUsers(us);
+  checkAchs(name);
   updateUI(name);
+  var newLv=getLv(us[k].xp||0).level;
+  if(newLv>oldLv){lvFlash();showToast('🎉 LEVEL UP! Jesteś Level '+newLv+'!');}
 }
 
-function isYesterday(dateStr){
-  if(!dateStr) return false;
-  try{
-    var parts=dateStr.split('.');
-    var d=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));
-    var yesterday=new Date(); yesterday.setDate(yesterday.getDate()-1);
-    return d.toDateString()===yesterday.toDateString();
-  }catch(e){return false;}
+function isYest(ds){
+  if(!ds) return false;
+  try{var p=ds.split('.');var d=new Date(+p[2],+p[1]-1,+p[0]);var y=new Date();y.setDate(y.getDate()-1);return d.toDateString()===y.toDateString();}catch(e){return false;}
 }
 
-function getLevel(xp){
+function getLv(xp){
   var lv={level:1,name:'Rookie',icon:'🌱',nextXp:100,progress:0};
   for(var i=LEVELS.length-1;i>=0;i--){
     if(xp>=LEVELS[i].min){
-      lv.level=i+1;
-      lv.name=LEVELS[i].name;
-      lv.icon=LEVELS[i].icon;
+      lv.level=i+1;lv.name=LEVELS[i].name;lv.icon=LEVELS[i].icon;
       lv.nextXp=LEVELS[i+1]?LEVELS[i+1].min:9999;
-      lv.progress=LEVELS[i+1]?Math.round((xp-LEVELS[i].min)/(LEVELS[i+1].min-LEVELS[i].min)*100):100;
+      lv.progress=LEVELS[i+1]?Math.min(100,Math.round((xp-LEVELS[i].min)/(LEVELS[i+1].min-LEVELS[i].min)*100)):100;
       break;
     }
   }
   return lv;
 }
 
-function checkAchievements(name){
-  var users=getUsers();
-  var key=name.toLowerCase();
-  if(!users[key]) return;
-  var stats=getStats(name);
-  if(!users[key].achievements) users[key].achievements=[];
-  ACHIEVEMENTS.forEach(function(ach){
-    if(users[key].achievements.indexOf(ach.id)===-1 && ach.check(stats)){
-      users[key].achievements.push(ach.id);
-      users[key].xp=(users[key].xp||0)+ach.xp;
-      saveUsers(users);
-      showAchievement(ach);
+function checkAchs(name){
+  var us=getUsers(),k=name.toLowerCase();
+  if(!us[k]) return;
+  var s=getStats(name);
+  if(!us[k].achs) us[k].achs=[];
+  var changed=false;
+  ACHS.forEach(function(a){
+    if(us[k].achs.indexOf(a.id)===-1&&a.check(s)){
+      us[k].achs.push(a.id);us[k].xp=(us[k].xp||0)+a.xp;changed=true;
+      setTimeout(function(ac){showAch(ac);},800,a);
     }
   });
+  if(changed) saveUsers(us);
 }
 
-function showAchievement(ach){
-  var pop=document.getElementById('achievePop');
-  document.getElementById('achIcon').textContent=ach.icon;
-  document.getElementById('achName').textContent=ach.name;
-  document.getElementById('achXp').textContent='+'+ach.xp+' XP';
-  pop.classList.add('show');
-  setTimeout(function(){pop.classList.remove('show');},4000);
-}
-
-function showToast(msg){
-  var t=document.getElementById('toast');
-  t.textContent=msg;
-  t.classList.add('show');
-  setTimeout(function(){t.classList.remove('show');},3000);
-}
-
-function confetti(){
-  var colors=['#00ff88','#8b5cf6','#3b82f6','#f97316','#eab308','#ef4444'];
-  for(var i=0;i<40;i++){
-    var el=document.createElement('div');
-    el.className='confetti-piece';
-    el.style.left=Math.random()*100+'vw';
-    el.style.background=colors[Math.floor(Math.random()*colors.length)];
-    el.style.animationDelay=Math.random()*0.5+'s';
-    el.style.animationDuration=(0.8+Math.random()*0.8)+'s';
-    document.body.appendChild(el);
-    setTimeout(function(e){document.body.removeChild(e);},2000,el);
-  }
+function showAch(a){
+  var p=document.getElementById('achPop');
+  document.getElementById('achIcon').textContent=a.icon;
+  document.getElementById('achName').textContent=a.name;
+  document.getElementById('achXp').textContent='+'+a.xp+' XP';
+  p.classList.add('show');
+  setTimeout(function(){p.classList.remove('show');},4000);
 }
 
 function updateUI(name){
-  var stats=getStats(name);
-  var lv=getLevel(stats.xp);
+  var s=getStats(name),lv=getLv(s.xp);
+  document.getElementById('hdrAv').textContent=name.charAt(0).toUpperCase();
   document.getElementById('hdrName').textContent=name;
-  document.getElementById('hdrLevel').textContent='Level '+lv.level+' · '+lv.icon+' '+lv.name;
-  document.getElementById('hdrAvatar').textContent=name.charAt(0).toUpperCase();
-  document.getElementById('xpTotal').textContent=stats.xp;
+  document.getElementById('hdrLv').textContent='Level '+lv.level+' · '+lv.icon+' '+lv.name;
+  document.getElementById('xpTotal').textContent=s.xp;
   document.getElementById('xpBarLabel').textContent=lv.icon+' Level '+lv.level+' — '+lv.name;
-  document.getElementById('xpBarNext').textContent=stats.xp+' / '+lv.nextXp+' XP';
-  document.getElementById('xpBarFill').style.width=lv.progress+'%';
-  document.getElementById('statTotal').textContent=stats.total;
-  document.getElementById('statStreak').textContent=stats.streak+'🔥';
-  document.getElementById('statHot').textContent=stats.hot;
-  document.getElementById('statToday').textContent=stats.today;
-  renderMissions(stats);
+  document.getElementById('xpBarNext').textContent=s.xp+'/'+lv.nextXp+' XP';
+  document.getElementById('xpFill').style.width=lv.progress+'%';
+  document.getElementById('stTotal').textContent=s.total;
+  document.getElementById('stStreak').textContent=s.streak+'🔥';
+  document.getElementById('stHot').textContent=s.hot;
+  document.getElementById('stToday').textContent=s.today;
+  renderMissions(s);
 }
 
-function renderMissions(stats){
-  var todayStr=new Date().toLocaleDateString('pl-PL');
-  var missions=[
-    {icon:'⚡',title:'Zapisz 5 ankiet dziś',target:5,current:stats.today,xp:'+100 XP'},
-    {icon:'🔥',title:'Zdobądź 3 gorące leady',target:3,current:Math.min(stats.hot,3),xp:'+150 XP'},
-    {icon:'🔗',title:'Utrzymaj streak 3 dni',target:3,current:Math.min(stats.streak,3),xp:'+75 XP'},
-    {icon:'💎',title:'Osiągnij 10 ankiet łącznie',target:10,current:Math.min(stats.total,10),xp:'+200 XP'}
+function renderMissions(s){
+  var ms=[
+    {icon:'⚡',title:'5 ankiet dziś',target:5,cur:s.today,xp:'+100XP'},
+    {icon:'🔥',title:'3 gorące leady',target:3,cur:Math.min(s.hot,3),xp:'+150XP'},
+    {icon:'🔗',title:'Streak 3 dni',target:3,cur:Math.min(s.streak,3),xp:'+75XP'},
+    {icon:'💎',title:'10 ankiet łącznie',target:10,cur:Math.min(s.total,10),xp:'+200XP'}
   ];
-  var html='';
-  missions.forEach(function(m){
-    var pct=Math.round(m.current/m.target*100);
-    var done=m.current>=m.target;
-    html+='<div class="mission-card'+(done?' done':'')+'">'+
-      '<div class="mission-icon">'+m.icon+(done?' ✅':'')+'</div>'+
-      '<div class="mission-title">'+m.title+'</div>'+
-      '<div class="mission-prog"><div class="mission-prog-fill" style="width:'+Math.min(pct,100)+'%"></div></div>'+
-      '<div class="mission-xp">'+m.current+'/'+m.target+' · '+m.xp+'</div>'+
-      '</div>';
+  var h='';
+  ms.forEach(function(m){
+    var pct=Math.min(100,Math.round(m.cur/m.target*100));
+    var done=m.cur>=m.target;
+    h+='<div class="mc'+(done?' done':'')+'"><div class="mc-icon">'+m.icon+(done?' ✅':'')+'</div>'+
+      '<div class="mc-title">'+m.title+'</div>'+
+      '<div class="mc-bar"><div class="mc-bar-fill" style="width:'+pct+'%"></div></div>'+
+      '<div class="mc-xp">'+m.cur+'/'+m.target+' · '+m.xp+'</div></div>';
   });
-  document.getElementById('missionsRow').innerHTML=html;
+  document.getElementById('missionRow').innerHTML=h;
 }
 
-// ============================================================
-// PARTICLES
-// ============================================================
-function initParticles(){
-  var container=document.getElementById('particles');
-  for(var i=0;i<20;i++){
-    var p=document.createElement('div');
-    p.className='particle';
-    p.style.left=Math.random()*100+'%';
-    p.style.animationDelay=Math.random()*8+'s';
-    p.style.animationDuration=(6+Math.random()*8)+'s';
-    p.style.width=p.style.height=(1+Math.random()*3)+'px';
-    container.appendChild(p);
+// ======================================================
+// FX
+// ======================================================
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},3000);
+}
+
+function floatXP(text){
+  var el=document.createElement('div');
+  el.className='xp-float';el.textContent=text;
+  el.style.left=(20+Math.random()*60)+'%';el.style.top='50%';
+  document.body.appendChild(el);
+  setTimeout(function(){if(el.parentNode) el.parentNode.removeChild(el);},1400);
+}
+
+function lvFlash(){
+  var el=document.createElement('div');el.className='lv-flash';
+  document.body.appendChild(el);
+  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},700);
+}
+
+function confettiBlast(){
+  var cols=['#00ff88','#a78bfa','#60a5fa','#fb923c','#fbbf24','#f87171'];
+  for(var i=0;i<50;i++){
+    var el=document.createElement('div');el.className='confetti-p';
+    el.style.cssText='left:'+Math.random()*100+'vw;top:-10px;width:'+(5+Math.random()*6)+'px;height:'+(5+Math.random()*6)+'px;background:'+cols[Math.floor(Math.random()*cols.length)]+';animation-duration:'+(0.8+Math.random()*0.9)+'s;animation-delay:'+Math.random()*0.4+'s';
+    document.body.appendChild(el);
+    setTimeout(function(e){if(e.parentNode)e.parentNode.removeChild(e);},2000,el);
   }
 }
 
-// ============================================================
-// APP LAUNCH
-// ============================================================
-function launchApp(name){
-  document.getElementById('authScreen').style.display='none';
-  document.getElementById('appScreen').style.display='block';
-  window._currentUser=name;
-  updateUI(name);
-  var today=new Date().toISOString().split('T')[0];
-  var df=document.getElementById('r_data_wizyty');
-  if(df) df.value=today;
+function initParticles(){
+  var c=document.getElementById('particles');
+  for(var i=0;i<18;i++){
+    var p=document.createElement('div');p.className='pt';
+    p.style.cssText='left:'+Math.random()*100+'%;width:'+(1+Math.random()*3)+'px;height:'+(1+Math.random()*3)+'px;background:var(--green);animation-delay:'+Math.random()*10+'s;animation-duration:'+(8+Math.random()*10)+'s';
+    c.appendChild(p);
+  }
 }
 
-window.addEventListener('DOMContentLoaded',function(){
-  initParticles();
-  var session=getSession();
-  if(session&&session.name) launchApp(session.name);
-  document.getElementById('loginPin').addEventListener('keydown',function(e){if(e.key==='Enter') doLogin();});
-  document.getElementById('regPin2').addEventListener('keydown',function(e){if(e.key==='Enter') doRegister();});
-});
-
-// ============================================================
-// NAVIGATION
-// ============================================================
+// ======================================================
+// NAV
+// ======================================================
 function switchMode(mode){
-  document.querySelectorAll('.mode-panel').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.mode-btn').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.mpanel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.msb').forEach(function(b){b.classList.remove('active');});
   document.getElementById('panel_'+mode).classList.add('active');
-  document.getElementById('modeBtn_'+mode).classList.add('active');
+  document.getElementById('msb_'+mode).classList.add('active');
 }
 
-function showTab(id,btn){
-  document.querySelectorAll('#panel_szybka .tab-content').forEach(function(el){el.classList.remove('active');});
-  document.querySelectorAll('.tab-btn').forEach(function(el){el.classList.remove('active');});
+function showTab(id, btn){
+  document.querySelectorAll('#panel_quick .tpanel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tbtn').forEach(function(b){b.classList.remove('active');});
   document.getElementById(id).classList.add('active');
   if(btn) btn.classList.add('active');
 }
 
-function goStep(n){
-  document.querySelectorAll('.step-content').forEach(function(el){el.classList.remove('active');});
-  document.getElementById('step'+n).classList.add('active');
-  for(var i=1;i<=7;i++){
-    var item=document.getElementById('si'+i);
-    item.classList.remove('active','done');
-    if(i<n) item.classList.add('done');
-    else if(i===n) item.classList.add('active');
-    if(i<7) document.getElementById('sc'+i).classList.toggle('done',i<n);
-  }
-  document.getElementById('wizardProg').style.width=(n/7*100)+'%';
-  window.scrollTo(0,0);
+// ======================================================
+// LAUNCH
+// ======================================================
+function launchApp(name){
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('appScreen').style.display='block';
+  window._user=name;
+  updateUI(name);
+  // Build all flows
+  buildFlow('flow_qpv',   FLOW_QPV,   'Ankiety_Podstawowe', '',       50);
+  buildFlow('flow_qheat', FLOW_QHEAT, 'Ankiety_Podstawowe', 'blue',   50);
+  buildFlow('flow_qnew',  FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
+  buildFlow('flow_full',  FLOW_FULL,  'Ankiety_Rozbudowane','',      100);
 }
 
-// ============================================================
-// HELPERS
-// ============================================================
-function selectScale(gid,btn){document.querySelectorAll('#'+gid+' .scale-btn').forEach(function(b){b.classList.remove('selected');});btn.classList.add('selected');}
-function selectTemp(gid,btn){document.querySelectorAll('#'+gid+' .temp-btn').forEach(function(b){b.classList.remove('selected');});btn.classList.add('selected');}
-function getScaleVal(gid){var s=document.querySelector('#'+gid+' .scale-btn.selected');return s?s.getAttribute('data-v'):'';}
-function getTempVal(gid){var s=document.querySelector('#'+gid+' .temp-btn.selected');return s?s.getAttribute('data-val'):'';}
-function getRadio(name){var s=document.querySelector('input[name="'+name+'"]:checked');return s?(s.value||s.parentElement.textContent.trim()):'';}
-
-// ============================================================
-// SUBMIT
-// ============================================================
-function submitSzybka(prefix){
-  var miejscowosc=document.getElementById(prefix+'_miejscowosc')?document.getElementById(prefix+'_miejscowosc').value:'';
-  var telefon=document.getElementById(prefix+'_telefon')?document.getElementById(prefix+'_telefon').value:'';
-  if(!miejscowosc||!telefon){alert('Uzupelnij miejscowosc i telefon klienta!');return;}
-  var interesy=['pv','pc','mag','ter'].map(function(k){var el=document.getElementById(prefix+'_ch_'+k);if(!el||!el.checked)return '';return {pv:'PV',pc:'PC',mag:'Magazyn',ter:'Termoizolacja'}[k];}).filter(Boolean).join(', ');
-  var temp=getTempVal('tg_'+prefix);
-  var data={
-    sheet_name:'Ankiety_Podstawowe',typ_ankiety:prefix.toUpperCase(),
-    ankieter:window._currentUser||'',data_wizyty:new Date().toLocaleDateString('pl-PL'),
-    miejscowosc:miejscowosc,telefon:telefon,
-    typ_obj:getRadio(prefix+'_typ'),rachunek_prad:document.getElementById(prefix+'_rachunek')?document.getElementById(prefix+'_rachunek').value:'',
-    ma_pv:getRadio(prefix+'_pv'),rok_pv:document.getElementById(prefix+'_rok_pv')?document.getElementById(prefix+'_rok_pv').value:'',
-    moc_pv:document.getElementById(prefix+'_moc_pv')?document.getElementById(prefix+'_moc_pv').value:'',
-    rozl_pv:getRadio(prefix+'_rozl'),ocena_pv:getScaleVal('sg_'+prefix),
-    zrodlo_ciepla:getRadio(prefix+'_zrodlo'),wiek_kotla:document.getElementById(prefix+'_wiek_kotla')?document.getElementById(prefix+'_wiek_kotla').value:'',
-    typ_instal:getRadio(prefix+'_instal'),koszt_ogrzew:document.getElementById(prefix+'_koszt')?document.getElementById(prefix+'_koszt').value:'',
-    autokonsum:document.getElementById(prefix+'_autokonsum')?document.getElementById(prefix+'_autokonsum').value:'',
-    zaint_mag:getRadio(prefix+'_zaint_mag'),zaint_pc:getRadio(prefix+'_zaint'),przerwy:getRadio(prefix+'_przerwy'),
-    powierzchnia:document.getElementById(prefix+'_powierzchnia')?document.getElementById(prefix+'_powierzchnia').value:'',
-    rok_budynku:document.getElementById(prefix+'_rok')?document.getElementById(prefix+'_rok').value:'',
-    liczba_osob:document.getElementById(prefix+'_osoby')?document.getElementById(prefix+'_osoby').value:'',
-    trend_prad:getRadio(prefix+'_trend'),interesy:interesy,
-    horyz:document.getElementById(prefix+'_horyz')?document.getElementById(prefix+'_horyz').value:'',
-    temp_leada:temp,uwagi:document.getElementById(prefix+'_uwagi')?document.getElementById(prefix+'_uwagi').value:''
-  };
-  sendToSheets(data,50,temp==='Gorący');
-}
-
-function submitRozbudowana(){
-  var telefon=document.getElementById('r_telefon')?document.getElementById('r_telefon').value:'';
-  var miejscowosc=document.getElementById('r_miejscowosc')?document.getElementById('r_miejscowosc').value:'';
-  if(!telefon||!miejscowosc){alert('Uzupelnij telefon i miejscowosc (Krok 1)!');goStep(1);return;}
-  var probPV=['alerty','rachunki','brak','nic'].map(function(k){var el=document.getElementById('r_prob_'+k);return el&&el.checked?el.parentElement.textContent.trim():'';}).filter(Boolean).join(', ');
-  var interesy=['pv','pc','ter','klim'].map(function(k){var el=document.getElementById('r_int_'+k);return el&&el.checked?el.parentElement.textContent.trim():'';}).filter(Boolean).join(', ');
-  var temp=getTempVal('tg_rozb');
-  var data={
-    sheet_name:'Ankiety_Rozbudowane',typ_ankiety:'ROZBUDOWANA',
-    ankieter:window._currentUser||'',data_wizyty:document.getElementById('r_data_wizyty')?document.getElementById('r_data_wizyty').value:'',
-    miejscowosc:miejscowosc,telefon:telefon,typ_obj:document.getElementById('r_typ_obj')?document.getElementById('r_typ_obj').value:'',
-    rok_budynku:document.getElementById('r_rok_budynku')?document.getElementById('r_rok_budynku').value:'',
-    powierzchnia:document.getElementById('r_powierzchnia')?document.getElementById('r_powierzchnia').value:'',
-    liczba_osob:document.getElementById('r_liczba_osob')?document.getElementById('r_liczba_osob').value:'',
-    ociepl:getRadio('r_ociepl'),ev:getRadio('r_ev'),
-    rachunek_prad:document.getElementById('r_rachunek_prad')?document.getElementById('r_rachunek_prad').value:'',
-    trend_prad:getRadio('r_trend_prad'),koszt_ogrzew:document.getElementById('r_koszt_ogrzew')?document.getElementById('r_koszt_ogrzew').value:'',
-    motyw:getRadio('r_motyw'),ma_pv:getRadio('r_ma_pv'),
-    rok_pv:document.getElementById('r_rok_pv')?document.getElementById('r_rok_pv').value:'',
-    moc_pv:document.getElementById('r_moc_pv')?document.getElementById('r_moc_pv').value:'',
-    rozl_pv:getRadio('r_rozl_pv'),prob_pv:probPV,ocena_pv:getScaleVal('sg_r_ocena'),
-    zrodlo_ciepla:getRadio('r_zrodlo_ciepla'),
-    wiek_kotla:document.getElementById('r_wiek_kotla')?document.getElementById('r_wiek_kotla').value:'',
-    typ_instal:document.getElementById('r_typ_instal')?document.getElementById('r_typ_instal').value:'',
-    zaint_pc:getRadio('r_zaint_pc'),zaint_mag:getRadio('r_zaint_mag'),
-    autokonsum:document.getElementById('r_autokonsum')?document.getElementById('r_autokonsum').value:'',
-    przerwy:getRadio('r_przerwy'),interesy:interesy,temp_leada:temp,
-    termin_kontakt:document.getElementById('r_termin')?document.getElementById('r_termin').value:'',
-    horyz:document.getElementById('r_horyz')?document.getElementById('r_horyz').value:'',
-    uwagi:document.getElementById('r_uwagi')?document.getElementById('r_uwagi').value:''
-  };
-  sendToSheets(data,100,temp==='Gorący');
-}
-
-function sendToSheets(data,xpAmount,isHot){
-  if(!WEBHOOK_URL||WEBHOOK_URL==='WSTAW_TU_URL_APPS_SCRIPT'){
-    alert('Brak URL webhooka! Wklej URL Apps Script do zmiennej WEBHOOK_URL.');
-    return;
-  }
-  var btns=document.querySelectorAll('.btn-main');
-  btns.forEach(function(b){b.disabled=true;b.textContent='Zapisuję...';});
-  fetch(WEBHOOK_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
-  .then(function(){
-    if(window._currentUser) addXP(window._currentUser,xpAmount,isHot);
-    confetti();
-    var msg=isHot?'🔥 GORĄCY LEAD! +'+xpAmount+' XP':'✅ Zapisano! +'+xpAmount+' XP';
-    showToast(msg);
-    setTimeout(function(){showSuccessScreen(data.typ_ankiety,data.temp_leada,xpAmount);},600);
-  })
-  .catch(function(err){
-    btns.forEach(function(b){b.disabled=false;b.textContent='Zapisz ankietę';});
-    alert('Blad polaczenia: '+err.message);
-  });
-}
-
-function showSuccessScreen(typ,temp,xp){
-  var stats=getStats(window._currentUser||'');
-  var lv=getLevel(stats.xp);
-  var appEl=document.getElementById('appScreen');
-  appEl.innerHTML='<div style="max-width:420px;margin:0 auto;padding:40px 20px;text-align:center;">'+
-    '<div style="font-size:5em;margin-bottom:12px;animation:pulse 0.6s ease">✅</div>'+
-    '<div style="font-size:1.4em;font-weight:900;color:var(--green);margin-bottom:6px;">+'+xp+' XP!</div>'+
-    '<div style="font-size:0.9em;color:var(--muted);margin-bottom:4px;">Typ: <strong style="color:var(--text)">'+typ+'</strong></div>'+
-    '<div style="font-size:0.9em;margin-bottom:16px;">Lead: <strong>'+( temp||'brak' )+'</strong></div>'+
-    '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:24px;">'+
-      '<div style="font-size:0.72em;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Twój progres</div>'+
-      '<div style="font-size:1em;font-weight:800;color:var(--green);margin-bottom:4px;">'+lv.icon+' Level '+lv.level+' — '+lv.name+'</div>'+
-      '<div style="font-size:0.82em;color:var(--muted);margin-bottom:8px;">'+stats.xp+' XP · '+stats.total+' ankiet · '+stats.streak+'🔥 streak</div>'+
-      '<div style="height:6px;background:var(--bg3);border-radius:6px;overflow:hidden;">'+
-        '<div style="height:100%;width:'+lv.progress+'%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:6px;"></div>'+
-      '</div>'+
-    '</div>'+
-    '<button onclick="location.reload()" style="padding:14px 32px;background:linear-gradient(135deg,var(--green),var(--green2));color:#000;border:none;border-radius:12px;font-size:1em;font-weight:800;cursor:pointer;font-family:Inter,sans-serif;">➕ Nowa ankieta</button>'+
-  '</div>';
-}
+window.addEventListener('DOMContentLoaded',function(){
+  initParticles();
+  var s=getSession();
+  if(s&&s.name) launchApp(s.name);
+  document.getElementById('lPin').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  document.getElementById('rPin2').addEventListener('keydown',function(e){if(e.key==='Enter')doRegister();});
+});
 </script>
 </body>
 </html>
