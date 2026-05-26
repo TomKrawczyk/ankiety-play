@@ -919,6 +919,25 @@ function sendData(data, xp, isHot, fid) {
   });
 }
 
+function pushRanking(name, xp, total, hot, streak, todayCount) {
+  var today = new Date().toLocaleDateString('pl-PL');
+  var payload = {
+    action:  'updateRanking',
+    name:    name,
+    xp:      xp,
+    total:   total,
+    hot:     hot,
+    streak:  streak,
+    today:   todayCount,
+    date:    today
+  };
+  fetch(WEBHOOK, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  }).catch(function(){}); // silent - nie blokujemy UI
+}
+
 function afterSave(data, xp, isHot, fid) {
   // Oblicz XP z mnożnikiem combo
   var mult = getMultiplier();
@@ -1051,6 +1070,9 @@ function addXP(name,amount,isHot){
   updateUI(name);
   var newLv=getLv(us[k].xp||0).level;
   if(newLv>oldLv){lvFlash();showToast('🎉 LEVEL UP! Jesteś Level '+newLv+'!');}
+  // Push statystyk do globalnego rankingu w arkuszu
+  var todayC=0;try{var _td=JSON.parse(localStorage.getItem('4eco_td_'+k))||{};todayC=_td.d===today?(_td.c||0):0;}catch(e){}
+  pushRanking(us[k].name,us[k].xp||0,us[k].total||0,us[k].hot||0,us[k].streak||0,todayC);
 }
 
 function isYest(ds){
@@ -1399,51 +1421,63 @@ function initCombo() {
 
 
 // ============================================================
-// RANKING ANKIETERÓW
+// RANKING ANKIETERÓW — dane z Google Sheets (globalny)
 // ============================================================
-var _rankTab = 'xp'; // 'xp' | 'total' | 'hot' | 'today'
+var _rankTab = 'xp';
+var _rankCache = null; // cache danych z arkusza
 
 function renderRanking() {
-  // Ustaw datę odświeżenia
   var dateEl = document.getElementById('rankingDate');
-  if (dateEl) {
-    var now = new Date();
-    dateEl.textContent = 'Stan na: ' + now.toLocaleTimeString('pl-PL', {hour:'2-digit',minute:'2-digit'});
-  }
+  var container = document.getElementById('rankingList');
+  if (!container) return;
 
+  container.innerHTML = '<div class="rank-empty">⏳ Ładowanie rankingu...</div>';
+
+  // Pobierz dane z arkusza (action=getRanking)
+  fetch(WEBHOOK + '?action=getRanking', {
+    method: 'GET',
+    headers: { 'Content-Type': 'text/plain' }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (res.status !== 'ok' || !res.data) throw new Error('Brak danych');
+    _rankCache = res.data;
+    drawRanking(res.data);
+    if (dateEl) {
+      var now = new Date();
+      dateEl.textContent = 'Stan na: ' + now.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'});
+    }
+  })
+  .catch(function(e){
+    // Fallback: localStorage
+    _rankCache = null;
+    drawRankingLocal();
+    if (dateEl) dateEl.textContent = '⚠️ Tryb offline';
+  });
+}
+
+function drawRankingLocal() {
   var users = getUsers();
-  var me = (window._user || '').toLowerCase();
   var today = new Date().toLocaleDateString('pl-PL');
-
-  // Buduj tablicę graczy
   var list = [];
   Object.keys(users).forEach(function(k) {
     var u = users[k];
-    // Dzisiejsze ankiety
     var todayCount = 0;
-    try {
-      var td = JSON.parse(localStorage.getItem('4eco_td_' + k)) || {};
-      todayCount = (td.d === today ? (td.c || 0) : 0);
-    } catch(e) {}
-
-    list.push({
-      key:   k,
-      name:  u.name || k,
-      xp:    u.xp    || 0,
-      total: u.total || 0,
-      hot:   u.hot   || 0,
-      today: todayCount,
-      streak:u.streak|| 0,
-      lv:    getLv(u.xp || 0)
-    });
+    try { var td = JSON.parse(localStorage.getItem('4eco_td_'+k))||{}; todayCount = td.d===today?(td.c||0):0; } catch(e){}
+    list.push({ name:u.name||k, xp:u.xp||0, total:u.total||0, hot:u.hot||0, today:todayCount, streak:u.streak||0 });
   });
+  drawRanking(list);
+}
 
-  // Sortuj wg aktywnej zakładki
-  list.sort(function(a, b) { return b[_rankTab] - a[_rankTab]; });
+function drawRanking(list) {
+  var me = (window._user || '').toLowerCase();
+  var container = document.getElementById('rankingList');
+  if (!container) return;
 
+  // Sortuj
+  list.sort(function(a,b){ return b[_rankTab] - a[_rankTab]; });
   var maxVal = list.length > 0 ? (list[0][_rankTab] || 1) : 1;
 
-  // Tabsy
   var tabs = [
     { key:'xp',    label:'⭐ XP'    },
     { key:'total', label:'📋 Ankiety'},
@@ -1457,22 +1491,21 @@ function renderRanking() {
     }).join('') +
   '</div>';
 
-  // Karty
   var cardsHtml = '';
   if (list.length === 0) {
-    cardsHtml = '<div class="rank-empty">Brak ankieterów w systemie.</div>';
+    cardsHtml = '<div class="rank-empty">Brak danych w rankingu.</div>';
   } else {
     var medals = ['🥇','🥈','🥉'];
     list.forEach(function(u, i) {
       var pos     = i + 1;
-      var isMe    = (u.key === me);
+      var isMe    = (u.name || '').toLowerCase() === me;
       var medal   = medals[i] || (pos + '.');
       var rankCls = pos <= 3 ? ' rank-' + pos : '';
       var pct     = maxVal > 0 ? Math.round((u[_rankTab] / maxVal) * 100) : 0;
-      var initials= u.name.split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
-      var val     = u[_rankTab];
+      var initials= (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+      var val     = u[_rankTab] || 0;
       var valLabel= {xp:'XP', total:'ankiet', hot:'gorących', today:'dziś'}[_rankTab];
-
+      var lv      = getLv(u.xp || 0);
       cardsHtml +=
         '<div class="rank-card' + rankCls + '">' +
           (isMe ? '<div class="rank-you">TY</div>' : '') +
@@ -1480,8 +1513,8 @@ function renderRanking() {
           '<div class="rank-avatar">' + initials + '</div>' +
           '<div class="rank-info">' +
             '<div class="rank-name">' + u.name + '</div>' +
-            '<div class="rank-sub">' + u.lv.icon + ' ' + u.lv.name +
-              ' &nbsp;·&nbsp; 🎯 ' + u.total + ' ankiet' +
+            '<div class="rank-sub">' + lv.icon + ' ' + lv.name +
+              ' &nbsp;·&nbsp; 🎯 ' + (u.total||0) + ' ankiet' +
               (u.streak > 1 ? ' &nbsp;·&nbsp; 🔥 ' + u.streak + ' dni z rzędu' : '') +
             '</div>' +
           '</div>' +
@@ -1493,14 +1526,13 @@ function renderRanking() {
         '</div>';
     });
   }
-
-  var container = document.getElementById('rankingList');
-  if (container) container.innerHTML = tabsHtml + cardsHtml;
+  container.innerHTML = tabsHtml + cardsHtml;
 }
 
 function setRankTab(tab) {
   _rankTab = tab;
-  renderRanking();
+  if (_rankCache) drawRanking(_rankCache);
+  else renderRanking();
 }
 
 </script>
