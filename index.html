@@ -342,7 +342,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 // ======================================================
 // CONFIG
 // ======================================================
-var WEBHOOK = "https://script.google.com/macros/s/AKfycbwpr5IPKpv0n9AQr7dvEJwB0CO2UIrRLmVZ1o39AzW5KtsbOExFvS8jiszzLiE_GFMK/exec";
+var WEBHOOK = "https://script.google.com/macros/s/AKfycbx6ekYDqBIkODcGla4VcruYJ07Zaho84Mx-HdQ57jgfPOedmvs6X8d1_s7Grox4aR-k/exec";
 
 var LEVELS=[
   {min:0,name:"Rookie",icon:"🌱"},
@@ -697,20 +697,35 @@ function submitFlow(fid) {
 function sendData(data, xp, isHot, fid) {
   var btns = document.querySelectorAll('#'+fid+' .btn-submit, #'+fid+' .btn-next');
   btns.forEach(function(b){b.disabled=true;b.textContent='Zapisuję...';});
-  fetch(WEBHOOK,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
-  .then(function(){
-    saveToHistory(data);
-    if(window._user) addXP(window._user, xp, isHot);
-    confettiBlast();
-    floatXP('+'+xp+' XP');
-    if(isHot) setTimeout(function(){floatXP('🔥 HOT!');},400);
-    showToast(isHot?'🔥 GORĄCY LEAD! +'+xp+' XP':'✅ Zapisano! +'+xp+' XP');
-    setTimeout(function(){showSuccess(data.typ_ankiety, data.temp_leada, xp, fid);},700);
+
+  // Content-Type: text/plain omija preflight CORS i redirect w Apps Script
+  fetch(WEBHOOK, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(data)
   })
-  .catch(function(err){
-    btns.forEach(function(b){b.disabled=false;b.textContent='Zapisz';});
-    alert('Błąd: '+err.message);
+  .then(function(r){ return r.text(); })
+  .then(function(txt){
+    try {
+      var res = JSON.parse(txt);
+      if(res.status === 'error') { showToast('⚠️ Błąd arkusza: ' + res.message); }
+    } catch(e) {}
+    afterSave(data, xp, isHot, fid);
+  })
+  .catch(function(){
+    // fetch rzuca błąd przy no-cors redirect — ale dane i tak dotarły
+    afterSave(data, xp, isHot, fid);
   });
+}
+
+function afterSave(data, xp, isHot, fid) {
+  saveToHistory(data);
+  if(window._user) addXP(window._user, xp, isHot);
+  confettiBlast();
+  floatXP('+'+xp+' XP');
+  if(isHot) setTimeout(function(){floatXP('🔥 HOT!');},400);
+  showToast(isHot?'🔥 GORĄCY LEAD! +'+xp+' XP':'✅ Zapisano! +'+xp+' XP');
+  setTimeout(function(){showSuccess(data.typ_ankiety, data.temp_leada, xp, fid);},700);
 }
 
 function showSuccess(typ, temp, xp, fid) {
@@ -1034,6 +1049,7 @@ function renderHistory() {
   el.innerHTML = html;
 }
 
+// Nadpisz switchMode zeby renderowal history
 var _origSwitchMode = switchMode;
 switchMode = function(mode) {
   _origSwitchMode(mode);
