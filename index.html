@@ -403,21 +403,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
     </div>
     <!-- PV Quick -->
     <div id="q_pv" class="tpanel active">
-      <div id="flow_qpv" class="qflow"></div>
+      <div id="PV" class="qflow"></div>
     </div>
     <!-- HEAT Quick -->
     <div id="q_heat" class="tpanel">
-      <div id="flow_qheat" class="qflow"></div>
+      <div id="PC" class="qflow"></div>
     </div>
     <!-- NEW Quick -->
     <div id="q_new" class="tpanel">
-      <div id="flow_qnew" class="qflow"></div>
+      <div id="NOWY" class="qflow"></div>
     </div>
   </div>
 
   <!-- FULL MODE -->
   <div id="panel_full" class="mpanel">
-    <div id="flow_full" class="qflow"></div>
+    <div id="ROZBUDOWANA" class="qflow"></div>
   </div>
 
   
@@ -1099,10 +1099,10 @@ function launchApp(name){
   updateUI(name);
   initCombo(); // start combo system
   // Build all flows
-  buildFlow('flow_qpv',   FLOW_QPV,   'Ankiety_Podstawowe', '',       50);
-  buildFlow('flow_qheat', FLOW_QHEAT, 'Ankiety_Podstawowe', 'blue',   50);
-  buildFlow('flow_qnew',  FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
-  buildFlow('flow_full',  FLOW_FULL,  'Ankiety_Rozbudowane','',      100);
+  buildFlow('PV',   FLOW_QPV,   'Ankiety_Podstawowe', '',       50);
+  buildFlow('PC', FLOW_QHEAT, 'Ankiety_Podstawowe', 'blue',   50);
+  buildFlow('NOWY',  FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
+  buildFlow('ROZBUDOWANA',  FLOW_FULL,  'Ankiety_Rozbudowane','',      100);
 }
 
 window.addEventListener('DOMContentLoaded',function(){
