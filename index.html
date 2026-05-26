@@ -227,9 +227,110 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .hitem-temp{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.72em;font-weight:800;margin-top:8px}
 .hempty{text-align:center;padding:40px 20px;color:var(--muted);font-size:0.88em}
 
+
+/* ============ COMBO MULTIPLIER ============ */
+#comboBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  pointer-events: none;
+}
+.combo-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 14px 3px;
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(6px);
+}
+.combo-label {
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #aaa;
+  text-transform: uppercase;
+}
+.combo-value {
+  font-size: 1em;
+  font-weight: 900;
+  color: #00ff88;
+  transition: color 0.4s;
+  letter-spacing: 0.5px;
+}
+.combo-value.x1   { color: #aaa; }
+.combo-value.x125 { color: #fbbf24; }
+.combo-value.x150 { color: #fb923c; }
+.combo-value.x175 { color: #f87171; }
+.combo-value.x200 { color: #00ff88; text-shadow: 0 0 10px #00ff88; }
+.combo-timer {
+  font-size: 0.68em;
+  color: #888;
+  font-variant-numeric: tabular-nums;
+}
+.combo-progress {
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  position: relative;
+  overflow: hidden;
+}
+.combo-fill {
+  height: 100%;
+  border-radius: 0 2px 2px 0;
+  transition: width 1s linear, background 0.4s;
+  background: #00ff88;
+}
+.combo-fill.x1   { background: #555; }
+.combo-fill.x125 { background: #fbbf24; }
+.combo-fill.x150 { background: #fb923c; }
+.combo-fill.x175 { background: #f87171; }
+.combo-fill.x200 { background: #00ff88; box-shadow: 0 0 6px #00ff88; }
+
+/* Popup combo boost */
+@keyframes comboPop {
+  0%   { transform: translateX(-50%) scale(0.5); opacity:0; }
+  40%  { transform: translateX(-50%) scale(1.15); opacity:1; }
+  70%  { transform: translateX(-50%) scale(0.95); opacity:1; }
+  100% { transform: translateX(-50%) scale(1); opacity:0; }
+}
+.combo-popup {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.5);
+  background: rgba(0,0,0,0.9);
+  border: 2px solid #00ff88;
+  border-radius: 14px;
+  padding: 10px 22px;
+  font-size: 1.1em;
+  font-weight: 900;
+  color: #00ff88;
+  z-index: 9998;
+  pointer-events: none;
+  white-space: nowrap;
+  animation: comboPop 1.6s ease forwards;
+}
+
 </style>
 </head>
 <body>
+
+<!-- COMBO BAR -->
+<div id="comboBar">
+  <div class="combo-top">
+    <span class="combo-label">⚡ COMBO</span>
+    <span class="combo-value x1" id="comboVal">×1.00</span>
+    <span class="combo-timer" id="comboTimer">5:00</span>
+  </div>
+  <div class="combo-progress">
+    <div class="combo-fill x1" id="comboFill" style="width:100%"></div>
+  </div>
+</div>
+
 <div id="particles"></div>
 
 <!-- ===== AUTH ===== -->
@@ -719,13 +820,19 @@ function sendData(data, xp, isHot, fid) {
 }
 
 function afterSave(data, xp, isHot, fid) {
+  // Oblicz XP z mnożnikiem combo
+  var mult = getMultiplier();
+  var finalXp = Math.round(xp * mult);
   saveToHistory(data);
-  if(window._user) addXP(window._user, xp, isHot);
+  if(window._user) addXP(window._user, finalXp, isHot);
+  // Zwiększ combo na następną ankietę
+  comboHit();
   confettiBlast();
-  floatXP('+'+xp+' XP');
+  floatXP('+'+finalXp+' XP' + (mult > 1 ? ' ×'+mult.toFixed(2) : ''));
   if(isHot) setTimeout(function(){floatXP('🔥 HOT!');},400);
-  showToast(isHot?'🔥 GORĄCY LEAD! +'+xp+' XP':'✅ Zapisano! +'+xp+' XP');
-  setTimeout(function(){showSuccess(data.typ_ankiety, data.temp_leada, xp, fid);},700);
+  var multTxt = mult > 1 ? ' (×'+mult.toFixed(2)+' combo!)' : '';
+  showToast(isHot?'🔥 GORĄCY LEAD! +'+finalXp+' XP'+multTxt:'✅ Zapisano! +'+finalXp+' XP'+multTxt);
+  setTimeout(function(){showSuccess(data.typ_ankiety, data.temp_leada, finalXp, fid);},700);
 }
 
 function showSuccess(typ, temp, xp, fid) {
@@ -733,6 +840,21 @@ function showSuccess(typ, temp, xp, fid) {
   var lv = getLv(stats.xp);
   var tCol = {Zimny:'#60a5fa',Letni:'#fbbf24',Ciepły:'#fb923c',Gorący:'#00ff88'}[temp]||'#aaa';
   var tEm = {Zimny:'🔵',Letni:'🟡',Ciepły:'🟠',Gorący:'🔥'}[temp]||'';
+  // Combo info
+  var curStep = getCurrentStep();
+  var mult    = COMBO_STEPS[curStep];
+  var nextMult= curStep < COMBO_STEPS.length-1 ? COMBO_STEPS[curStep+1] : null;
+  var comboCls= COMBO_CLASSES[curStep];
+  var comboColors = {x1:'#aaa', x125:'#fbbf24', x150:'#fb923c', x175:'#f87171', x200:'#00ff88'};
+  var comboCol = comboColors[comboCls]||'#aaa';
+  var comboRow = '<div class="srow" style="border-top:1px solid rgba(255,255,255,0.07);margin-top:8px;padding-top:8px">'+
+    '<span class="srow-label">⚡ Mnożnik XP</span>'+
+    '<span class="srow-val" style="color:'+comboCol+';font-size:1.1em">×'+mult.toFixed(2)+'</span></div>';
+  var nextRow = nextMult ?
+    '<div class="srow"><span class="srow-label">Kolejna ankieta</span>'+
+    '<span class="srow-val" style="color:#00ff88">→ ×'+nextMult.toFixed(2)+'</span></div>' :
+    '<div class="srow"><span class="srow-label">⚡ MAX COMBO!</span>'+
+    '<span class="srow-val" style="color:#00ff88">🏆 ×2.00</span></div>';
   var app = document.getElementById('appScreen');
   app.innerHTML = '<div class="success-screen">'+
     '<div class="success-icon">✅</div>'+
@@ -740,6 +862,7 @@ function showSuccess(typ, temp, xp, fid) {
     '<div class="success-card">'+
       '<div class="srow"><span class="srow-label">Typ ankiety</span><span class="srow-val">'+typ+'</span></div>'+
       '<div class="srow"><span class="srow-label">Lead</span><span class="srow-val" style="color:'+tCol+'">'+tEm+' '+(temp||'brak')+'</span></div>'+
+    comboRow + nextRow +
     '</div>'+
     '<div class="success-card glow">'+
       '<div style="font-size:0.68em;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Twój progres</div>'+
@@ -974,6 +1097,7 @@ function launchApp(name){
   document.getElementById('appScreen').style.display='block';
   window._user=name;
   updateUI(name);
+  initCombo(); // start combo system
   // Build all flows
   buildFlow('flow_qpv',   FLOW_QPV,   'Ankiety_Podstawowe', '',       50);
   buildFlow('flow_qheat', FLOW_QHEAT, 'Ankiety_Podstawowe', 'blue',   50);
@@ -1055,6 +1179,123 @@ switchMode = function(mode) {
   _origSwitchMode(mode);
   if(mode === 'history') renderHistory();
 };
+
+
+// ============================================================
+// COMBO MULTIPLIER SYSTEM
+// 5 min okno — każda ankieta zwiększa mnożnik
+// Brak ankiety przez 5 min → reset do ×1.00
+// ×1.00 → ×1.25 → ×1.50 → ×1.75 → ×2.00 (max)
+// ============================================================
+var COMBO_WINDOW   = 5 * 60;   // 5 minut w sekundach
+var COMBO_STEPS    = [1.00, 1.25, 1.50, 1.75, 2.00];
+var COMBO_CLASSES  = ['x1',  'x125', 'x150', 'x175', 'x200'];
+var COMBO_KEY      = '4eco_combo';
+
+var _comboTick  = null;   // setInterval timer
+var _comboSec   = COMBO_WINDOW; // pozostały czas w sekundach
+
+function loadCombo() {
+  try {
+    var raw = localStorage.getItem(COMBO_KEY);
+    if (!raw) return { step: 0, ts: 0 };
+    return JSON.parse(raw);
+  } catch(e) { return { step: 0, ts: 0 }; }
+}
+
+function saveCombo(step) {
+  localStorage.setItem(COMBO_KEY, JSON.stringify({ step: step, ts: Date.now() }));
+}
+
+function getCurrentStep() {
+  var d = loadCombo();
+  var elapsed = (Date.now() - d.ts) / 1000;
+  if (elapsed >= COMBO_WINDOW) return 0;          // wygasł
+  return Math.min(d.step, COMBO_STEPS.length - 1);
+}
+
+function getMultiplier() {
+  return COMBO_STEPS[getCurrentStep()];
+}
+
+// Wywołaj po zapisaniu ankiety — zwiększa combo
+function comboHit() {
+  var d = loadCombo();
+  var elapsed = (Date.now() - d.ts) / 1000;
+  var curStep = (elapsed >= COMBO_WINDOW) ? 0 : Math.min(d.step, COMBO_STEPS.length - 1);
+  var newStep = Math.min(curStep + 1, COMBO_STEPS.length - 1);
+  saveCombo(newStep);
+  renderComboBar(newStep, COMBO_WINDOW);
+  // Popup
+  if (newStep > 0) {
+    var mult = COMBO_STEPS[newStep];
+    showComboPopup('⚡ COMBO ×' + mult.toFixed(2) + '!');
+  }
+  startComboTick();
+}
+
+function showComboPopup(txt) {
+  var el = document.createElement('div');
+  el.className = 'combo-popup';
+  el.textContent = txt;
+  document.body.appendChild(el);
+  setTimeout(function() { try { document.body.removeChild(el); } catch(e){} }, 1700);
+}
+
+function renderComboBar(step, secLeft) {
+  var bar = document.getElementById('comboBar');
+  if (!bar) return;
+  var mult = COMBO_STEPS[step];
+  var cls  = COMBO_CLASSES[step];
+
+  bar.style.display = 'flex';
+
+  var val  = document.getElementById('comboVal');
+  var fill = document.getElementById('comboFill');
+  var tmr  = document.getElementById('comboTimer');
+
+  if (val)  { val.textContent = '×' + mult.toFixed(2); val.className = 'combo-value ' + cls; }
+  if (fill) { 
+    var pct = Math.max(0, Math.min(100, (secLeft / COMBO_WINDOW) * 100));
+    fill.style.width = pct + '%';
+    fill.className = 'combo-fill ' + cls;
+  }
+  if (tmr) {
+    var m = Math.floor(secLeft / 60);
+    var s = Math.floor(secLeft % 60);
+    tmr.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    // Miganie gdy < 60s
+    tmr.style.color = secLeft < 60 ? (Math.floor(secLeft) % 2 === 0 ? '#f87171' : '#555') : '#888';
+  }
+}
+
+function startComboTick() {
+  if (_comboTick) clearInterval(_comboTick);
+  var d = loadCombo();
+  _comboTick = setInterval(function() {
+    var elapsed = (Date.now() - d.ts) / 1000;
+    var secLeft = Math.max(0, COMBO_WINDOW - elapsed);
+    var step    = getCurrentStep();
+    renderComboBar(step, secLeft);
+    if (secLeft <= 0) {
+      clearInterval(_comboTick);
+      _comboTick = null;
+      saveCombo(0);
+      renderComboBar(0, 0);
+      showToast('⏱️ Combo wygasło — mnożnik ×1.00');
+    }
+  }, 1000);
+}
+
+// Init przy starcie — jeśli jest aktywne combo, wznów odliczanie
+function initCombo() {
+  var d = loadCombo();
+  var elapsed = (Date.now() - d.ts) / 1000;
+  if (d.step > 0 && elapsed < COMBO_WINDOW) {
+    renderComboBar(d.step, COMBO_WINDOW - elapsed);
+    startComboTick();
+  }
+}
 
 </script>
 </body>
