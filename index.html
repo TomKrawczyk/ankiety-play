@@ -348,6 +348,7 @@ var ACHS=[
 // --- QUICK PV ---
 var FLOW_QPV = [
   {id:"tel", type:"text", title:"Numer telefonu klienta?", hint:"Wpisz numer — to jedyne pole obowiązkowe", placeholder:"600 000 000", req:true},
+  {id:"imie", type:"text", title:"Imię i nazwisko klienta?", hint:"Opcjonalne, ale warto mieć", placeholder:"np. Jan Kowalski"},
   {id:"msc", type:"text", title:"Skąd jesteś?", hint:"Nazwa miejscowości", placeholder:"np. Kłodawa", req:true},
   {id:"pv_status", type:"choice", title:"Masz już panele na dachu?", choices:[
     {icon:"✅",text:"Tak, działają"},
@@ -374,6 +375,7 @@ var FLOW_QPV = [
 // --- QUICK HEAT ---
 var FLOW_QHEAT = [
   {id:"tel", type:"text", title:"Numer telefonu klienta?", placeholder:"600 000 000", req:true},
+  {id:"imie", type:"text", title:"Imię i nazwisko klienta?", hint:"Opcjonalne, ale warto mieć", placeholder:"np. Jan Kowalski"},
   {id:"msc", type:"text", title:"Miejscowość?", placeholder:"np. Kłodawa", req:true},
   {id:"ogrzew", type:"choice", title:"Czym teraz ogrzewasz dom?", choices:[
     {icon:"🪨",text:"Węgiel / ekogroszek"},
@@ -401,6 +403,7 @@ var FLOW_QHEAT = [
 // --- QUICK NEW ---
 var FLOW_QNEW = [
   {id:"tel", type:"text", title:"Numer telefonu klienta?", placeholder:"600 000 000", req:true},
+  {id:"imie", type:"text", title:"Imię i nazwisko klienta?", hint:"Opcjonalne, ale warto mieć", placeholder:"np. Jan Kowalski"},
   {id:"msc", type:"text", title:"Miejscowość?", placeholder:"np. Kłodawa", req:true},
   {id:"typ", type:"choice", title:"Jaki typ nieruchomości?", choices:[
     {icon:"🏠",text:"Dom jednorodzinny"},
@@ -434,6 +437,7 @@ var FLOW_QNEW = [
 // --- FULL SURVEY ---
 var FLOW_FULL = [
   {id:"tel", type:"text", title:"Telefon klienta", placeholder:"600 000 000", req:true},
+  {id:"imie", type:"text", title:"Imię i nazwisko klienta?", hint:"Opcjonalne, ale warto mieć", placeholder:"np. Jan Kowalski"},
   {id:"msc", type:"text", title:"Miejscowość", placeholder:"np. Kłodawa", req:true},
   {id:"typ", type:"choice", title:"Typ nieruchomości?", choices:[
     {icon:"🏠",text:"Dom jednorodzinny"},
@@ -643,6 +647,7 @@ function submitFlow(fid) {
     data_wizyty: new Date().toLocaleDateString('pl-PL'),
     miejscowosc: a.msc||'',
     telefon: a.tel||'',
+    imie: a.imie||'',
     typ_obj: a.typ||'',
     rachunek_prad: a.rachunek||'',
     koszt_ogrzew: a.koszt||a.koszt_ogrzew||'',
