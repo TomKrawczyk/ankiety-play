@@ -315,6 +315,95 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
   animation: comboPop 1.6s ease forwards;
 }
 
+
+/* ============ RANKING ============ */
+.rank-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  margin-bottom: 8px;
+  background: var(--card);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s;
+}
+.rank-card:active { transform: scale(0.98); }
+.rank-card.rank-1 { border-color: #f59e0b; background: rgba(245,158,11,0.07); }
+.rank-card.rank-2 { border-color: #94a3b8; background: rgba(148,163,184,0.06); }
+.rank-card.rank-3 { border-color: #cd7c3a; background: rgba(205,124,58,0.06); }
+.rank-pos {
+  font-size: 1.3em;
+  font-weight: 900;
+  min-width: 34px;
+  text-align: center;
+  color: var(--muted);
+}
+.rank-card.rank-1 .rank-pos { color: #f59e0b; }
+.rank-card.rank-2 .rank-pos { color: #94a3b8; }
+.rank-card.rank-3 .rank-pos { color: #cd7c3a; }
+.rank-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00ff88, #0ea5e9);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1em; font-weight: 900; color: #000;
+  flex-shrink: 0;
+}
+.rank-info { flex: 1; min-width: 0; }
+.rank-name {
+  font-size: 0.9em; font-weight: 800;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rank-sub {
+  font-size: 0.68em; color: var(--muted); margin-top: 2px;
+}
+.rank-xp {
+  text-align: right;
+  flex-shrink: 0;
+}
+.rank-xp-val {
+  font-size: 1em; font-weight: 900; color: #00ff88;
+}
+.rank-xp-lbl { font-size: 0.62em; color: var(--muted); }
+.rank-bar-wrap {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: rgba(255,255,255,0.05);
+}
+.rank-bar {
+  height: 100%; background: linear-gradient(90deg,#00ff88,#0ea5e9);
+  border-radius: 0 1px 1px 0;
+  transition: width 0.6s ease;
+}
+.rank-you {
+  position: absolute; top: 6px; right: 8px;
+  font-size: 0.58em; font-weight: 700;
+  color: #00ff88; letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: rgba(0,255,136,0.12);
+  padding: 1px 5px; border-radius: 4px;
+}
+.rank-empty {
+  text-align: center; color: var(--muted);
+  padding: 40px 20px; font-size: 0.85em;
+}
+.rank-tabs {
+  display: flex; gap: 6px; padding: 10px 10px 6px;
+}
+.rank-tab {
+  flex: 1; padding: 6px 4px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; font-size: 0.72em; font-weight: 700;
+  color: var(--muted); cursor: pointer; text-align: center;
+  transition: all 0.15s;
+}
+.rank-tab.active {
+  background: rgba(0,255,136,0.12);
+  border-color: #00ff88; color: #00ff88;
+}
+
 </style>
 </head>
 <body>
@@ -392,6 +481,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
     <button class="msb active" id="msb_quick" onclick="switchMode('quick')">⚡ Szybka<span>5 pytań · 2 min</span></button>
     <button class="msb" id="msb_full" onclick="switchMode('full')">📋 Pełna<span>10 pytań · 5 min</span></button>
     <button class="msb" id="msb_history" onclick="switchMode('history')">📂 Moje<span>historia ankiet</span></button>
+    <button class="msb" id="msb_ranking" onclick="switchMode('ranking');renderRanking()">🏆 Ranking<span>top ankieterzy</span></button>
   </div>
 
   <!-- QUICK MODE TABS -->
@@ -438,6 +528,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
   <div class="ach-icon" id="achIcon">🏅</div>
   <div><div class="ach-badge">Odznaka odblokowana!</div><div class="ach-name" id="achName">—</div><div class="ach-xp" id="achXp">+50 XP</div></div>
 </div>
+
+
+  <!-- PANEL RANKING -->
+  <div id="panel_ranking" class="mpanel">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:0.88em;font-weight:800">🏆 Ranking ankieterów</div>
+      <div style="font-size:0.7em;color:var(--muted)" id="rankingDate"></div>
+    </div>
+    <div id="rankingList" style="padding:10px 10px 80px"></div>
+  </div>
 
 <script>
 // ======================================================
@@ -1295,6 +1395,111 @@ function initCombo() {
     renderComboBar(d.step, COMBO_WINDOW - elapsed);
     startComboTick();
   }
+}
+
+
+// ============================================================
+// RANKING ANKIETERÓW
+// ============================================================
+var _rankTab = 'xp'; // 'xp' | 'total' | 'hot' | 'today'
+
+function renderRanking() {
+  // Ustaw datę odświeżenia
+  var dateEl = document.getElementById('rankingDate');
+  if (dateEl) {
+    var now = new Date();
+    dateEl.textContent = 'Stan na: ' + now.toLocaleTimeString('pl-PL', {hour:'2-digit',minute:'2-digit'});
+  }
+
+  var users = getUsers();
+  var me = (window._user || '').toLowerCase();
+  var today = new Date().toLocaleDateString('pl-PL');
+
+  // Buduj tablicę graczy
+  var list = [];
+  Object.keys(users).forEach(function(k) {
+    var u = users[k];
+    // Dzisiejsze ankiety
+    var todayCount = 0;
+    try {
+      var td = JSON.parse(localStorage.getItem('4eco_td_' + k)) || {};
+      todayCount = (td.d === today ? (td.c || 0) : 0);
+    } catch(e) {}
+
+    list.push({
+      key:   k,
+      name:  u.name || k,
+      xp:    u.xp    || 0,
+      total: u.total || 0,
+      hot:   u.hot   || 0,
+      today: todayCount,
+      streak:u.streak|| 0,
+      lv:    getLv(u.xp || 0)
+    });
+  });
+
+  // Sortuj wg aktywnej zakładki
+  list.sort(function(a, b) { return b[_rankTab] - a[_rankTab]; });
+
+  var maxVal = list.length > 0 ? (list[0][_rankTab] || 1) : 1;
+
+  // Tabsy
+  var tabs = [
+    { key:'xp',    label:'⭐ XP'    },
+    { key:'total', label:'📋 Ankiety'},
+    { key:'hot',   label:'🔥 Gorące' },
+    { key:'today', label:'📅 Dziś'  },
+  ];
+  var tabsHtml = '<div class="rank-tabs">' +
+    tabs.map(function(t) {
+      return '<div class="rank-tab' + (t.key === _rankTab ? ' active' : '') + '" onclick="setRankTab('' + t.key + '')">' + t.label + '</div>';
+    }).join('') +
+  '</div>';
+
+  // Karty
+  var cardsHtml = '';
+  if (list.length === 0) {
+    cardsHtml = '<div class="rank-empty">Brak ankieterów w systemie.</div>';
+  } else {
+    var medals = ['🥇','🥈','🥉'];
+    list.forEach(function(u, i) {
+      var pos     = i + 1;
+      var isMe    = (u.key === me);
+      var medal   = medals[i] || (pos + '.');
+      var rankCls = pos <= 3 ? ' rank-' + pos : '';
+      var pct     = maxVal > 0 ? Math.round((u[_rankTab] / maxVal) * 100) : 0;
+      var initials= u.name.split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+      var val     = u[_rankTab];
+      var valLabel= {xp:'XP', total:'ankiet', hot:'gorących', today:'dziś'}[_rankTab];
+
+      cardsHtml +=
+        '<div class="rank-card' + rankCls + '">' +
+          (isMe ? '<div class="rank-you">TY</div>' : '') +
+          '<div class="rank-pos">' + medal + '</div>' +
+          '<div class="rank-avatar">' + initials + '</div>' +
+          '<div class="rank-info">' +
+            '<div class="rank-name">' + u.name + '</div>' +
+            '<div class="rank-sub">' + u.lv.icon + ' ' + u.lv.name +
+              ' &nbsp;·&nbsp; 🎯 ' + u.total + ' ankiet' +
+              (u.streak > 1 ? ' &nbsp;·&nbsp; 🔥 ' + u.streak + ' dni z rzędu' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="rank-xp">' +
+            '<div class="rank-xp-val">' + val + '</div>' +
+            '<div class="rank-xp-lbl">' + valLabel + '</div>' +
+          '</div>' +
+          '<div class="rank-bar-wrap"><div class="rank-bar" style="width:' + pct + '%"></div></div>' +
+        '</div>';
+    });
+  }
+
+  var container = document.getElementById('rankingList');
+  if (container) container.innerHTML = tabsHtml + cardsHtml;
+}
+
+function setRankTab(tab) {
+  _rankTab = tab;
+  renderRanking();
 }
 
 </script>
