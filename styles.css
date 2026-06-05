@@ -799,6 +799,7 @@ body.light { --muted:#475569; --muted2:#334155; }
 
 /* ── PROFIL OVERLAY ── */
 .profile-overlay {
+  display: none;
   position:fixed; inset:0; z-index:500;
   background:rgba(0,0,0,0.6); backdrop-filter:blur(6px);
   -webkit-backdrop-filter:blur(6px);
@@ -918,11 +919,6 @@ body.light { --muted:#475569; --muted2:#334155; }
   .nav-tiles { grid-template-columns:repeat(8,1fr); }
 }
 
-</style>
-/* ── PROFILE OVERLAY — obsługa klasą .open ── */
-.profile-overlay {
-  display: none;
-}
 .profile-overlay.open {
   display: block;
 }
