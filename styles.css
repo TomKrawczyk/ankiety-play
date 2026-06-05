@@ -1050,3 +1050,11 @@ body.light .bp-wk{box-shadow:0 0 10px rgba(22,163,74,0.18);}
 .bp-rw-tier{font-size:0.64em;font-weight:900;letter-spacing:0.5px;margin-top:2px;}
 .bp-rw-st{flex-shrink:0;text-align:right;font-size:1.1em;font-weight:900;min-width:46px;}
 .bp-rewards{padding:0 14px 18px;}
+
+/* ── MOBILE: klawiatura nie zasłania pola ── */
+/* min 16px font na inputach → iOS Safari NIE auto-zoomuje przy focusie */
+.q-input { font-size:16px; }
+/* przestrzeń pod ankietą TYLKO gdy klawiatura otwarta (body.kb-open),
+   by było gdzie przewinąć pole nad klawiaturę; bez tego brak pustki */
+body.kb-open .qflow { padding-bottom:45vh; }
+@media (min-width:760px){ body.kb-open .qflow { padding-bottom:24px; } }

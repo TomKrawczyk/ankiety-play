@@ -242,8 +242,25 @@ function renderQ(fid) {
 
   html += '</div></div>';
   container.innerHTML = html;
-  // Focus input
-  setTimeout(function(){ var inp=document.getElementById('qi_'+fid); if(inp) inp.focus(); },300);
+  // Focus input + przewiń pole nad klawiaturę (mobile)
+  setTimeout(function(){
+    var inp=document.getElementById('qi_'+fid);
+    if(inp){
+      inp.focus();
+      // po pojawieniu się klawiatury przewiń pole do widoku
+      setTimeout(function(){ scrollFieldIntoView(inp); }, 350);
+    }
+  },300);
+}
+
+// Przewija aktywne pole tak, by było widoczne nad klawiaturą
+function scrollFieldIntoView(el){
+  if(!el) return;
+  try {
+    el.scrollIntoView({block:'center', behavior:'smooth'});
+  } catch(e){
+    el.scrollIntoView();
+  }
 }
 
 function selectChoice(fid, val) {
@@ -445,3 +462,51 @@ function showSuccess(typ, temp, xp, fid) {
   '</div>';
 }
 
+
+/* ─────────────────────────────────────────────────────────────
+   MOBILE: klawiatura nie może zasłaniać aktywnego pola.
+   Używamy visualViewport (reaguje na pojawienie się klawiatury)
+   + reakcja na focus/scroll, by zawsze trzymać input w widoku.
+   ───────────────────────────────────────────────────────────── */
+(function(){
+  function isField(el){
+    return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+  }
+  function keepInView(){
+    var el = document.activeElement;
+    if(!isField(el)) return;
+    var vv = window.visualViewport;
+    if(!vv){ el.scrollIntoView({block:'center'}); return; }
+    var rect = el.getBoundingClientRect();
+    // dolna krawędź widocznego obszaru (nad klawiaturą)
+    var safeBottom = vv.height - 16;
+    var safeTop = 70; // miejsce na nagłówek
+    if(rect.bottom > safeBottom){
+      window.scrollBy({top: rect.bottom - safeBottom + 12, behavior:'smooth'});
+    } else if(rect.top < safeTop){
+      window.scrollBy({top: rect.top - safeTop - 8, behavior:'smooth'});
+    }
+  }
+  // Gdy pole dostaje fokus — włącz tryb klawiatury + przewiń je w widok
+  document.addEventListener('focusin', function(e){
+    if(isField(e.target)){
+      document.body.classList.add('kb-open');
+      setTimeout(keepInView, 300);
+      setTimeout(keepInView, 600);
+    }
+  });
+  // Gdy pole traci fokus — wyłącz tryb klawiatury
+  document.addEventListener('focusout', function(e){
+    if(isField(e.target)){
+      setTimeout(function(){
+        if(!isField(document.activeElement)) document.body.classList.remove('kb-open');
+      }, 120);
+    }
+  });
+  // Gdy klawiatura zmienia rozmiar viewportu — popraw pozycję
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', function(){
+      if(isField(document.activeElement)) setTimeout(keepInView, 60);
+    });
+  }
+})();
