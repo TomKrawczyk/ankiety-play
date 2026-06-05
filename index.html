@@ -683,6 +683,179 @@ body {
 @media (min-width: 900px) {
   #appScreen { max-width:700px; margin:0 auto; box-shadow:0 0 80px rgba(0,0,0,0.5); }
 }
+
+/* ── LIGHT THEME ── */
+body.light {
+  --bg:     #f0f4f8;
+  --bg2:    #e4eaf2;
+  --bg3:    #d8e0ec;
+  --card:   #ffffff;
+  --card2:  #f5f8ff;
+  --border: rgba(0,0,0,0.08);
+  --border2:rgba(0,0,0,0.13);
+  --text:   #0f172a;
+  --muted:  #64748b;
+  --muted2: #475569;
+}
+body.light .hdr { background:rgba(240,244,248,0.95); }
+body.light .msw  { background:var(--card); }
+body.light .xpbar { background:var(--bg3); }
+body.light .q-input { color:var(--text); }
+body.light .choice  { color:var(--text); }
+body.light .ts-btn .ts-label { color:var(--text); }
+body.light .auth-card { box-shadow:0 8px 40px rgba(0,0,0,0.12); }
+body.light .afield input { color:var(--text); }
+body.light .rank-card { background:var(--card); }
+body.light .profile-sheet { background:var(--card); }
+body.light .nav-tiles { background:var(--bg2); }
+body.light .nav-tile { background:var(--card); color:var(--text); }
+body.light .nav-tile.active { background:var(--green); color:#000; }
+body.light .sub-tile { background:var(--bg3); color:var(--text); }
+body.light .sub-tile.active { background:var(--green); color:#000; }
+body.light .sc { background:var(--bg2); }
+body.light .mc { background:var(--bg2); }
+body.light .hitem { background:var(--card); }
+body.light .lead-card.common { background:linear-gradient(135deg,#e2e8f0,#cbd5e1); border-color:#94a3b8; }
+body.light .bp-header { background:linear-gradient(135deg,rgba(167,139,250,0.08),rgba(96,165,250,0.05)); }
+body.light .spin-box { background:var(--card); }
+
+/* ── HDR AVATAR BUTTON ── */
+.hdr-av-btn {
+  background:none; border:none; padding:0; cursor:pointer;
+  border-radius:50%; transition:transform 0.2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.hdr-av-btn:active { transform:scale(0.92); }
+
+/* ── THEME TOGGLE ── */
+.btn-theme {
+  background:var(--bg3); border:1px solid var(--border2); border-radius:8px;
+  padding:5px 8px; font-size:1em; cursor:pointer; line-height:1;
+  transition:all 0.2s; -webkit-tap-highlight-color:transparent;
+}
+.btn-theme:active { transform:scale(0.9); }
+
+/* ── PROFIL OVERLAY ── */
+.profile-overlay {
+  position:fixed; inset:0; z-index:500;
+  background:rgba(0,0,0,0.6); backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  animation:fadeIn 0.2s ease;
+}
+.profile-sheet {
+  position:absolute; top:56px; left:8px; right:8px;
+  max-width:520px; margin:0 auto;
+  background:var(--card); border:1px solid var(--border2);
+  border-radius:20px; padding:16px 16px 12px;
+  box-shadow:0 12px 48px rgba(0,0,0,0.5);
+  animation:sheetDrop 0.3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes sheetDrop {
+  from{opacity:0;transform:translateY(-16px) scale(0.96)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.profile-handle {
+  width:36px; height:4px; background:var(--border2);
+  border-radius:4px; margin:0 auto 14px;
+}
+.profile-av-row {
+  display:flex; align-items:center; gap:12px; margin-bottom:14px;
+}
+.profile-av-big {
+  width:52px; height:52px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.5em; font-weight:900; color:#000;
+  background:linear-gradient(135deg,var(--green),var(--purple));
+  box-shadow:0 0 16px rgba(0,255,136,0.35);
+}
+.profile-name  { font-size:1em; font-weight:900; color:var(--text); }
+.profile-level { font-size:0.76em; color:var(--green); font-weight:700; margin-top:2px; }
+.profile-close-btn {
+  margin-left:auto; background:var(--bg3); border:1px solid var(--border2);
+  border-radius:8px; padding:6px 10px; font-size:0.8em; color:var(--muted);
+  cursor:pointer; font-family:Inter,sans-serif;
+}
+
+/* ── NAV KAFELKI ── */
+.nav-tiles {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  padding:12px;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+}
+.nav-tile {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:5px; padding:12px 6px;
+  background:var(--card); border:1.5px solid var(--border2); border-radius:14px;
+  cursor:pointer; font-family:'Inter',sans-serif;
+  transition:all 0.18s cubic-bezier(.34,1.56,.64,1);
+  -webkit-tap-highlight-color:transparent;
+  position:relative; overflow:hidden;
+}
+.nav-tile::before {
+  content:''; position:absolute; inset:0; border-radius:13px;
+  background:linear-gradient(135deg,rgba(0,255,136,0),rgba(0,255,136,0));
+  transition:background 0.2s;
+}
+.nav-tile.active {
+  border-color:var(--green);
+  background:linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,255,136,0.05));
+  box-shadow:0 4px 14px rgba(0,255,136,0.2);
+  transform:scale(1.03);
+}
+.nav-tile:active { transform:scale(0.95); }
+.nt-icon { font-size:1.5em; line-height:1; }
+.nt-label { font-size:0.62em; font-weight:800; color:var(--muted2); text-transform:uppercase; letter-spacing:0.5px; }
+.nav-tile.active .nt-label { color:var(--green); }
+
+/* Kolory kafelków — każdy ma swój akcent */
+#msb_quick.active      { border-color:var(--green);  box-shadow:0 4px 14px rgba(0,255,136,0.25); }
+#msb_full.active       { border-color:var(--blue);   background:linear-gradient(135deg,rgba(96,165,250,0.15),rgba(96,165,250,0.05)); box-shadow:0 4px 14px rgba(96,165,250,0.2); }
+#msb_full.active .nt-label { color:var(--blue); }
+#msb_history.active    { border-color:var(--purple); background:linear-gradient(135deg,rgba(167,139,250,0.15),rgba(167,139,250,0.05)); box-shadow:0 4px 14px rgba(167,139,250,0.2); }
+#msb_history.active .nt-label { color:var(--purple); }
+#msb_ranking.active    { border-color:var(--gold);   background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.05)); box-shadow:0 4px 14px rgba(245,158,11,0.2); }
+#msb_ranking.active .nt-label { color:var(--gold); }
+#msb_lokalizacja.active{ border-color:var(--orange); background:linear-gradient(135deg,rgba(251,146,60,0.15),rgba(251,146,60,0.05)); box-shadow:0 4px 14px rgba(251,146,60,0.2); }
+#msb_lokalizacja.active .nt-label { color:var(--orange); }
+#msb_karty.active      { border-color:var(--yellow); background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(251,191,36,0.05)); box-shadow:0 4px 14px rgba(251,191,36,0.2); }
+#msb_karty.active .nt-label { color:var(--yellow); }
+#msb_battlepass.active { border-color:var(--red);    background:linear-gradient(135deg,rgba(248,113,113,0.15),rgba(248,113,113,0.05)); box-shadow:0 4px 14px rgba(248,113,113,0.2); }
+#msb_battlepass.active .nt-label { color:var(--red); }
+#msb_avatar.active     { border-color:#c084fc;       background:linear-gradient(135deg,rgba(192,132,252,0.15),rgba(192,132,252,0.05)); box-shadow:0 4px 14px rgba(192,132,252,0.2); }
+#msb_avatar.active .nt-label { color:#c084fc; }
+
+/* ── SUB-TILES (zakładki ankiet) ── */
+.sub-tiles {
+  display:flex; gap:7px; padding:12px 12px 8px; flex-wrap:wrap;
+}
+.sub-tile {
+  flex:1; min-width:80px; padding:10px 8px;
+  background:var(--card); border:1.5px solid var(--border2); border-radius:12px;
+  cursor:pointer; font-size:0.78em; font-weight:800; color:var(--muted2);
+  font-family:'Inter',sans-serif; text-align:center; transition:all 0.2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.sub-tile.active {
+  background:linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,255,136,0.05));
+  border-color:var(--green); color:var(--green);
+  box-shadow:0 3px 10px rgba(0,255,136,0.15);
+}
+.sub-tile:active { transform:scale(0.96); }
+
+/* ── RESPONSIVE KAFELKI ── */
+@media (max-width:380px) {
+  .nav-tiles { grid-template-columns:repeat(4,1fr); gap:5px; padding:8px; }
+  .nt-icon   { font-size:1.3em; }
+  .nt-label  { font-size:0.55em; }
+  .nav-tile  { padding:10px 4px; border-radius:11px; }
+}
+@media (min-width:600px) {
+  .nav-tiles { grid-template-columns:repeat(8,1fr); }
+}
+
 </style>
 </head>
 <body>
@@ -735,44 +908,84 @@ body {
 
 <!-- ===== APP ===== -->
 <div id="appScreen">
+  <!-- HEADER -->
   <div class="hdr">
     <div class="hdr-left">
-      <div class="hdr-av" id="hdrAv">?</div>
-      <div><div class="hdr-name" id="hdrName">—</div><div class="hdr-lv" id="hdrLv">Level 1 · Rookie</div></div>
+      <button class="hdr-av-btn" id="hdrAvBtn" onclick="toggleProfileOverlay()">
+        <div class="hdr-av" id="hdrAv">?</div>
+      </button>
+      <div>
+        <div class="hdr-name" id="hdrName">—</div>
+        <div class="hdr-lv" id="hdrLv">Level 1 · Rookie</div>
+      </div>
     </div>
     <div class="hdr-right">
       <div class="xp-pill">⚡<span id="xpTotal">0</span> XP</div>
+      <button class="btn-theme" onclick="toggleTheme()" title="Zmień motyw">🌙</button>
       <button class="btn-logout" onclick="doLogout()">Wyloguj</button>
     </div>
   </div>
-  <div class="xpbar-wrap">
-    <div class="xpbar-info"><span id="xpBarLabel">Level 1</span><span id="xpBarNext">0/100 XP</span></div>
-    <div class="xpbar"><div class="xpbar-fill" id="xpFill" style="width:0%"></div></div>
+
+  <!-- PROFIL OVERLAY (xpbar + statsy + misje) -->
+  <div id="profileOverlay" class="profile-overlay" style="display:none" onclick="closeProfileIfOutside(event)">
+    <div class="profile-sheet" id="profileSheet">
+      <div class="profile-handle"></div>
+      <div class="profile-av-row">
+        <div class="profile-av-big" id="profileAvBig">?</div>
+        <div>
+          <div class="profile-name" id="profileName">—</div>
+          <div class="profile-level" id="profileLevel">Level 1</div>
+        </div>
+        <button class="profile-close-btn" onclick="toggleProfileOverlay()">✕</button>
+      </div>
+      <div class="xpbar-wrap" style="margin:0 0 10px;border-radius:12px;overflow:hidden">
+        <div class="xpbar-info"><span id="xpBarLabel">Level 1</span><span id="xpBarNext">0/100 XP</span></div>
+        <div class="xpbar"><div class="xpbar-fill" id="xpFill" style="width:0%"></div></div>
+      </div>
+      <div class="stats-grid" style="margin-bottom:10px">
+        <div class="sc g"><div class="sv" id="stTotal">0</div><div class="sl">Ankiety</div></div>
+        <div class="sc o"><div class="sv" id="stStreak">0🔥</div><div class="sl">Streak</div></div>
+        <div class="sc p"><div class="sv" id="stHot">0</div><div class="sl">Gorące</div></div>
+        <div class="sc y"><div class="sv" id="stToday">0</div><div class="sl">Dziś</div></div>
+      </div>
+      <div class="missions" id="missionRow" style="margin-bottom:4px"></div>
+    </div>
   </div>
-  <div class="stats-grid">
-    <div class="sc g"><div class="sv" id="stTotal">0</div><div class="sl">Ankiety</div></div>
-    <div class="sc o"><div class="sv" id="stStreak">0🔥</div><div class="sl">Streak</div></div>
-    <div class="sc p"><div class="sv" id="stHot">0</div><div class="sl">Gorące</div></div>
-    <div class="sc y"><div class="sv" id="stToday">0</div><div class="sl">Dziś</div></div>
-  </div>
-  <div class="missions" id="missionRow"></div>
-  <div class="msw">
-    <button class="msb active" id="msb_quick" onclick="switchMode('quick')">⚡ Szybka<span>5 pytań · 2 min</span></button>
-    <button class="msb" id="msb_full" onclick="switchMode('full')">📋 Pełna<span>10 pytań · 5 min</span></button>
-    <button class="msb" id="msb_history" onclick="switchMode('history')">📂 Moje<span>historia ankiet</span></button>
-    <button class="msb" id="msb_ranking" onclick="switchMode('ranking');renderRanking()">🏆 Ranking<span>top ankieterzy</span></button>
-    <button class="msb" id="msb_lokalizacja" onclick="switchMode('lokalizacja')">📍 Lokalizacja<span>kod i miejscowość</span></button>
-    <button class="msb" id="msb_karty" onclick="switchMode('karty');renderKarty()">🃏 Karty<span>kolekcja leadów</span></button>
-    <button class="msb" id="msb_battlepass" onclick="switchMode('battlepass');renderBattlePass()">🎯 Sezon<span>battle pass</span></button>
-    <button class="msb" id="msb_avatar" onclick="switchMode('avatar');renderAvatar()">🎭 Avatar<span>skiny postaci</span></button>
+
+  <!-- KAFELKI NAV -->
+  <div class="nav-tiles">
+    <button class="nav-tile active" id="msb_quick" onclick="switchMode('quick')">
+      <span class="nt-icon">⚡</span><span class="nt-label">Szybka</span>
+    </button>
+    <button class="nav-tile" id="msb_full" onclick="switchMode('full')">
+      <span class="nt-icon">📋</span><span class="nt-label">Pełna</span>
+    </button>
+    <button class="nav-tile" id="msb_history" onclick="switchMode('history')">
+      <span class="nt-icon">📂</span><span class="nt-label">Moje</span>
+    </button>
+    <button class="nav-tile" id="msb_ranking" onclick="switchMode('ranking');renderRanking()">
+      <span class="nt-icon">🏆</span><span class="nt-label">Ranking</span>
+    </button>
+    <button class="nav-tile" id="msb_lokalizacja" onclick="switchMode('lokalizacja')">
+      <span class="nt-icon">📍</span><span class="nt-label">Lokalizacja</span>
+    </button>
+    <button class="nav-tile" id="msb_karty" onclick="switchMode('karty');renderKarty()">
+      <span class="nt-icon">🃏</span><span class="nt-label">Karty</span>
+    </button>
+    <button class="nav-tile" id="msb_battlepass" onclick="switchMode('battlepass');renderBattlePass()">
+      <span class="nt-icon">🎯</span><span class="nt-label">Sezon</span>
+    </button>
+    <button class="nav-tile" id="msb_avatar" onclick="switchMode('avatar');renderAvatar()">
+      <span class="nt-icon">🎭</span><span class="nt-label">Avatar</span>
+    </button>
   </div>
 
   <!-- QUICK MODE TABS -->
   <div id="panel_quick" class="mpanel active">
-    <div class="tabs">
-      <button class="tbtn active" onclick="showTab('q_pv',this)">☀️ PV / Prąd</button>
-      <button class="tbtn" onclick="showTab('q_heat',this)">🌡️ Ogrzewanie</button>
-      <button class="tbtn" onclick="showTab('q_new',this)">🌿 Nowy klient</button>
+    <div class="sub-tiles">
+      <button class="sub-tile active" onclick="showTab('q_pv',this)">☀️ PV / Prąd</button>
+      <button class="sub-tile" onclick="showTab('q_heat',this)">🌡️ Ogrzewanie</button>
+      <button class="sub-tile" onclick="showTab('q_new',this)">🌿 Nowy klient</button>
     </div>
     <!-- PV Quick -->
     <div id="q_pv" class="tpanel active">
@@ -1490,13 +1703,17 @@ function showAch(a){
 
 function updateUI(name){
   var s=getStats(name),lv=getLv(s.xp);
-  document.getElementById('hdrAv').textContent=name.charAt(0).toUpperCase();
   document.getElementById('hdrName').textContent=name;
   var locLabel = '';
   var locKod = localStorage.getItem('4eco_loc_location_kod');
   var locMsc = localStorage.getItem('4eco_loc_location_msc');
   if(locKod||locMsc) locLabel = ' · 📍'+(locMsc||locKod);
-  document.getElementById('hdrLv').textContent='Level '+lv.level+' · '+lv.icon+' '+lv.name+locLabel;
+  document.getElementById('hdrLv').textContent=lv.icon+' Level '+lv.level+' — '+lv.name+locLabel;
+  // Profil overlay
+  var pName = document.getElementById('profileName');
+  var pLevel = document.getElementById('profileLevel');
+  if(pName) pName.textContent = name;
+  if(pLevel) pLevel.textContent = lv.icon+' '+lv.name+' — Level '+lv.level;
   document.getElementById('xpTotal').textContent=s.xp;
   document.getElementById('xpBarLabel').textContent=lv.icon+' Level '+lv.level+' — '+lv.name;
   document.getElementById('xpBarNext').textContent=s.xp+'/'+lv.nextXp+' XP';
@@ -1575,9 +1792,10 @@ function initParticles(){
 // ======================================================
 function switchMode(mode){
   document.querySelectorAll('.mpanel').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.msb').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.nav-tile').forEach(function(b){b.classList.remove('active');});
   document.getElementById('panel_'+mode).classList.add('active');
-  document.getElementById('msb_'+mode).classList.add('active');
+  var tileEl = document.getElementById('msb_'+mode);
+  if(tileEl) tileEl.classList.add('active');
   if(mode==='lokalizacja') renderLokalizacja();
   if(mode==='battlepass') renderBattlePass();
   if(mode==='karty') renderKarty();
@@ -1618,7 +1836,7 @@ function saveLokalizacja() {
 
 function showTab(id, btn){
   document.querySelectorAll('#panel_quick .tpanel').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.tbtn').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.sub-tile').forEach(function(b){b.classList.remove('active');});
   document.getElementById(id).classList.add('active');
   if(btn) btn.classList.add('active');
 }
@@ -2435,6 +2653,48 @@ renderRanking = function() {
 };
 
 </script>
+
+// ── PROFIL OVERLAY ──
+function toggleProfileOverlay() {
+  var ov = document.getElementById('profileOverlay');
+  if(!ov) return;
+  if(ov.style.display === 'none' || !ov.style.display) {
+    // Synchronizuj avatar w overlaye
+    var bigAv = document.getElementById('profileAvBig');
+    var hdrAv = document.getElementById('hdrAv');
+    if(bigAv && hdrAv) {
+      bigAv.innerHTML = hdrAv.innerHTML || hdrAv.textContent;
+      bigAv.style.background = hdrAv.style.background;
+      bigAv.style.fontSize   = '1.5em';
+    }
+    ov.style.display = 'flex';
+  } else {
+    ov.style.display = 'none';
+  }
+}
+function closeProfileIfOutside(e) {
+  if(e.target === document.getElementById('profileOverlay')) {
+    document.getElementById('profileOverlay').style.display = 'none';
+  }
+}
+
+// ── THEME TOGGLE ──
+function toggleTheme() {
+  var isLight = document.body.classList.toggle('light');
+  localStorage.setItem('4eco_theme', isLight ? 'light' : 'dark');
+  document.querySelector('.btn-theme').textContent = isLight ? '☀️' : '🌙';
+}
+function applyStoredTheme() {
+  var t = localStorage.getItem('4eco_theme');
+  if(t === 'light') {
+    document.body.classList.add('light');
+    var btn = document.querySelector('.btn-theme');
+    if(btn) btn.textContent = '☀️';
+  }
+}
+// Zastosuj motyw przy starcie
+applyStoredTheme();
+
 <!-- SPIN OVERLAY -->
 <div id="spinOverlay" style="display:none" class="spin-overlay" onclick="event.stopPropagation()">
   <div class="spin-box">
