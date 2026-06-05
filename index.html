@@ -2745,8 +2745,8 @@ function renderKarty() {
     +'</div>'
 
     // Karty button
-    +'<button onclick="var c=awardCard(window._user,null);renderKarty();showCardReveal(c);" '
-    +'style="width:100%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;border:none;border-radius:14px;padding:13px;font-size:0.85em;font-weight:900;cursor:pointer;margin-bottom:10px;letter-spacing:0.3px">🎴 Losuj kartę (demo)</button>'
+    +'<button onclick="showCardReveal(drawRandomCard(null));" '
+    +'style="width:100%;background:var(--card2);color:var(--muted2);border:1.5px dashed var(--border2);border-radius:14px;padding:11px;font-size:0.78em;font-weight:700;cursor:pointer;margin-bottom:10px;letter-spacing:0.3px">🎴 Podgląd losowania (nie zapisuje)</button>'
 
     // Grid kart
     +'<div id="cards_grid" class="cards-grid"></div>'
