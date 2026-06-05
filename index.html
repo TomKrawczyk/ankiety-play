@@ -405,6 +405,94 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
   border-color: #00ff88; color: #00ff88;
 }
 
+
+/* ============ AVATAR BUILDER ============ */
+.av-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.av-item{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative}
+.av-item.selected{border-color:var(--green);background:rgba(0,255,136,0.08);box-shadow:0 0 12px rgba(0,255,136,0.2)}
+.av-item.locked{opacity:0.4;filter:grayscale(1);cursor:not-allowed}
+.av-item .av-emoji{font-size:1.8em;display:block}
+.av-item .av-name{font-size:0.6em;color:var(--muted);margin-top:3px;font-weight:700}
+.av-item .av-lock{position:absolute;top:4px;right:6px;font-size:0.65em}
+.av-preview{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2em;margin:0 auto 12px;font-weight:900;color:#000;box-shadow:0 0 20px rgba(0,255,136,0.4);transition:all 0.4s}
+.av-section-title{font-size:0.7em;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:14px 0 6px}
+
+/* ============ KARTY LEADÓW ============ */
+.cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+.lead-card{border-radius:16px;padding:16px 12px;text-align:center;position:relative;overflow:hidden;border:2px solid transparent;animation:cardIn 0.4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes cardIn{from{opacity:0;transform:scale(0.7) rotate(-5deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.lead-card.common{background:linear-gradient(135deg,#1e293b,#334155);border-color:#475569}
+.lead-card.rare{background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-color:#3b82f6;box-shadow:0 0 12px rgba(59,130,246,0.3)}
+.lead-card.epic{background:linear-gradient(135deg,#2d1b69,#7c3aed);border-color:#a78bfa;box-shadow:0 0 16px rgba(167,139,250,0.4)}
+.lead-card.legendary{background:linear-gradient(135deg,#451a03,#b45309);border-color:#f59e0b;box-shadow:0 0 20px rgba(245,158,11,0.5);animation:legendaryGlow 2s ease-in-out infinite}
+@keyframes legendaryGlow{0%,100%{box-shadow:0 0 20px rgba(245,158,11,0.5)}50%{box-shadow:0 0 35px rgba(245,158,11,0.9)}}
+.card-rarity{font-size:0.55em;font-weight:900;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px}
+.card-rarity.common{color:#94a3b8}.card-rarity.rare{color:#60a5fa}.card-rarity.epic{color:#a78bfa}.card-rarity.legendary{color:#f59e0b}
+.card-icon{font-size:2.4em;margin:4px 0}
+.card-name{font-size:0.78em;font-weight:800;color:var(--text);margin:4px 0 2px}
+.card-date{font-size:0.6em;color:rgba(255,255,255,0.4)}
+.card-shine{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 30%,rgba(255,255,255,0.05) 50%,transparent 70%);pointer-events:none}
+.cards-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85em}
+.cards-counter{display:flex;gap:8px;padding:10px 12px 0;flex-wrap:wrap}
+.cc-badge{padding:4px 10px;border-radius:20px;font-size:0.68em;font-weight:800}
+.cc-badge.common{background:rgba(71,85,105,0.3);color:#94a3b8;border:1px solid #475569}
+.cc-badge.rare{background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid #3b82f6}
+.cc-badge.epic{background:rgba(167,139,250,0.15);color:#a78bfa;border:1px solid #7c3aed}
+.cc-badge.legendary{background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid #b45309}
+
+/* ============ SPIN WHEEL ============ */
+.spin-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:10000;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.spin-box{background:var(--card);border:2px solid var(--green);border-radius:24px;padding:28px 24px;text-align:center;max-width:320px;width:90%;box-shadow:0 0 40px rgba(0,255,136,0.3)}
+.spin-title{font-size:1.2em;font-weight:900;color:var(--text);margin-bottom:4px}
+.spin-sub{font-size:0.78em;color:var(--muted);margin-bottom:20px}
+.slot-row{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
+.slot{width:70px;height:70px;background:var(--bg3);border:2px solid var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:2em;overflow:hidden;position:relative}
+.slot.spinning{animation:slotSpin 0.08s linear infinite}
+@keyframes slotSpin{0%{transform:translateY(-3px)}50%{transform:translateY(3px)}100%{transform:translateY(-3px)}}
+.slot.won{border-color:var(--green);box-shadow:0 0 16px rgba(0,255,136,0.4);animation:wonPop 0.5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes wonPop{0%{transform:scale(0.8)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+.spin-result{font-size:1.4em;font-weight:900;color:var(--green);margin:10px 0 6px;min-height:36px}
+.spin-result-sub{font-size:0.8em;color:var(--muted);margin-bottom:16px;min-height:20px}
+.btn-spin{width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--green2));color:#000;border:none;border-radius:14px;font-size:1em;font-weight:900;cursor:pointer;font-family:Inter,sans-serif;box-shadow:0 4px 16px rgba(0,255,136,0.3);transition:all 0.2s}
+.btn-spin:disabled{opacity:0.5;cursor:not-allowed}
+.btn-spin-close{width:100%;padding:11px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:12px;font-size:0.88em;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;margin-top:8px}
+
+/* ============ BATTLE PASS ============ */
+.bp-header{background:linear-gradient(135deg,rgba(167,139,250,0.15),rgba(96,165,250,0.1));border:1px solid rgba(167,139,250,0.3);border-radius:16px;padding:14px 16px;margin:12px 12px 0}
+.bp-season{font-size:0.65em;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:2px}
+.bp-title{font-size:1.1em;font-weight:900;color:var(--text);margin:2px 0}
+.bp-xp-bar-wrap{margin-top:10px}
+.bp-xp-info{display:flex;justify-content:space-between;font-size:0.68em;color:var(--muted);margin-bottom:4px}
+.bp-xp-bar{height:6px;background:var(--bg3);border-radius:6px;overflow:hidden}
+.bp-xp-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue));border-radius:6px;transition:width 0.8s ease}
+.bp-rewards{padding:12px}
+.bp-reward{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;position:relative;overflow:hidden}
+.bp-reward.unlocked{border-color:rgba(0,255,136,0.4);background:rgba(0,255,136,0.04)}
+.bp-reward.unlocked::after{content:'✓';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--green);font-weight:900;font-size:1.1em}
+.bp-reward.next{border-color:rgba(167,139,250,0.5);animation:bpPulse 2s ease-in-out infinite}
+@keyframes bpPulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px rgba(167,139,250,0.3)}}
+.bp-req{font-size:0.62em;font-weight:800;color:var(--muted);min-width:50px}
+.bp-req.done{color:var(--green)}
+.bp-rew-icon{font-size:1.5em;min-width:36px;text-align:center}
+.bp-rew-info{flex:1}
+.bp-rew-name{font-size:0.82em;font-weight:800;color:var(--text)}
+.bp-rew-desc{font-size:0.65em;color:var(--muted);margin-top:1px}
+.bp-locked-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:1em;opacity:0.5}
+
+/* ============ POJEDYNEK ============ */
+.duel-card{background:linear-gradient(135deg,rgba(251,146,60,0.1),rgba(248,113,113,0.05));border:1px solid rgba(251,146,60,0.3);border-radius:16px;padding:14px 16px;margin:12px 12px 8px}
+.duel-title{font-size:0.65em;font-weight:900;color:var(--orange);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}
+.duel-vs{display:flex;align-items:center;justify-content:space-between;margin:10px 0}
+.duel-player{text-align:center;flex:1}
+.duel-player-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2em;font-weight:900;color:#000;margin:0 auto 4px}
+.duel-player-name{font-size:0.72em;font-weight:800;color:var(--text)}
+.duel-player-score{font-size:1.1em;font-weight:900;color:var(--orange)}
+.duel-vs-badge{font-size:1em;font-weight:900;color:var(--muted);padding:0 8px}
+.duel-timer{text-align:center;font-size:0.72em;color:var(--muted);margin-top:8px}
+.duel-timer span{color:var(--orange);font-weight:800}
+.duel-empty{text-align:center;padding:20px;color:var(--muted);font-size:0.82em}
+
 </style>
 </head>
 <body>
@@ -484,6 +572,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
     <button class="msb" id="msb_history" onclick="switchMode('history')">📂 Moje<span>historia ankiet</span></button>
     <button class="msb" id="msb_ranking" onclick="switchMode('ranking');renderRanking()">🏆 Ranking<span>top ankieterzy</span></button>
     <button class="msb" id="msb_lokalizacja" onclick="switchMode('lokalizacja')">📍 Lokalizacja<span>kod i miejscowość</span></button>
+    <button class="msb" id="msb_karty" onclick="switchMode('karty');renderKarty()">🃏 Karty<span>kolekcja leadów</span></button>
+    <button class="msb" id="msb_battlepass" onclick="switchMode('battlepass');renderBattlePass()">🎯 Sezon<span>battle pass</span></button>
+    <button class="msb" id="msb_avatar" onclick="switchMode('avatar');renderAvatar()">🎭 Avatar<span>skiny postaci</span></button>
   </div>
 
   <!-- QUICK MODE TABS -->
@@ -541,7 +632,50 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
     </div>
   </div>
 
+  <div id="panel_karty" class="mpanel">
+    <div style="padding:12px 12px 0;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:0.95em;font-weight:800;color:var(--text)">🃏 Kolekcja kart leadów</div>
+        <div style="font-size:0.72em;color:var(--muted);margin-top:2px">Zdobywasz karty za Gorące leady</div>
+      </div>
+      <div id="karty_total" style="font-size:1.4em;font-weight:900;color:var(--yellow)">0</div>
+    </div>
+    <div class="cards-counter" id="cards_counter"></div>
+    <div id="cards_grid" class="cards-grid"></div>
+  </div>
+
+  <div id="panel_battlepass" class="mpanel">
+    <div class="bp-header">
+      <div class="bp-season">⚡ Sezon Czerwiec 2026</div>
+      <div class="bp-title">Łowca Energii</div>
+      <div style="font-size:0.72em;color:var(--muted);margin-top:2px">Zbieraj XP i odblokowuj nagrody</div>
+      <div class="bp-xp-bar-wrap">
+        <div class="bp-xp-info"><span id="bp_xp_cur">0 XP</span><span id="bp_xp_max">cel: 3000 XP</span></div>
+        <div class="bp-xp-bar"><div class="bp-xp-fill" id="bp_xp_fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="bp-rewards" id="bp_rewards_list"></div>
+  </div>
+
+  <div id="panel_avatar" class="mpanel">
+    <div style="padding:16px">
+      <div style="font-size:0.95em;font-weight:800;color:var(--text);margin-bottom:4px">🎭 Customizacja postaci</div>
+      <div style="font-size:0.76em;color:var(--muted);margin-bottom:14px">Odblokuj nowe skiny zdobywając XP i poziomy</div>
+      <div class="av-preview" id="av_preview_big">?</div>
+      <div style="text-align:center;font-size:0.78em;font-weight:800;color:var(--green);margin-bottom:4px" id="av_preview_name">Domyślny</div>
+      <div class="av-section-title">🎭 Ikona postaci</div>
+      <div class="av-grid" id="av_icons_grid"></div>
+      <div class="av-section-title">🌈 Kolor tła avatara</div>
+      <div class="av-grid" id="av_colors_grid"></div>
+      <div class="av-section-title">✨ Efekt ramki</div>
+      <div class="av-grid" id="av_frames_grid"></div>
+      <button onclick="saveAvatar()" style="width:100%;margin-top:16px;padding:14px;background:linear-gradient(135deg,var(--green),var(--green2));color:#000;border:none;border-radius:14px;font-size:0.95em;font-weight:900;cursor:pointer;font-family:Inter,sans-serif">✅ Zapisz wygląd</button>
+      <div id="av_ok" style="display:none;margin-top:10px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:10px;padding:9px;font-size:0.8em;color:var(--green);text-align:center;font-weight:700">✓ Wygląd zapisany!</div>
+    </div>
+  </div>
+
   <div id="panel_ranking" class="mpanel">
+    <div id="duel_section"></div>
     <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
       <div style="font-size:0.88em;font-weight:800">🏆 Ranking ankieterów</div>
       <div style="font-size:0.7em;color:var(--muted)" id="rankingDate"></div>
@@ -1167,6 +1301,7 @@ function updateUI(name){
   document.getElementById('stHot').textContent=s.hot;
   document.getElementById('stToday').textContent=s.today;
   renderMissions(s);
+  if(typeof applyAvatarToHeader === 'function') applyAvatarToHeader();
 }
 
 function renderMissions(s){
@@ -1239,6 +1374,10 @@ function switchMode(mode){
   document.getElementById('panel_'+mode).classList.add('active');
   document.getElementById('msb_'+mode).classList.add('active');
   if(mode==='lokalizacja') renderLokalizacja();
+  if(mode==='battlepass') renderBattlePass();
+  if(mode==='karty') renderKarty();
+  if(mode==='avatar') renderAvatar();
+  if(mode==='ranking') { renderRanking(); renderDuel(); }
 }
 
 function renderLokalizacja() {
@@ -1289,6 +1428,7 @@ function launchApp(name){
   updateUI(name);
   initCombo(); // start combo system
   // Build all flows
+  applyAvatarToHeader();
   buildFlow('PV',   FLOW_QPV,   'Ankiety_Podstawowe', '',       50);
   buildFlow('PC', FLOW_QHEAT, 'Ankiety_Podstawowe', 'blue',   50);
   buildFlow('NOWY',  FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
@@ -1604,5 +1744,450 @@ function setRankTab(tab) {
 }
 
 </script>
+
+<script>
+
+// ============================================================
+// AVATAR SYSTEM
+// ============================================================
+var AV_ICONS = [
+  {id:'default', emoji:'⚡', name:'Domyślny', req:0},
+  {id:'fire',    emoji:'🔥', name:'Ogień',    req:100},
+  {id:'target',  emoji:'🎯', name:'Snajper',  req:300},
+  {id:'diamond', emoji:'💎', name:'Diament',  req:600},
+  {id:'crown',   emoji:'👑', name:'Korona',   req:1000},
+  {id:'alien',   emoji:'👽', name:'Alien',    req:1800},
+  {id:'ninja',   emoji:'🥷', name:'Ninja',    req:3000},
+  {id:'god',     emoji:'🌟', name:'GOD',      req:5000}
+];
+var AV_COLORS = [
+  {id:'green',   bg:'linear-gradient(135deg,#00ff88,#00cc6a)',   name:'Neon',    req:0},
+  {id:'blue',    bg:'linear-gradient(135deg,#60a5fa,#3b82f6)',   name:'Błękit',  req:100},
+  {id:'purple',  bg:'linear-gradient(135deg,#a78bfa,#7c3aed)',   name:'Fiolet',  req:300},
+  {id:'orange',  bg:'linear-gradient(135deg,#fb923c,#f97316)',   name:'Ogień',   req:600},
+  {id:'red',     bg:'linear-gradient(135deg,#f87171,#ef4444)',   name:'Czerwień',req:1000},
+  {id:'gold',    bg:'linear-gradient(135deg,#fbbf24,#d97706)',   name:'Złoto',   req:1800},
+  {id:'rainbow', bg:'linear-gradient(135deg,#f87171,#fbbf24,#00ff88,#60a5fa,#a78bfa)', name:'Tęcza', req:3000},
+  {id:'dark',    bg:'linear-gradient(135deg,#1e293b,#475569)',   name:'Shadow',  req:5000}
+];
+var AV_FRAMES = [
+  {id:'none',    css:'none',   name:'Brak',    req:0},
+  {id:'glow',    css:'0 0 12px rgba(0,255,136,0.7)', name:'Glow',  req:200},
+  {id:'pulse',   css:'0 0 0 3px rgba(0,255,136,0.5)', name:'Pulse', req:500},
+  {id:'gold',    css:'0 0 16px rgba(245,158,11,0.8)', name:'Złota', req:1000},
+  {id:'rainbow', css:'0 0 20px rgba(167,139,250,0.9)', name:'Tęcza', req:2000},
+  {id:'fire',    css:'0 0 24px rgba(251,146,60,1)',   name:'Ogień', req:3500}
+];
+
+function getAvatar(name) {
+  var k = 'av_' + (name||window._user||'anon').toLowerCase();
+  try { return JSON.parse(localStorage.getItem(k)) || {icon:'default',color:'green',frame:'none'}; } catch(e) { return {icon:'default',color:'green',frame:'none'}; }
+}
+function saveAvatarData(name, data) {
+  var k = 'av_' + (name||window._user||'anon').toLowerCase();
+  localStorage.setItem(k, JSON.stringify(data));
+}
+
+function renderAvatar() {
+  var xp = getStats(window._user||'').xp;
+  var av = getAvatar(window._user);
+  var _selIcon  = av.icon;
+  var _selColor = av.color;
+  var _selFrame = av.frame;
+
+  function updatePreview() {
+    var iconObj  = AV_ICONS.find(function(x){return x.id===_selIcon;}) || AV_ICONS[0];
+    var colorObj = AV_COLORS.find(function(x){return x.id===_selColor;}) || AV_COLORS[0];
+    var frameObj = AV_FRAMES.find(function(x){return x.id===_selFrame;}) || AV_FRAMES[0];
+    var prev = document.getElementById('av_preview_big');
+    prev.textContent = iconObj.emoji;
+    prev.style.background = colorObj.bg;
+    prev.style.boxShadow = frameObj.css !== 'none' ? frameObj.css : '0 0 20px rgba(0,255,136,0.4)';
+    document.getElementById('av_preview_name').textContent = iconObj.name + ' · ' + colorObj.name;
+  }
+
+  function makeGrid(containerId, items, selectedId, onSelect) {
+    var html = '';
+    items.forEach(function(item) {
+      var locked = xp < item.req;
+      var sel = selectedId === item.id;
+      html += '<div class="av-item'+(sel?' selected':'')+(locked?' locked':'')+'" onclick="'+(locked?'':'')+'">';
+      if(item.emoji) html += '<span class="av-emoji">'+item.emoji+'</span>';
+      else html += '<span class="av-emoji" style="display:block;width:32px;height:32px;border-radius:50%;background:'+item.bg+';margin:0 auto"></span>';
+      html += '<span class="av-name">'+(locked?'🔒 '+item.req+'XP':item.name)+'</span>';
+      html += '</div>';
+    });
+    var el = document.getElementById(containerId);
+    el.innerHTML = html;
+    el.querySelectorAll('.av-item:not(.locked)').forEach(function(el2, i) {
+      el2.addEventListener('click', function() {
+        var id = items.filter(function(x){return xp>=x.req;})[i].id;
+        onSelect(id);
+        el.querySelectorAll('.av-item').forEach(function(e){e.classList.remove('selected');});
+        el2.classList.add('selected');
+        updatePreview();
+      });
+    });
+  }
+
+  makeGrid('av_icons_grid',  AV_ICONS,  _selIcon,  function(id){_selIcon=id;});
+  makeGrid('av_colors_grid', AV_COLORS, _selColor, function(id){_selColor=id;});
+  makeGrid('av_frames_grid', AV_FRAMES, _selFrame, function(id){_selFrame=id;});
+  updatePreview();
+
+  document.getElementById('av_ok').style.display='none';
+  // Przechowaj wybory przez closure w save button
+  document.querySelector('[onclick="saveAvatar()"]').onclick = function() {
+    saveAvatarData(window._user, {icon:_selIcon, color:_selColor, frame:_selFrame});
+    applyAvatarToHeader();
+    var ok = document.getElementById('av_ok');
+    ok.style.display='block';
+    setTimeout(function(){ok.style.display='none';},2500);
+  };
+}
+
+function applyAvatarToHeader() {
+  var av = getAvatar(window._user);
+  var iconObj  = AV_ICONS.find(function(x){return x.id===av.icon;}) || AV_ICONS[0];
+  var colorObj = AV_COLORS.find(function(x){return x.id===av.color;}) || AV_COLORS[0];
+  var frameObj = AV_FRAMES.find(function(x){return x.id===av.frame;}) || AV_FRAMES[0];
+  var hdrAv = document.getElementById('hdrAv');
+  hdrAv.textContent = iconObj.emoji;
+  hdrAv.style.background = colorObj.bg;
+  hdrAv.style.boxShadow = frameObj.css !== 'none' ? frameObj.css : '0 0 12px rgba(0,255,136,0.3)';
+  hdrAv.style.fontSize = '1.3em';
+}
+
+// ============================================================
+// KARTY LEADÓW
+// ============================================================
+var CARD_RARITIES = ['common','rare','epic','legendary'];
+var CARD_RARITY_CHANCE = [0.55, 0.30, 0.12, 0.03];
+var CARD_ICONS = ['🔥','⚡','💎','🏆','🎯','🌟','👑','🦅','🚀','💥','🎪','🔮','🌊','🎲','🦁'];
+
+function rollCardRarity() {
+  var r = Math.random();
+  var cum = 0;
+  for(var i=0;i<CARD_RARITY_CHANCE.length;i++) {
+    cum += CARD_RARITY_CHANCE[i];
+    if(r < cum) return CARD_RARITIES[i];
+  }
+  return 'common';
+}
+
+function addLeadCard(clientName) {
+  var k = '4eco_cards_' + (window._user||'anon').toLowerCase();
+  var cards = [];
+  try { cards = JSON.parse(localStorage.getItem(k)) || []; } catch(e) {}
+  var rarity = rollCardRarity();
+  var icon = CARD_ICONS[Math.floor(Math.random()*CARD_ICONS.length)];
+  var card = {
+    id: Date.now(),
+    name: clientName || 'Nieznany lead',
+    rarity: rarity,
+    icon: icon,
+    date: new Date().toLocaleDateString('pl-PL')
+  };
+  cards.unshift(card);
+  localStorage.setItem(k, JSON.stringify(cards));
+  return card;
+}
+
+function getCards() {
+  var k = '4eco_cards_' + (window._user||'anon').toLowerCase();
+  try { return JSON.parse(localStorage.getItem(k)) || []; } catch(e) { return []; }
+}
+
+function renderKarty() {
+  var cards = getCards();
+  var el = document.getElementById('cards_grid');
+  var counter = document.getElementById('cards_counter');
+  var total = document.getElementById('karty_total');
+  total.textContent = cards.length;
+
+  var counts = {common:0,rare:0,epic:0,legendary:0};
+  cards.forEach(function(c){counts[c.rarity]=(counts[c.rarity]||0)+1;});
+  var rarityLabels = {common:'⬜ Common',rare:'🔵 Rare',epic:'🟣 Epic',legendary:'🟡 Legendary'};
+  counter.innerHTML = Object.keys(counts).filter(function(r){return counts[r]>0;}).map(function(r){
+    return '<span class="cc-badge '+r+'">'+rarityLabels[r]+' ×'+counts[r]+'</span>';
+  }).join('');
+
+  if(cards.length===0) {
+    el.innerHTML = '<div class="cards-empty" style="grid-column:1/-1">🃏 Brak kart<br><span style="font-size:0.85em">Zdobywaj karty za każdy Gorący lead!</span></div>';
+    return;
+  }
+  el.innerHTML = cards.slice(0,30).map(function(c){
+    return '<div class="lead-card '+c.rarity+'">' +
+      '<div class="card-rarity '+c.rarity+'">'+c.rarity.toUpperCase()+'</div>'+
+      '<div class="card-icon">'+c.icon+'</div>'+
+      '<div class="card-name">'+c.name+'</div>'+
+      '<div class="card-date">'+c.date+'</div>'+
+      '<div class="card-shine"></div>'+
+      '</div>';
+  }).join('');
+}
+
+function showNewCard(card, clientName) {
+  var rarityNames = {common:'Common 🃏',rare:'Rare 🔵',epic:'Epic 🟣',legendary:'LEGENDARY 🟡'};
+  var msg = document.createElement('div');
+  msg.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9995;background:var(--card);border:2px solid '+(card.rarity==='legendary'?'#f59e0b':card.rarity==='epic'?'#a78bfa':card.rarity==='rare'?'#60a5fa':'#475569')+';border-radius:16px;padding:14px 20px;text-align:center;animation:cardIn 0.5s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,0.5);min-width:200px';
+  msg.innerHTML = '<div style="font-size:0.6em;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:var(--muted)">Nowa karta!</div><div style="font-size:2em">'+card.icon+'</div><div style="font-size:0.8em;font-weight:900;color:var(--text);margin:2px 0">'+clientName+'</div><div style="font-size:0.65em;color:'+(card.rarity==='legendary'?'#f59e0b':card.rarity==='epic'?'#a78bfa':'#60a5fa')+'">'+rarityNames[card.rarity]+'</div>';
+  document.body.appendChild(msg);
+  setTimeout(function(){if(msg.parentNode)msg.parentNode.removeChild(msg);},3500);
+}
+
+// ============================================================
+// SPIN WHEEL
+// ============================================================
+var SPIN_PRIZES = [
+  {emoji:'💸',label:'+50 XP',   xpBonus:50,  weight:30},
+  {emoji:'⚡',label:'+100 XP',  xpBonus:100, weight:25},
+  {emoji:'🎯',label:'+200 XP',  xpBonus:200, weight:15},
+  {emoji:'🔥',label:'×2 XP!',   xpBonus:0,   weight:15, multiplier:2},
+  {emoji:'💎',label:'+500 XP',  xpBonus:500, weight:8},
+  {emoji:'🌟',label:'×3 XP!!!', xpBonus:0,   weight:5,  multiplier:3},
+  {emoji:'👑',label:'+1000 XP', xpBonus:1000,weight:2}
+];
+
+var _spinPrize = null;
+var _spinBaseXP = 0;
+
+function showSpin(baseXP) {
+  _spinBaseXP = baseXP;
+  _spinPrize = null;
+  document.getElementById('spinOverlay').style.display='flex';
+  document.getElementById('slot1').textContent='🎲';
+  document.getElementById('slot2').textContent='🎲';
+  document.getElementById('slot3').textContent='🎲';
+  document.getElementById('spinResult').textContent='';
+  document.getElementById('spinResultSub').textContent='';
+  document.getElementById('btnSpin').disabled=false;
+  document.getElementById('btnSpin').style.display='block';
+  document.getElementById('btnSpinClose').style.display='none';
+}
+
+function rollPrize() {
+  var total = SPIN_PRIZES.reduce(function(s,p){return s+p.weight;},0);
+  var r = Math.random()*total;
+  var cum = 0;
+  for(var i=0;i<SPIN_PRIZES.length;i++){
+    cum+=SPIN_PRIZES[i].weight;
+    if(r<cum) return SPIN_PRIZES[i];
+  }
+  return SPIN_PRIZES[0];
+}
+
+function doSpin() {
+  document.getElementById('btnSpin').disabled=true;
+  var slots = ['slot1','slot2','slot3'];
+  var emojis = SPIN_PRIZES.map(function(p){return p.emoji;});
+  var prize = rollPrize();
+  _spinPrize = prize;
+
+  // Animacja spinowania
+  var intervals = slots.map(function(sid, i) {
+    return setInterval(function(){
+      document.getElementById(sid).textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    }, 80);
+  });
+
+  // Stop slotów jeden po drugim
+  setTimeout(function(){
+    clearInterval(intervals[0]);
+    document.getElementById('slot1').textContent = prize.emoji;
+    document.getElementById('slot1').classList.add('won');
+  }, 900);
+  setTimeout(function(){
+    clearInterval(intervals[1]);
+    document.getElementById('slot2').textContent = prize.emoji;
+    document.getElementById('slot2').classList.add('won');
+  }, 1300);
+  setTimeout(function(){
+    clearInterval(intervals[2]);
+    document.getElementById('slot3').textContent = prize.emoji;
+    document.getElementById('slot3').classList.add('won');
+    showSpinResult(prize);
+  }, 1700);
+}
+
+function showSpinResult(prize) {
+  var bonusXP = prize.xpBonus;
+  var subText = '';
+  if(prize.multiplier) {
+    bonusXP = Math.round(_spinBaseXP * (prize.multiplier - 1));
+    subText = 'Bonus ×'+prize.multiplier+' do bazy +'+_spinBaseXP+' XP = łącznie +'+(bonusXP+_spinBaseXP)+' XP!';
+  } else {
+    subText = 'Dodano do Twojego konta!';
+  }
+  if(bonusXP > 0 && window._user) {
+    addXP(window._user, bonusXP, false);
+    updateUI(window._user);
+    applyAvatarToHeader();
+  }
+  document.getElementById('spinResult').textContent = prize.label;
+  document.getElementById('spinResultSub').textContent = subText;
+  document.getElementById('btnSpin').style.display='none';
+  document.getElementById('btnSpinClose').style.display='block';
+  floatXP('+'+bonusXP+' XP 🎰');
+}
+
+function closeSpin() {
+  document.getElementById('spinOverlay').style.display='none';
+  document.querySelectorAll('.slot').forEach(function(s){s.classList.remove('won');});
+}
+
+// ============================================================
+// BATTLE PASS
+// ============================================================
+var BP_REWARDS = [
+  {xpReq:100,  icon:'🔵', name:'Skin: Błękit',    desc:'Nowy kolor avatara'},
+  {xpReq:200,  icon:'✨', name:'Efekt: Glow',      desc:'Świecąca ramka avatara'},
+  {xpReq:300,  icon:'🎯', name:'Ikona: Snajper',   desc:'Nowa ikona postaci'},
+  {xpReq:500,  icon:'🟣', name:'Skin: Fiolet',     desc:'Fioletowy kolor avatara'},
+  {xpReq:700,  icon:'💎', name:'Ikona: Diament',   desc:'Odblokowana ikona'},
+  {xpReq:1000, icon:'🏆', name:'Tytuł: Closer',    desc:'Specjalny tytuł w rankingu'},
+  {xpReq:1500, icon:'👑', name:'Ikona: Korona',    desc:'Ekskluzywna ikona'},
+  {xpReq:2000, icon:'🌈', name:'Skin: Tęcza',      desc:'Tęczowy gradient avatara'},
+  {xpReq:3000, icon:'🌟', name:'GOD MODE skin',    desc:'Legendarny wygląd postaci'},
+  {xpReq:5000, icon:'🔥', name:'LEGEND: Ogień',    desc:'Płonąca ramka — maksymalny prestiż'}
+];
+
+function renderBattlePass() {
+  var xp = getStats(window._user||'').xp;
+  var maxXP = BP_REWARDS[BP_REWARDS.length-1].xpReq;
+  var pct = Math.min(100, Math.round(xp/maxXP*100));
+  document.getElementById('bp_xp_cur').textContent = xp+' XP';
+  document.getElementById('bp_xp_fill').style.width = pct+'%';
+
+  var nextReward = BP_REWARDS.find(function(r){return xp<r.xpReq;});
+  document.getElementById('bp_xp_max').textContent = nextReward ? 'następna nagroda: '+nextReward.xpReq+' XP' : '🏆 Wszystkie odblokowane!';
+
+  var html = '';
+  BP_REWARDS.forEach(function(r) {
+    var done = xp >= r.xpReq;
+    var isNext = nextReward && r.xpReq === nextReward.xpReq;
+    html += '<div class="bp-reward'+(done?' unlocked':isNext?' next':'')+'">'+
+      '<div class="bp-req'+(done?' done':'')+'">'+r.xpReq+'<br><span style="font-size:0.8em">XP</span></div>'+
+      '<div class="bp-rew-icon">'+r.icon+'</div>'+
+      '<div class="bp-rew-info"><div class="bp-rew-name">'+r.name+'</div><div class="bp-rew-desc">'+r.desc+'</div></div>'+
+      (done ? '' : '<div class="bp-locked-icon">🔒</div>')+
+      '</div>';
+  });
+  document.getElementById('bp_rewards_list').innerHTML = html;
+}
+
+// ============================================================
+// POJEDYNEK TYGODNIOWY — w panelu rankingu
+// ============================================================
+function renderDuel() {
+  var users = getUsers();
+  var names = Object.keys(users);
+  if(names.length < 2) return;
+  // Znajdź gracza z największą liczbą ankiet w tym tygodniu
+  var weekKey = getWeekKey();
+  var weekScores = names.map(function(n){
+    var u = users[n];
+    var wk = (u.weeklyXP||{})[weekKey]||0;
+    return {name:n, score:wk};
+  }).sort(function(a,b){return b.score-a.score;});
+
+  var me = (window._user||'').toLowerCase();
+  var myScore = weekScores.find(function(x){return x.name===me;});
+  var top = weekScores[0];
+  var rival = top.name === me ? weekScores[1] : top;
+  if(!rival) return;
+
+  var duelEl = document.getElementById('duel_section');
+  if(!duelEl) return;
+
+  var daysLeft = 7 - new Date().getDay();
+  duelEl.innerHTML = '<div class="duel-card">'+
+    '<div class="duel-title">⚔️ Pojedynek tygodnia</div>'+
+    '<div style="font-size:0.72em;color:var(--muted);margin-bottom:8px">Kto zdobędzie więcej XP w tym tygodniu?</div>'+
+    '<div class="duel-vs">'+
+      '<div class="duel-player">'+
+        '<div class="duel-player-av" style="background:linear-gradient(135deg,var(--green),var(--green2))">'+me.charAt(0).toUpperCase()+'</div>'+
+        '<div class="duel-player-name">Ty</div>'+
+        '<div class="duel-player-score">'+(myScore?myScore.score:0)+'</div>'+
+      '</div>'+
+      '<div class="duel-vs-badge">VS</div>'+
+      '<div class="duel-player">'+
+        '<div class="duel-player-av" style="background:linear-gradient(135deg,var(--orange),#f97316)">'+rival.name.charAt(0).toUpperCase()+'</div>'+
+        '<div class="duel-player-name">'+rival.name+'</div>'+
+        '<div class="duel-player-score">'+rival.score+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="duel-timer">Reset za <span>'+daysLeft+' dni</span> · W niedzielę wyłania się zwycięzca 🏆</div>'+
+  '</div>';
+}
+
+function getWeekKey() {
+  var d = new Date();
+  var jan1 = new Date(d.getFullYear(),0,1);
+  var week = Math.ceil(((d-jan1)/86400000+jan1.getDay()+1)/7);
+  return d.getFullYear()+'W'+week;
+}
+
+// Nadpisz addXP żeby zapisywał też tygodniowe XP
+var _origAddXP = addXP;
+addXP = function(name, amount, isHot) {
+  _origAddXP(name, amount, isHot);
+  // Zapisz tygodniowe XP
+  var us = getUsers();
+  var k = name.toLowerCase();
+  if(us[k]) {
+    if(!us[k].weeklyXP) us[k].weeklyXP = {};
+    var wk = getWeekKey();
+    us[k].weeklyXP[wk] = (us[k].weeklyXP[wk]||0) + amount;
+    saveUsers(us);
+  }
+};
+
+// ============================================================
+// INTEGRACJA: Spin + Karta po Gorącym leadzie
+// ============================================================
+var _origSubmitFlow = submitFlow;
+submitFlow = function(fid) {
+  // Wywołaj oryginalny submit
+  _origSubmitFlow(fid);
+};
+
+// Hook na showSuccess - dodaj spin i kartę po gorącym leadzie
+var _origShowSuccess = showSuccess;
+showSuccess = function(xp, temp, typ, data) {
+  _origShowSuccess(xp, temp, typ, data);
+  if(temp === 'Gorący') {
+    var card = addLeadCard(data && data.imie ? data.imie : 'Lead');
+    showNewCard(card, data && data.imie ? data.imie : 'Lead');
+    setTimeout(function(){ showSpin(xp); }, 2500);
+  }
+};
+
+// ============================================================
+// Patch rankingu — dodaj sekcję pojedynku
+// ============================================================
+var _origRenderRanking = renderRanking;
+renderRanking = function() {
+  _origRenderRanking();
+  renderDuel();
+};
+
+</script>
+<!-- SPIN OVERLAY -->
+<div id="spinOverlay" style="display:none" class="spin-overlay" onclick="event.stopPropagation()">
+  <div class="spin-box">
+    <div class="spin-title">🎰 GORĄCY LEAD!</div>
+    <div class="spin-sub">Kręcisz kołem fortuny — czas na bonus!</div>
+    <div class="slot-row">
+      <div class="slot" id="slot1">🔥</div>
+      <div class="slot" id="slot2">🔥</div>
+      <div class="slot" id="slot3">🔥</div>
+    </div>
+    <div class="spin-result" id="spinResult"></div>
+    <div class="spin-result-sub" id="spinResultSub"></div>
+    <button class="btn-spin" id="btnSpin" onclick="doSpin()">🎰 KRĘĆ!</button>
+    <button class="btn-spin-close" id="btnSpinClose" style="display:none" onclick="closeSpin()">Zamknij</button>
+  </div>
+</div>
 </body>
 </html>
