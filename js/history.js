@@ -59,11 +59,17 @@ function renderHistory() {
 }
 
 // Nadpisz switchMode zeby renderowal history
-var _origSwitchMode = switchMode;
-switchMode = function(mode) {
-  _origSwitchMode(mode);
-  if(mode === 'history') renderHistory();
-};
+// UWAGA: switchMode jest w gamification.js ktory laduje sie PO history.js,
+// dlatego override odraczamy do DOMContentLoaded (inaczej ReferenceError psuje caly plik).
+window.addEventListener('DOMContentLoaded', function() {
+  if (typeof switchMode === 'function') {
+    var _origSwitchMode = switchMode;
+    switchMode = function(mode) {
+      _origSwitchMode(mode);
+      if (mode === 'history') renderHistory();
+    };
+  }
+});
 
 
 // ============================================================

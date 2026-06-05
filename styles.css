@@ -958,6 +958,3 @@ body.light #cardDetailOverlay { background: rgba(0,0,0,0.88) !important; }
 body.light input, body.light textarea, body.light select {
   color: var(--text); background: var(--card); border-color: var(--border2);
 }
-
-.card-tap { transition:transform 0.12s; }
-.card-tap:active { transform:scale(0.95); }
