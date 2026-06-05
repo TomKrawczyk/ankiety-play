@@ -256,6 +256,12 @@ function renderBattlePass() {
   el = document.getElementById('bp_xp_cur');  if(el) el.textContent = xp + ' XP';
   el = document.getElementById('bp_xp_fill'); if(el) el.style.width = pct + '%';
 
+  // ── NASTĘPNA NAGRODA: najbliższy nieodblokowany event + element avatara ──
+  renderNextReward(s);
+
+  // ── EVENTY / WYZWANIA (z ACHS) ──
+  renderEvents(s);
+
   var REWARDS = [
     {xp:100,  icon:'🔥', name:'Skórka Ogień'},
     {xp:300,  icon:'🎯', name:'Tytuł: Łowca'},
@@ -281,6 +287,136 @@ function renderBattlePass() {
     '</div>';
   });
   list.innerHTML = html;
+}
+
+// ── EVENTY / WYZWANIA: render listy z postępem (na bazie ACHS) ──
+function renderEvents(s) {
+  var box = document.getElementById('bp_events_list');
+  if (!box || typeof ACHS === 'undefined') return;
+  // progres dla każdego eventu: mierzymy względem progu w nazwie/warunku
+  var defs = [
+    {id:'first',   cur:s.total,  goal:1},
+    {id:'speed3',  cur:s.today,  goal:3},
+    {id:'streak3', cur:s.streak, goal:3},
+    {id:'hot1',    cur:s.hot,    goal:1},
+    {id:'hot5',    cur:s.hot,    goal:5},
+    {id:'ten',     cur:s.total,  goal:10},
+    {id:'daily5',  cur:s.today,  goal:5},
+    {id:'streak7', cur:s.streak, goal:7},
+    {id:'twenty',  cur:s.total,  goal:20},
+    {id:'hot10',   cur:s.hot,    goal:10},
+    {id:'daily10', cur:s.today,  goal:10},
+    {id:'fifty',   cur:s.total,  goal:50},
+    {id:'streak14',cur:s.streak, goal:14},
+    {id:'hot25',   cur:s.hot,    goal:25},
+    {id:'hundred', cur:s.total,  goal:100},
+    {id:'streak30',cur:s.streak, goal:30},
+    {id:'hot50',   cur:s.hot,    goal:50},
+    {id:'machine', cur:s.total,  goal:250},
+    {id:'legend500',cur:s.total, goal:500}
+  ];
+  var byId = {}; defs.forEach(function(d){ byId[d.id]=d; });
+  var RC = {common:'#94a3b8', rare:'#60a5fa', epic:'#a78bfa', legendary:'#fbbf24'};
+  // sort: nieukończone wg % malejąco najpierw, potem ukończone
+  var rows = ACHS.map(function(a){
+    var d = byId[a.id] || {cur:0,goal:1};
+    var done = a.check(s);
+    var p = Math.min(100, Math.round((d.cur/d.goal)*100));
+    return {a:a, cur:Math.min(d.cur,d.goal), goal:d.goal, done:done, p:p};
+  });
+  rows.sort(function(x,y){
+    if (x.done !== y.done) return x.done ? 1 : -1;
+    return y.p - x.p;
+  });
+  var html = '';
+  rows.forEach(function(r){
+    var col = RC[r.a.tier] || (r.done ? 'var(--green)' : 'var(--muted2)');
+    html += '<div class="bp-ev'+(r.done?' done':'')+'">' +
+      '<div class="bp-ev-ic">'+(r.done?'✅':r.a.icon)+'</div>' +
+      '<div class="bp-ev-mid">' +
+        '<div class="bp-ev-name">'+r.a.name+'</div>' +
+        '<div class="bp-ev-bar"><div class="bp-ev-fill" style="width:'+r.p+'%;background:'+(r.done?'var(--green)':'var(--green)')+'"></div></div>' +
+      '</div>' +
+      '<div class="bp-ev-rt">' +
+        '<div class="bp-ev-xp">+'+r.a.xp+' XP</div>' +
+        '<div class="bp-ev-prog">'+(r.done?'✓':r.cur+'/'+r.goal)+'</div>' +
+      '</div>' +
+    '</div>';
+  });
+  box.innerHTML = html;
+}
+
+// ── NASTĘPNA NAGRODA: najbliższy event + najbliższy element avatara ──
+function renderNextReward(s) {
+  var box = document.getElementById('bp_next_reward');
+  if (!box) return;
+  var xp = s.xp;
+
+  // najbliższy nieodblokowany EVENT (najmniejsza brakująca "odległość" w %)
+  var nextEv = null, bestP = -1;
+  if (typeof ACHS !== 'undefined') {
+    var prog = {
+      first:[s.total,1], speed3:[s.today,3], streak3:[s.streak,3], hot1:[s.hot,1],
+      hot5:[s.hot,5], ten:[s.total,10], daily5:[s.today,5], streak7:[s.streak,7],
+      twenty:[s.total,20], hot10:[s.hot,10], daily10:[s.today,10], fifty:[s.total,50],
+      streak14:[s.streak,14], hot25:[s.hot,25], hundred:[s.total,100], streak30:[s.streak,30],
+      hot50:[s.hot,50], machine:[s.total,250], legend500:[s.total,500]
+    };
+    ACHS.forEach(function(a){
+      if (a.check(s)) return;
+      var pr = prog[a.id] || [0,1];
+      var p = Math.min(99, Math.round(pr[0]/pr[1]*100));
+      if (p > bestP) { bestP = p; nextEv = {a:a, cur:Math.min(pr[0],pr[1]), goal:pr[1], p:p}; }
+    });
+  }
+
+  // najbliższy element avatara do odblokowania za XP
+  var nextAv = null;
+  function scan(arr, type, emojiOf, nameOf){
+    if (typeof arr === 'undefined') return;
+    arr.forEach(function(it){
+      if (!it.req || it.req <= xp) return;
+      if (!nextAv || it.req < nextAv.req) {
+        nextAv = {req:it.req, type:type, emoji:emojiOf(it), name:nameOf(it)};
+      }
+    });
+  }
+  scan(typeof AV_ICONS!=='undefined'?AV_ICONS:undefined,'Ikona',function(i){return i.emoji;},function(i){return i.name;});
+  scan(typeof AV_COLORS!=='undefined'?AV_COLORS:undefined,'Kolor',function(i){return '🎨';},function(i){return i.name;});
+  scan(typeof AV_FRAMES!=='undefined'?AV_FRAMES:undefined,'Ramka',function(i){return '✨';},function(i){return i.name;});
+  scan(typeof AV_TITLES!=='undefined'?AV_TITLES:undefined,'Tytuł',function(i){return '👑';},function(i){return (i.label||'').replace(/^[^ ]+\s*/,'')||i.id;});
+
+  var html = '<div class="bp-next-wrap">';
+  html += '<div class="bp-next-head">🎁 Następna nagroda</div>';
+  if (nextEv) {
+    html += '<div class="bp-next-card">' +
+      '<div class="bp-next-ic">'+nextEv.a.icon+'</div>' +
+      '<div class="bp-next-mid">' +
+        '<div class="bp-next-name">'+nextEv.a.name+'</div>' +
+        '<div class="bp-next-sub">Event · +'+nextEv.a.xp+' XP</div>' +
+        '<div class="bp-ev-bar" style="margin-top:6px"><div class="bp-ev-fill" style="width:'+nextEv.p+'%"></div></div>' +
+      '</div>' +
+      '<div class="bp-next-prog">'+nextEv.cur+'/'+nextEv.goal+'</div>' +
+    '</div>';
+  }
+  if (nextAv) {
+    var needed = nextAv.req - xp;
+    var avp = Math.min(99, Math.round(xp/nextAv.req*100));
+    html += '<div class="bp-next-card">' +
+      '<div class="bp-next-ic">'+nextAv.emoji+'</div>' +
+      '<div class="bp-next-mid">' +
+        '<div class="bp-next-name">'+nextAv.name+'</div>' +
+        '<div class="bp-next-sub">'+nextAv.type+' · brakuje '+needed+' XP</div>' +
+        '<div class="bp-ev-bar" style="margin-top:6px"><div class="bp-ev-fill" style="width:'+avp+'%"></div></div>' +
+      '</div>' +
+      '<div class="bp-next-prog">'+nextAv.req+'<br><span style="font-size:0.7em;color:var(--muted)">XP</span></div>' +
+    '</div>';
+  }
+  if (!nextEv && !nextAv) {
+    html += '<div class="bp-next-card" style="justify-content:center;color:var(--muted)">🏆 Wszystko odblokowane — jesteś legendą!</div>';
+  }
+  html += '</div>';
+  box.innerHTML = html;
 }
 
 // ── KARTY (lista zdobytych kart gracza) ─────────────────────

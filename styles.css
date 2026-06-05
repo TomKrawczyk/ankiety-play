@@ -984,3 +984,31 @@ body.light #cardDetailOverlay { background: rgba(0,0,0,0.88) !important; }
 body.light input, body.light textarea, body.light select {
   color: var(--text); background: var(--card); border-color: var(--border2);
 }
+
+/* ── EVENTY / WYZWANIA + NASTĘPNA NAGRODA (Sezon) ── */
+.bp-next-wrap{padding:14px 14px 4px;}
+.bp-next-head{font-size:0.82em;font-weight:900;margin-bottom:10px;color:var(--text);letter-spacing:0.3px;}
+.bp-next-card{display:flex;align-items:center;gap:12px;background:var(--card2);border:1px solid var(--border2);
+  border-radius:14px;padding:12px 14px;margin-bottom:10px;box-shadow:0 0 16px rgba(16,216,115,0.08);}
+.bp-next-ic{font-size:1.9em;width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+  background:var(--bg3);border-radius:12px;flex-shrink:0;}
+.bp-next-mid{flex:1;min-width:0;}
+.bp-next-name{font-size:0.84em;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bp-next-sub{font-size:0.66em;color:var(--muted2);margin-top:2px;}
+.bp-next-prog{font-size:0.86em;font-weight:900;color:var(--green);text-align:right;flex-shrink:0;line-height:1.1;}
+
+.bp-events-title,.bp-rewards-title{font-size:0.8em;font-weight:900;padding:14px 14px 6px;color:var(--text);letter-spacing:0.3px;}
+.bp-events{padding:0 14px 6px;display:flex;flex-direction:column;gap:8px;}
+.bp-ev{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:10px 12px;transition:opacity .2s;}
+.bp-ev.done{opacity:0.55;}
+.bp-ev-ic{font-size:1.35em;width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  background:var(--bg3);border-radius:9px;flex-shrink:0;}
+.bp-ev-mid{flex:1;min-width:0;}
+.bp-ev-name{font-size:0.78em;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bp-ev-bar{height:6px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-top:5px;}
+.bp-ev-fill{height:100%;background:var(--green);border-radius:4px;transition:width .4s ease;box-shadow:0 0 8px rgba(16,216,115,0.4);}
+.bp-ev-rt{text-align:right;flex-shrink:0;}
+.bp-ev-xp{font-size:0.7em;font-weight:900;color:var(--green);}
+.bp-ev-prog{font-size:0.64em;color:var(--muted);margin-top:2px;}
+body.light .bp-ev-fill,body.light .bp-next-card{box-shadow:0 0 8px rgba(22,163,74,0.25);}
