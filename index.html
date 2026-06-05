@@ -82,7 +82,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .mc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--blue))}
 .mc.done::before{background:linear-gradient(90deg,var(--green),var(--green2))}
 .mc-icon{font-size:1.3em;margin-bottom:3px}
-.mc-title{font-size:0.72em;font-weight:700;line-height:1.3;margin-bottom:5px}
+.mc-title{font-size:0.72em;font-weight:700;line-height:1.3;margin-bottom:5px;color:var(--text)}
 .mc-bar{height:3px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:3px}
 .mc-bar-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue));border-radius:3px;transition:width 0.5s}
 .mc.done .mc-bar-fill{background:var(--green)}
@@ -184,7 +184,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .ach.show{transform:translateY(0)}
 .ach-icon{font-size:2em;flex-shrink:0}
 .ach-badge{font-size:0.62em;color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:1px}
-.ach-name{font-size:0.86em;font-weight:800;margin:1px 0}
+.ach-name{font-size:0.86em;font-weight:800;margin:1px 0;color:var(--text)}
 .ach-xp{font-size:0.72em;color:var(--muted)}
 .xp-float{position:fixed;font-size:1.5em;font-weight:900;color:var(--green);pointer-events:none;z-index:9999;animation:xpup 1.2s ease forwards;text-shadow:0 0 10px rgba(0,255,136,0.5)}
 @keyframes xpup{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-90px) scale(1.6)}}
@@ -201,10 +201,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .srow{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .srow:last-child{margin-bottom:0}
 .srow-label{font-size:0.74em;color:var(--muted)}
-.srow-val{font-size:0.84em;font-weight:800}
+.srow-val{font-size:0.84em;font-weight:800;color:var(--text)}
 .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
 .sgrid-item{background:var(--bg3);border-radius:10px;padding:10px 6px;text-align:center}
-.sgrid-item .sv{font-size:1.2em;font-weight:900}
+.sgrid-item .sv{font-size:1.2em;font-weight:900;color:var(--text)}
 .sgrid-item .sl{font-size:0.62em;color:var(--muted);margin-top:2px}
 
 /* TABS */
@@ -223,7 +223,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .hitem-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .hitem-cell{background:var(--bg3);border-radius:8px;padding:6px 9px}
 .hitem-cell .hl{font-size:0.6em;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
-.hitem-cell .hv{font-size:0.78em;font-weight:700;margin-top:1px}
+.hitem-cell .hv{font-size:0.78em;font-weight:700;margin-top:1px;color:var(--text)}
 .hitem-temp{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.72em;font-weight:800;margin-top:8px}
 .hempty{text-align:center;padding:40px 20px;color:var(--muted);font-size:0.88em}
 
@@ -356,6 +356,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .rank-name {
   font-size: 0.9em; font-weight: 800;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--text);
 }
 .rank-sub {
   font-size: 0.68em; color: var(--muted); margin-top: 2px;
@@ -979,7 +980,7 @@ function showSuccess(typ, temp, xp, fid) {
     '<div class="success-icon">✅</div>'+
     '<div class="success-xp">+'+xp+' XP!</div>'+
     '<div class="success-card">'+
-      '<div class="srow"><span class="srow-label">Typ ankiety</span><span class="srow-val">'+typ+'</span></div>'+
+      '<div class="srow"><span class="srow-label">Typ ankiety</span><span class="srow-val" style="color:var(--blue)">'+typ+'</span></div>'+
       '<div class="srow"><span class="srow-label">Lead</span><span class="srow-val" style="color:'+tCol+'">'+tEm+' '+(temp||'brak')+'</span></div>'+
     comboRow + nextRow +
     '</div>'+
@@ -988,7 +989,7 @@ function showSuccess(typ, temp, xp, fid) {
       '<div style="font-size:1.1em;font-weight:900;color:var(--green)">'+lv.icon+' Level '+lv.level+' — '+lv.name+'</div>'+
       '<div class="sgrid">'+
         '<div class="sgrid-item"><div class="sv" style="color:var(--green)">'+stats.xp+'</div><div class="sl">XP</div></div>'+
-        '<div class="sgrid-item"><div class="sv">'+stats.total+'</div><div class="sl">Ankiet</div></div>'+
+        '<div class="sgrid-item"><div class="sv" style="color:var(--purple)">'+stats.total+'</div><div class="sl">Ankiet</div></div>'+
         '<div class="sgrid-item"><div class="sv" style="color:var(--orange)">'+stats.streak+'🔥</div><div class="sl">Streak</div></div>'+
       '</div>'+
       '<div style="height:7px;background:var(--bg3);border-radius:7px;overflow:hidden">'+
