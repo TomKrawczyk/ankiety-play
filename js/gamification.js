@@ -272,36 +272,85 @@ function renderBattlePass() {
 function renderKarty() {
   var panel = document.getElementById('panel_karty');
   if (!panel) return;
-  var k     = '4eco_cards_' + (window._user||'anon').toLowerCase();
-  var cards = [];
-  try { cards = JSON.parse(localStorage.getItem(k)) || []; } catch(e) {}
 
-  if (cards.length === 0) {
-    panel.innerHTML =
-      '<div style="padding:40px 20px;text-align:center;color:var(--muted)">' +
-        '<div style="font-size:2.5em;margin-bottom:12px">🃏</div>' +
-        '<div style="font-size:0.88em;font-weight:800;color:var(--text);margin-bottom:6px">Brak kart</div>' +
-        '<div style="font-size:0.75em">Zdobywaj karty oznaczając gorące leady 🔥</div>' +
+  var k     = '4eco_cards_' + (window._user||'anon').toLowerCase();
+  var owned = [];
+  try { owned = JSON.parse(localStorage.getItem(k)) || []; } catch(e) {}
+  var ownedIds = owned.map(function(c){ return c.id; });
+
+  var RARITY_COLORS = {common:'#94a3b8', rare:'#60a5fa', epic:'#a78bfa', legendary:'#fbbf24'};
+  var RARITY_LABELS = {common:'Common', rare:'Rare', epic:'Epic', legendary:'Legendary'};
+  var RARITY_ORDER  = {common:0, rare:1, epic:2, legendary:3};
+
+  // ── Statystyki kolekcji
+  var total    = typeof CARD_DEFINITIONS !== 'undefined' ? CARD_DEFINITIONS.length : 0;
+  var gotCount = owned.length;
+  var pct      = total > 0 ? Math.round(gotCount/total*100) : 0;
+
+  var html = '<div style="padding:12px 12px 90px">';
+
+  // Nagłówek + pasek
+  html += '<div style="background:var(--card2);border:1px solid var(--border2);border-radius:16px;padding:14px 16px;margin-bottom:14px">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+      '<div style="font-size:0.9em;font-weight:900;color:var(--text)">🃏 Kolekcja</div>' +
+      '<div style="font-size:0.72em;color:var(--muted);font-weight:700">'+gotCount+' / '+total+' kart</div>' +
+    '</div>' +
+    '<div style="background:var(--bg3);border-radius:8px;height:8px;overflow:hidden;margin-bottom:8px">' +
+      '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,var(--yellow),var(--orange));border-radius:8px;transition:width 0.6s ease"></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px">' +
+      ['common','rare','epic','legendary'].map(function(r){
+        var cnt = owned.filter(function(c){return c.rarity===r;}).length;
+        var def_cnt = typeof CARD_DEFINITIONS !== 'undefined' ? CARD_DEFINITIONS.filter(function(c){return c.rarity===r;}).length : '?';
+        return '<div style="flex:1;text-align:center;background:var(--bg3);border-radius:10px;padding:6px 4px;border:1px solid '+(cnt>0?RARITY_COLORS[r]:'var(--border2)')+'">' +
+          '<div style="font-size:0.72em;font-weight:900;color:'+(cnt>0?RARITY_COLORS[r]:'var(--muted)')+'">'+cnt+'</div>' +
+          '<div style="font-size:0.52em;color:var(--muted);text-transform:uppercase;font-weight:700">'+RARITY_LABELS[r].slice(0,3)+'</div>' +
+        '</div>';
+      }).join('') +
+    '</div>' +
+  '</div>';
+
+  // ── Zdobyte karty
+  if (owned.length > 0) {
+    var sorted = owned.slice().sort(function(a,b){
+      return (RARITY_ORDER[b.rarity]||0)-(RARITY_ORDER[a.rarity]||0);
+    });
+    html += '<div style="font-size:0.7em;font-weight:900;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding-left:2px">✅ Twoje karty ('+owned.length+')</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:20px">';
+    sorted.forEach(function(card) {
+      var rc = RARITY_COLORS[card.rarity||'common'];
+      var cardJson = JSON.stringify(card).replace(/"/g,'&quot;');
+      html += '<div onclick="showCardDetail('+cardJson+')" style="background:var(--card2);border:1.5px solid '+rc+';border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;box-shadow:0 0 12px rgba(0,0,0,0.3);transition:transform 0.15s;position:relative;-webkit-tap-highlight-color:transparent" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">' +
+        '<div style="position:absolute;top:6px;right:8px;font-size:0.48em;font-weight:900;color:'+rc+';text-transform:uppercase;letter-spacing:0.5px">'+RARITY_LABELS[card.rarity||'common']+'</div>' +
+        '<div style="font-size:2.2em;margin:8px 0 6px;filter:drop-shadow(0 0 6px rgba(0,0,0,0.5))">'+card.icon+'</div>' +
+        '<div style="font-size:0.7em;font-weight:900;color:var(--text);line-height:1.2">'+card.name+'</div>' +
+        (card.bonus?'<div style="font-size:0.55em;color:'+rc+';margin-top:4px;font-weight:800">'+card.bonus+'</div>':'') +
+        '<div style="font-size:0.52em;color:var(--muted);margin-top:4px">'+( card.date||'' )+'</div>' +
       '</div>';
-    return;
+    });
+    html += '</div>';
   }
 
-  var RARITY_COLORS = {common:'#94a3b8', rare:'#60a5fa', epic:'#a78bfa', legendary:'#ffd700'};
-  var html = '<div style="padding:12px 12px 80px">';
-  html += '<div style="font-size:0.7em;color:var(--muted);margin-bottom:10px">' + cards.length + ' kart zdobytych</div>';
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">';
-  cards.forEach(function(card) {
-    var rc = RARITY_COLORS[card.rarity||'common'] || '#94a3b8';
-    html += '<div onclick="showCardDetail(' + JSON.stringify(card).replace(/"/g,'&quot;') + ')" style="' +
-      'background:var(--card2);border:1.5px solid '+rc+';border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;' +
-      'box-shadow:0 0 10px rgba('+hexToRgb(rc)+',0.25)">' +
-      '<div style="font-size:2em;margin-bottom:6px">' + (card.icon||'🃏') + '</div>' +
-      '<div style="font-size:0.72em;font-weight:800;color:var(--text)">' + (card.name||'Karta') + '</div>' +
-      '<div style="font-size:0.58em;color:'+rc+';margin-top:3px;text-transform:uppercase;font-weight:700">' + (card.rarity||'common') + '</div>' +
-      '<div style="font-size:0.58em;color:var(--muted);margin-top:2px">' + (card.date||'') + '</div>' +
-    '</div>';
-  });
-  html += '</div></div>';
+  // ── Katalog kart do zdobycia
+  if (typeof CARD_DEFINITIONS !== 'undefined' && CARD_DEFINITIONS.length > 0) {
+    var locked = CARD_DEFINITIONS.filter(function(d){ return ownedIds.indexOf(d.id) === -1; });
+    if (locked.length > 0) {
+      html += '<div style="font-size:0.7em;font-weight:900;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding-left:2px">🔒 Do zdobycia ('+locked.length+')</div>';
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px">';
+      locked.forEach(function(card) {
+        var rc = RARITY_COLORS[card.rarity||'common'];
+        html += '<div style="background:var(--bg3);border:1.5px dashed var(--border2);border-radius:14px;padding:14px 10px;text-align:center;opacity:0.55;position:relative">' +
+          '<div style="position:absolute;top:6px;right:8px;font-size:0.48em;font-weight:900;color:'+rc+';text-transform:uppercase;letter-spacing:0.5px;opacity:0.7">'+RARITY_LABELS[card.rarity||'common']+'</div>' +
+          '<div style="font-size:2.2em;margin:8px 0 6px;filter:grayscale(1)">'+card.icon+'</div>' +
+          '<div style="font-size:0.7em;font-weight:900;color:var(--muted);line-height:1.2">'+card.name+'</div>' +
+          '<div style="font-size:0.55em;color:var(--muted);margin-top:4px;line-height:1.3">'+card.desc.substring(0,45)+(card.desc.length>45?'…':'')+'</div>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+  }
+
+  html += '</div>';
   panel.innerHTML = html;
 }
 
