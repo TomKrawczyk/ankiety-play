@@ -758,6 +758,27 @@ body.light .mpanel { background:var(--card); }
 body.light #panel_avatar .av-tab { color:#475569 !important; }
 body.light #panel_avatar .av-tab.active { color:#000 !important; }
 
+/* ── LIGHT MODE: biały tekst na zielonych aktywnych przyciskach (kontrast) ── */
+body.light .nav-tile.active,
+body.light .sub-tile.active,
+body.light .atab.active,
+body.light .rank-tab.active,
+body.light .choice.selected,
+body.light .btn-next,
+body.light .btn-submit,
+body.light .btn-primary,
+body.light .q-btn,
+body.light .spin-btn,
+body.light .ts-btn.active {
+  color:#ffffff !important;
+}
+body.light .nav-tile.active *,
+body.light .sub-tile.active *,
+body.light .btn-next *,
+body.light .btn-submit * {
+  color:#ffffff !important;
+}
+
 /* Overlaye i popupy (skrzynia, karty) - zawsze ciemne */
 body.light #chestRevealOv,
 body.light #cardDetailOverlay { 
