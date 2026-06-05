@@ -701,8 +701,26 @@ body.light .xpbar { background:var(--bg3); }
 body.light .q-input { color:var(--text); }
 body.light .choice  { color:var(--text); }
 body.light .ts-btn .ts-label { color:var(--text); }
-body.light .auth-card { box-shadow:0 8px 40px rgba(0,0,0,0.12); }
-body.light .afield input { color:var(--text); }
+/* ===== EKRAN LOGOWANIA – ZAWSZE CIEMNY (niezależnie od trybu jasnego) ===== */
+#authScreen {
+  --bg:#070711; --bg2:#0d0d1a; --bg3:#12121f;
+  --card:#161627; --card2:#1c1c30;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+  --text:#f1f5f9; --muted:#64748b; --muted2:#94a3b8;
+  --green:#00ff88; --green2:#00cc6a;
+  background:radial-gradient(circle at 50% 0%, rgba(0,255,136,0.10), transparent 60%), #070711 !important;
+  color:#f1f5f9 !important;
+}
+#authScreen .auth-card { background:#161627 !important; box-shadow:0 8px 40px rgba(0,0,0,0.6) !important; }
+#authScreen .atabs { background:#12121f !important; }
+#authScreen .atab { color:#94a3b8 !important; }
+#authScreen .atab.active { background:#00ff88 !important; color:#000 !important; }
+#authScreen .afield label { color:#94a3b8 !important; }
+#authScreen .afield input { background:#1c1c30 !important; color:#f1f5f9 !important; border-color:rgba(255,255,255,0.12) !important; }
+#authScreen .logo-title { color:#f1f5f9 !important; }
+#authScreen .logo-sub { color:#94a3b8 !important; }
+#authScreen .remember span, #authScreen .ahint { color:#94a3b8 !important; }
+#authScreen .btn-auth { color:#000 !important; }
 body.light .rank-card { background:var(--card); }
 body.light .profile-sheet { background:var(--card); }
 body.light .nav-tiles { background:var(--bg2); }
