@@ -684,6 +684,10 @@ body {
   #appScreen { max-width:700px; margin:0 auto; box-shadow:0 0 80px rgba(0,0,0,0.5); }
 }
 
+/* combo hidden */
+.footer { text-align:center; padding:8px 0 env(safe-area-inset-bottom,12px); font-size:0.6em; color:var(--muted); opacity:0.25; pointer-events:none; }
+#comboBar { display:none !important; }
+
 /* ── LIGHT THEME ── */
 body.light {
   --bg:     #f0f4f8;
@@ -1015,7 +1019,7 @@ body.light .spin-box { background:var(--card); }
     </div>
     <div id="historyList" style="padding:12px 14px;max-width:600px;margin:0 auto"></div>
   </div>
-  <div class="footer">4ECO Field Agent · ankiety.4-eco.pl</div>
+  <div class="footer" style="opacity:0.3;font-size:0.6em;letter-spacing:0.5px;padding:6px 0 10px;text-align:center;color:var(--muted)">4ECO · ankiety.4-eco.pl</div>
   <!-- PANEL RANKING -->
   <div id="panel_lokalizacja" class="mpanel">
     <div class="panel-section">
