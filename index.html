@@ -925,6 +925,8 @@ body.light { --muted:#475569; --muted2:#334155; }
 }
 
 </style>
+
+<script>try{if(localStorage.getItem("4eco_theme")==="light")document.body.classList.add("light");}catch(e){}</script>
 </head>
 <body>
 
@@ -1780,6 +1782,7 @@ function updateUI(name){
   document.getElementById('stToday').textContent=s.today;
   renderMissions(s);
   if(typeof applyAvatarToHeader === 'function') applyAvatarToHeader();
+  applyStoredTheme();
 }
 
 function renderMissions(s){
@@ -2336,6 +2339,23 @@ function saveAvatar(name, icon, color, frame) {
   };
   var k = 'av_' + name.toLowerCase();
   localStorage.setItem(k, JSON.stringify(data));
+}
+
+function toggleTheme() {
+  var isLight = document.body.classList.toggle('light');
+  localStorage.setItem('4eco_theme', isLight ? 'light' : 'dark');
+  // Zmień ikonę przycisku
+  var btn = document.querySelector('.btn-theme');
+  if(btn) btn.textContent = isLight ? '☀️' : '🌙';
+}
+
+function applyStoredTheme() {
+  var theme = localStorage.getItem('4eco_theme') || 'dark';
+  if(theme === 'light') {
+    document.body.classList.add('light');
+    var btn = document.querySelector('.btn-theme');
+    if(btn) btn.textContent = '☀️';
+  }
 }
 
 function applyAvatarToHeader() {
