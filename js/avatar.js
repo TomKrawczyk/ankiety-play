@@ -107,7 +107,17 @@ var AV_TITLES = [
   {id:'boss',       label:'😎 The Boss',         req:4000, tier:'epic',      color:'#f97316'},
   {id:'legend',     label:'🏆 Legend',           req:5000, tier:'legendary', color:'#ffd700'},
   {id:'god_mode',   label:'⚡ GOD MODE',         req:10000,tier:'legendary', color:'#ffd700'},
-  {id:'goat',       label:'🐐 G.O.A.T.',         req:15000,tier:'legendary', color:'#ffd700'}
+  {id:'goat',       label:'🐐 G.O.A.T.',         req:15000,tier:'legendary', color:'#ffd700'},
+  {id:'prospector', label:'🔍 Poszukiwacz',      req:200,  tier:'common',    color:'#34d399'},
+  {id:'negotiator', label:'💬 Negocjator',       req:450,  tier:'common',    color:'#fbbf24'},
+  {id:'rainmaker',  label:'🌧️ Rainmaker',        req:800,  tier:'rare',      color:'#60a5fa'},
+  {id:'energizer',  label:'⚡ Energetyk',         req:1200, tier:'rare',      color:'#10d873'},
+  {id:'maestro',    label:'🎻 Maestro',          req:1800, tier:'rare',      color:'#c084fc'},
+  {id:'titan',      label:'🛡️ Tytan',            req:3500, tier:'epic',      color:'#94a3b8'},
+  {id:'overlord',   label:'👑 Overlord',         req:4500, tier:'epic',      color:'#f59e0b'},
+  {id:'mythic',     label:'🔮 Mityczny',         req:6000, tier:'legendary', color:'#a78bfa'},
+  {id:'immortal',   label:'♾️ Nieśmiertelny',     req:8000, tier:'legendary', color:'#5eead4'},
+  {id:'apex',       label:'🌟 APEX',             req:20000,tier:'legendary', color:'#ffd700'}
 ];
 
 // ── Tytuł avatara danego usera (z localStorage) ───────────────
