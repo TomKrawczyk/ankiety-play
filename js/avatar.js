@@ -321,8 +321,10 @@ function _avSaveAndApply(btn) {
   saveAvatar(window._user, s.icon, s.color, s.frame);
   localStorage.setItem('4eco_av_title_' + (window._user || ''), s.title);
   applyAvatarToHeader();
-  btn.textContent = '✓ Zapisano!';
-  setTimeout(function() { btn.textContent = '💾 Zapisz'; }, 1800);
+  // odśwież NAGŁÓWEK (tytuł #hdrTitle ustawiany jest w updateUI)
+  if (typeof updateUI === 'function') updateUI(window._user);
+  btn.textContent = '\u2713 Zapisano!';
+  setTimeout(function() { btn.textContent = '\ud83d\udcbe Zapisz'; }, 1800);
 }
 
 function _avRenderGrid(type) {
