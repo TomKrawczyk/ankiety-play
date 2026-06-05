@@ -1012,3 +1012,28 @@ body.light input, body.light textarea, body.light select {
 .bp-ev-xp{font-size:0.7em;font-weight:900;color:var(--green);}
 .bp-ev-prog{font-size:0.64em;color:var(--muted);margin-top:2px;}
 body.light .bp-ev-fill,body.light .bp-next-card{box-shadow:0 0 8px rgba(22,163,74,0.25);}
+
+/* ── SEZON: meta + pasek postępu miesiąca ── */
+.bp-season-meta{font-size:0.72em;color:var(--muted);margin-top:4px;}
+.bp-season-meta b{color:var(--green);font-weight:900;}
+.bp-season-bar{height:5px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;margin-top:10px;}
+.bp-season-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--green2));border-radius:4px;transition:width .5s ease;}
+body.light .bp-season-bar{background:rgba(0,0,0,0.08);}
+
+/* ── TYGODNIOWE WYZWANIA ── */
+.bp-weekly-title{display:flex;align-items:center;justify-content:space-between;
+  font-size:0.8em;font-weight:900;padding:16px 14px 8px;color:var(--text);letter-spacing:0.3px;}
+.bp-weekly-reset{font-size:0.78em;font-weight:700;color:var(--muted2);background:var(--bg3);
+  padding:3px 9px;border-radius:20px;}
+.bp-weekly{padding:0 14px 6px;display:flex;flex-direction:column;gap:8px;}
+.bp-wk{display:flex;align-items:center;gap:11px;background:var(--card2);border:1px solid var(--border2);
+  border-radius:13px;padding:11px 13px;box-shadow:0 0 14px rgba(16,216,115,0.06);transition:opacity .2s;}
+.bp-wk.done{opacity:0.6;}
+.bp-wk-ic{font-size:1.5em;width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+  background:var(--bg3);border-radius:11px;flex-shrink:0;}
+.bp-wk-mid{flex:1;min-width:0;}
+.bp-wk-name{font-size:0.82em;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bp-wk-rt{text-align:right;flex-shrink:0;}
+.bp-wk-xp{font-size:0.74em;font-weight:900;color:var(--green);}
+.bp-wk-prog{font-size:0.66em;color:var(--muted);margin-top:2px;}
+body.light .bp-wk{box-shadow:0 0 10px rgba(22,163,74,0.18);}

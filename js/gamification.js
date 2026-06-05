@@ -10,6 +10,51 @@ function getStats(name) {
   return {xp:u.xp||0, total:u.total||0, hot:u.hot||0, streak:u.streak||0, today:td, lastDay:u.lastDay||'', achs:u.achs||[]};
 }
 
+// ── STATY TYGODNIOWE (reset wg klucza ISO) ──
+function getWeekStats(name) {
+  var k = (name||'').toLowerCase();
+  var wk = getWeekKey();
+  var w;
+  try { w = JSON.parse(localStorage.getItem('4eco_wk_'+k)) || {}; } catch(e) { w = {}; }
+  if (w.week !== wk) w = {week:wk, surveys:0, hot:0, days:[], bestDay:0, claimed:[]};
+  return {
+    week: wk,
+    surveys: w.surveys||0,
+    hot: w.hot||0,
+    days: (w.days||[]).length,
+    bestDay: w.bestDay||0,
+    claimed: w.claimed||[]
+  };
+}
+
+// ── Sprawdź ukończone tygodniowe wyzwania → przyznaj XP raz (claim) ──
+function checkWeekly(name) {
+  if (typeof WEEKLY_CHALLENGES === 'undefined') return;
+  var k = (name||'').toLowerCase();
+  var us = getUsers(); if (!us[k]) return;
+  var wk = getWeekKey();
+  var wkey = '4eco_wk_'+k;
+  var w;
+  try { w = JSON.parse(localStorage.getItem(wkey)) || {}; } catch(e) { w = {}; }
+  if (w.week !== wk) w = {week:wk, surveys:0, hot:0, days:[], bestDay:0, claimed:[]};
+  if (!w.claimed) w.claimed = [];
+  var ws = getWeekStats(name);
+  var changed = false;
+  WEEKLY_CHALLENGES.forEach(function(c){
+    var cur = ws[c.progKey] || 0;
+    if (cur >= c.goal && w.claimed.indexOf(c.id) === -1) {
+      w.claimed.push(c.id);
+      us[k].xp = (us[k].xp||0) + c.xp;
+      changed = true;
+      setTimeout(function(ch){ showAch({icon:ch.icon, name:'Wyzwanie: '+ch.name, xp:ch.xp}); }, 900, c);
+    }
+  });
+  if (changed) {
+    localStorage.setItem(wkey, JSON.stringify(w));
+    saveUsers(us);
+  }
+}
+
 function addXP(name, amount, isHot) {
   var us = getUsers(), k = (name||'').toLowerCase();
   if (!us[k]) return;
@@ -27,8 +72,25 @@ function addXP(name, amount, isHot) {
     var cnt = (td.d === today ? td.c : 0) + 1;
     localStorage.setItem('4eco_td_'+k, JSON.stringify({d:today, c:cnt}));
   } catch(e) {}
+  // ── STATY TYGODNIOWE (reset co poniedziałek wg klucza ISO) ──
+  try {
+    var wk = getWeekKey();
+    var wkey = '4eco_wk_' + k;
+    var w = JSON.parse(localStorage.getItem(wkey)) || {};
+    if (w.week !== wk) { w = {week:wk, surveys:0, hot:0, days:[], bestDay:0, claimed:[]}; }
+    w.surveys = (w.surveys||0) + 1;
+    if (isHot) w.hot = (w.hot||0) + 1;
+    if (!w.days) w.days = [];
+    if (w.days.indexOf(today) === -1) w.days.push(today);
+    // bestDay = max ankiet w jednym dniu tego tygodnia (z licznika dziennego)
+    var dc = cnt;
+    if (dc > (w.bestDay||0)) w.bestDay = dc;
+    if (!w.claimed) w.claimed = [];
+    localStorage.setItem(wkey, JSON.stringify(w));
+  } catch(e) {}
   saveUsers(us);
   checkAchs(name);
+  checkWeekly(name);
   updateUI(name);
   var newLv = getLv(us[k].xp||0).level;
   if (newLv > oldLv) { lvFlash(); showToast('🎉 LEVEL UP! Jesteś Level ' + newLv + '!'); }
@@ -250,6 +312,8 @@ function showTab(id, btn) {
 function renderBattlePass() {
   var s  = getStats(window._user || '');
   var xp = s.xp;
+  renderSeason();
+  renderWeekly(window._user || '');
   var GOAL = 3000;
   var pct  = Math.min(100, Math.round(xp / GOAL * 100));
   var el;
@@ -540,3 +604,49 @@ window.addEventListener('DOMContentLoaded', function() {
   if (lPin)  lPin.addEventListener('keydown',  function(e){ if(e.key==='Enter') doLogin(); });
   if (rPin2) rPin2.addEventListener('keydown', function(e){ if(e.key==='Enter') doRegister(); });
 });
+
+
+// ── RENDER: nagłówek sezonu (licznik dni do końca miesiąca) ──
+function renderSeason() {
+  if (typeof getSeasonInfo !== 'function') return;
+  var si = getSeasonInfo();
+  var el = document.getElementById('bp_season_name');
+  if (el) el.textContent = '⚡ Sezon ' + si.name;
+  el = document.getElementById('bp_season_meta');
+  if (el) el.innerHTML = '⏳ Pozostało <b>' + si.daysLeft + '</b> ' +
+    (si.daysLeft === 1 ? 'dzień' : (si.daysLeft >= 2 && si.daysLeft <= 4 ? 'dni' : 'dni')) +
+    ' do końca sezonu';
+  el = document.getElementById('bp_season_fill');
+  if (el) el.style.width = si.progress + '%';
+}
+
+// ── RENDER: tygodniowe wyzwania (reset co poniedziałek) ──
+function renderWeekly(name) {
+  var box = document.getElementById('bp_weekly_list');
+  if (!box || typeof WEEKLY_CHALLENGES === 'undefined') return;
+  var ws = getWeekStats(name);
+  // licznik resetu
+  var rst = document.getElementById('bp_weekly_reset');
+  if (rst && typeof getDaysToWeekEnd === 'function') {
+    var d = getDaysToWeekEnd();
+    rst.textContent = 'reset za ' + d + (d === 1 ? ' dzień' : ' dni');
+  }
+  var html = '';
+  WEEKLY_CHALLENGES.forEach(function(c){
+    var cur  = Math.min(ws[c.progKey] || 0, c.goal);
+    var done = (ws.claimed.indexOf(c.id) !== -1) || cur >= c.goal;
+    var p    = Math.min(100, Math.round((ws[c.progKey]||0) / c.goal * 100));
+    html += '<div class="bp-wk' + (done ? ' done' : '') + '">' +
+      '<div class="bp-wk-ic">' + (done ? '✅' : c.icon) + '</div>' +
+      '<div class="bp-wk-mid">' +
+        '<div class="bp-wk-name">' + c.name + '</div>' +
+        '<div class="bp-ev-bar"><div class="bp-ev-fill" style="width:' + p + '%"></div></div>' +
+      '</div>' +
+      '<div class="bp-wk-rt">' +
+        '<div class="bp-wk-xp">+' + c.xp + ' XP</div>' +
+        '<div class="bp-wk-prog">' + (done ? '✓' : cur + '/' + c.goal) + '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  box.innerHTML = html;
+}
