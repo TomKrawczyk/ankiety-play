@@ -483,6 +483,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
     <button class="msb" id="msb_full" onclick="switchMode('full')">📋 Pełna<span>10 pytań · 5 min</span></button>
     <button class="msb" id="msb_history" onclick="switchMode('history')">📂 Moje<span>historia ankiet</span></button>
     <button class="msb" id="msb_ranking" onclick="switchMode('ranking');renderRanking()">🏆 Ranking<span>top ankieterzy</span></button>
+    <button class="msb" id="msb_lokalizacja" onclick="switchMode('lokalizacja')">📍 Lokalizacja<span>kod i miejscowość</span></button>
   </div>
 
   <!-- QUICK MODE TABS -->
@@ -522,6 +523,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
   </div>
   <div class="footer">4ECO Field Agent · ankiety.4-eco.pl</div>
   <!-- PANEL RANKING -->
+  <div id="panel_lokalizacja" class="mpanel">
+    <div style="padding:16px">
+      <div style="font-size:0.95em;font-weight:800;margin-bottom:4px;color:var(--text)">📍 Moja lokalizacja</div>
+      <div style="font-size:0.76em;color:var(--muted);margin-bottom:18px">Ustaw raz przed wyjściem w teren — kod i miejscowość będą automatycznie uzupełniane w każdej ankiecie.</div>
+      <div class="afield" style="margin-bottom:14px">
+        <label style="display:block;font-size:0.72em;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Kod pocztowy</label>
+        <input id="loc_kod" type="text" class="q-input" placeholder="np. 62-600" inputmode="numeric" maxlength="6" style="font-size:1em;font-weight:800;letter-spacing:2px">
+      </div>
+      <div class="afield" style="margin-bottom:20px">
+        <label style="display:block;font-size:0.72em;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">Miejscowość</label>
+        <input id="loc_msc" type="text" class="q-input" placeholder="np. Kłodawa">
+      </div>
+      <button onclick="saveLokalizacja()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--green2));color:#000;border:none;border-radius:14px;font-size:0.95em;font-weight:900;cursor:pointer;font-family:Inter,sans-serif;box-shadow:0 4px 16px rgba(0,255,136,0.3)">✅ Zapisz lokalizację</button>
+      <div id="loc_ok" style="display:none;margin-top:12px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:10px;padding:10px 14px;font-size:0.82em;color:var(--green);text-align:center;font-weight:700">✓ Lokalizacja zapisana! Będzie uzupełniana automatycznie.</div>
+      <div id="loc_current" style="margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-size:0.8em;color:var(--muted)">Brak zapisanej lokalizacji</div>
+    </div>
+  </div>
+
   <div id="panel_ranking" class="mpanel">
     <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
       <div style="font-size:0.88em;font-weight:800">🏆 Ranking ankieterów</div>
@@ -572,113 +591,15 @@ var ACHS=[
 
 // --- QUICK PV ---
 var FLOW_QPV = [
-  {id:"imie", type:"text", title:"Imię i nazwisko klienta?", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
-  {id:"tel", type:"text", title:"Numer telefonu klienta?", hint:"Wpisz numer — to jedyne pole obowiązkowe", placeholder:"600 000 000", req:true},
-  {id:"kod", type:"text", title:"Kod pocztowy?", hint:"Wymagane", placeholder:"np. 62-600", req:true},
-  {id:"msc", type:"text", title:"Skąd jesteś?", hint:"Nazwa miejscowości", placeholder:"np. Kłodawa", req:true},
-  {id:"pv_status", type:"choice", title:"Masz już panele na dachu?", choices:[
+  {id:"imie", type:"text", title:"Imię i nazwisko", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
+  {id:"tel", type:"text", title:"Numer telefonu", hint:"Obowiązkowe", placeholder:"600 000 000", req:true},
+  {id:"kod", type:"text", title:"Kod pocztowy", hint:"Uzupełniony automatycznie z ustawień — zmień jeśli inny", placeholder:"np. 62-600", req:true, autofill:"location_kod"},
+  {id:"msc", type:"text", title:"Miejscowość", hint:"Uzupełniona automatycznie — zmień jeśli inna", placeholder:"np. Kłodawa", req:true, autofill:"location_msc"},
+  {id:"pv_status", type:"choice", title:"Czy ma już panele słoneczne?", choices:[
     {icon:"✅",text:"Tak, działają"},
-    {icon:"⚠️",text:"Tak, ale coś nie gra"},
-    {icon:"🔜",text:"Planuję w tym roku"},
-    {icon:"❌",text:"Nie mam"}
-  ]},
-  {id:"rachunek", type:"choice", title:"Ile mniej więcej płacisz miesięcznie za prąd?", hint:"Orientacyjnie", choices:[
-    {icon:"💸",text:"Ponad 500 zł"},
-    {icon:"💰",text:"300–500 zł"},
-    {icon:"💵",text:"150–300 zł"},
-    {icon:"🪙",text:"Poniżej 150 zł"}
-  ]},
-  {id:"bol", type:"choice", title:"Co najbardziej boli Cię w rachunkach?", choices:[
-    {icon:"📈",text:"Cały czas rosną"},
-    {icon:"🤷",text:"Nie rozumiem za co płacę"},
-    {icon:"😴",text:"Nie śledzę — płacę i tyle"},
-    {icon:"👍",text:"Jestem zadowolony/a"}
-  ]},
-  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
-  {id:"uwagi", type:"textarea", title:"Coś jeszcze warto wiedzieć?", hint:"Opcjonalne notatki", placeholder:"np. ma stary kocioł, pyta o dotacje..."}
-];
-
-// --- QUICK HEAT ---
-var FLOW_QHEAT = [
-  {id:"imie", type:"text", title:"Imię i nazwisko klienta?", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
-  {id:"tel", type:"text", title:"Numer telefonu klienta?", placeholder:"600 000 000", req:true},
-  {id:"kod", type:"text", title:"Kod pocztowy?", hint:"Wymagane", placeholder:"np. 62-600", req:true},
-  {id:"msc", type:"text", title:"Miejscowość?", placeholder:"np. Kłodawa", req:true},
-  {id:"ogrzew", type:"choice", title:"Czym teraz ogrzewasz dom?", choices:[
-    {icon:"🪨",text:"Węgiel / ekogroszek"},
-    {icon:"🔵",text:"Gaz ziemny"},
-    {icon:"⚡",text:"Prąd / bojler"},
-    {icon:"🌡️",text:"Mam już pompę ciepła"},
-    {icon:"🪵",text:"Drewno / inne"}
-  ]},
-  {id:"koszt", type:"choice", title:"Ile rocznie wydajesz na ogrzewanie?", choices:[
-    {icon:"🥵",text:"Ponad 10 000 zł"},
-    {icon:"😰",text:"6 000–10 000 zł"},
-    {icon:"😐",text:"3 000–6 000 zł"},
-    {icon:"😊",text:"Poniżej 3 000 zł"}
-  ]},
-  {id:"wiek_budynku", type:"choice", title:"Kiedy mniej więcej wybudowany jest dom?", choices:[
-    {icon:"🏚️",text:"Przed 1990"},
-    {icon:"🏠",text:"1990–2005"},
-    {icon:"🏡",text:"2005–2015"},
-    {icon:"🏗️",text:"Po 2015"}
-  ]},
-  {id:"temp", type:"temp", title:"Temperatura leada?"},
-  {id:"uwagi", type:"textarea", title:"Notatki", placeholder:"np. zainteresowany dotacjami, żona decyduje...", hint:"Opcjonalne"}
-];
-
-// --- QUICK NEW ---
-var FLOW_QNEW = [
-  {id:"imie", type:"text", title:"Imię i nazwisko klienta?", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
-  {id:"tel", type:"text", title:"Numer telefonu klienta?", placeholder:"600 000 000", req:true},
-  {id:"kod", type:"text", title:"Kod pocztowy?", hint:"Wymagane", placeholder:"np. 62-600", req:true},
-  {id:"msc", type:"text", title:"Miejscowość?", placeholder:"np. Kłodawa", req:true},
-  {id:"typ", type:"choice", title:"Jaki typ nieruchomości?", choices:[
-    {icon:"🏠",text:"Dom jednorodzinny"},
-    {icon:"🌾",text:"Gospodarstwo rolne"},
-    {icon:"🏢",text:"Firma / lokal"},
-    {icon:"🏘️",text:"Inne"}
-  ]},
-  {id:"rachunki_ogol", type:"emoji", title:"Jak oceniasz swoje rachunki za energię?", opts:[
-    {emoji:"😌",label:"Spokojnie"},
-    {emoji:"😐",label:"Średnio"},
-    {emoji:"😟",label:"Drogo"},
-    {emoji:"😡",label:"Horror"}
-  ]},
-  {id:"int", type:"multi", title:"Co Cię interesuje? (możesz zaznaczyć kilka)", choices:[
-    {icon:"☀️",text:"Panele słoneczne"},
-    {icon:"🌡️",text:"Pompa ciepła"},
-    {icon:"🔋",text:"Magazyn energii"},
-    {icon:"🏠",text:"Ocieplenie domu"},
-    {icon:"❄️",text:"Klimatyzacja"}
-  ]},
-  {id:"decyzja", type:"choice", title:"Kiedy planujesz decyzję?", choices:[
-    {icon:"🚀",text:"Jak najszybciej"},
-    {icon:"📅",text:"W ciągu pół roku"},
-    {icon:"🕐",text:"Za rok lub dłużej"},
-    {icon:"🤔",text:"Jeszcze nie wiem"}
-  ]},
-  {id:"temp", type:"temp", title:"Temperatura leada?"},
-  {id:"uwagi", type:"textarea", title:"Notatki", placeholder:"np. oboje domownicy zainteresowani...", hint:"Opcjonalne"}
-];
-
-// --- FULL SURVEY ---
-var FLOW_FULL = [
-  {id:"imie", type:"text", title:"Imię i nazwisko klienta?", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
-  {id:"tel", type:"text", title:"Telefon klienta", placeholder:"600 000 000", req:true},
-  {id:"kod", type:"text", title:"Kod pocztowy?", hint:"Wymagane", placeholder:"np. 62-600", req:true},
-  {id:"msc", type:"text", title:"Miejscowość", placeholder:"np. Kłodawa", req:true},
-  {id:"typ", type:"choice", title:"Typ nieruchomości?", choices:[
-    {icon:"🏠",text:"Dom jednorodzinny"},
-    {icon:"🌾",text:"Gospodarstwo rolne"},
-    {icon:"🏢",text:"Firma / lokal"},
-    {icon:"🏘️",text:"Inne"}
-  ]},
-  {id:"pv", type:"choice", title:"Czy masz panele fotowoltaiczne?", choices:[
-    {icon:"✅",text:"Tak, działają dobrze"},
-    {icon:"⚠️",text:"Tak, ale mam problemy"},
-    {icon:"🔜",text:"Planuję instalację"},
-    {icon:"❌",text:"Nie mam"}
+    {icon:"⚠️",text:"Tak, ale coś nie działa"},
+    {icon:"🔜",text:"Planuje w tym roku"},
+    {icon:"❌",text:"Nie ma paneli"}
   ]},
   {id:"rachunek", type:"choice", title:"Miesięczny rachunek za prąd?", choices:[
     {icon:"💸",text:"Ponad 500 zł"},
@@ -686,10 +607,108 @@ var FLOW_FULL = [
     {icon:"💵",text:"150–300 zł"},
     {icon:"🪙",text:"Poniżej 150 zł"}
   ]},
-  {id:"ogrzew", type:"choice", title:"Czym ogrzewasz dom?", choices:[
+  {id:"bol", type:"choice", title:"Jak klient mówi o rachunkach?", choices:[
+    {icon:"📈",text:"Rosną i jest tym zdenerwowany"},
+    {icon:"🤷",text:"Nie rozumie za co płaci"},
+    {icon:"😴",text:"Nie śledzi — płaci i tyle"},
+    {icon:"👍",text:"Jest zadowolony"}
+  ]},
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. pyta o dotacje, jest zainteresowany magazynem..."}
+];
+
+// --- QUICK HEAT ---
+var FLOW_QHEAT = [
+  {id:"imie", type:"text", title:"Imię i nazwisko", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
+  {id:"tel", type:"text", title:"Numer telefonu", hint:"Obowiązkowe", placeholder:"600 000 000", req:true},
+  {id:"kod", type:"text", title:"Kod pocztowy", hint:"Uzupełniony automatycznie — zmień jeśli inny", placeholder:"np. 62-600", req:true, autofill:"location_kod"},
+  {id:"msc", type:"text", title:"Miejscowość", hint:"Uzupełniona automatycznie — zmień jeśli inna", placeholder:"np. Kłodawa", req:true, autofill:"location_msc"},
+  {id:"ogrzew", type:"choice", title:"Czym ogrzewa dom?", choices:[
+    {icon:"🪨",text:"Węgiel / ekogroszek"},
+    {icon:"🔵",text:"Gaz ziemny"},
+    {icon:"⚡",text:"Prąd / bojler"},
+    {icon:"🌡️",text:"Ma już pompę ciepła"},
+    {icon:"🪵",text:"Drewno / inne"}
+  ]},
+  {id:"koszt", type:"choice", title:"Roczny koszt ogrzewania?", choices:[
+    {icon:"🥵",text:"Ponad 10 000 zł"},
+    {icon:"😰",text:"6 000–10 000 zł"},
+    {icon:"😐",text:"3 000–6 000 zł"},
+    {icon:"😊",text:"Poniżej 3 000 zł"}
+  ]},
+  {id:"wiek_budynku", type:"choice", title:"Wiek budynku?", choices:[
+    {icon:"🏚️",text:"Stary — przed 1990"},
+    {icon:"🏠",text:"1990–2005"},
+    {icon:"🏡",text:"2005–2015"},
+    {icon:"🏗️",text:"Nowy — po 2015"}
+  ]},
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. żona decyduje, pyta o dotacje..."}
+];
+
+// --- QUICK NEW ---
+var FLOW_QNEW = [
+  {id:"imie", type:"text", title:"Imię i nazwisko", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
+  {id:"tel", type:"text", title:"Numer telefonu", hint:"Obowiązkowe", placeholder:"600 000 000", req:true},
+  {id:"kod", type:"text", title:"Kod pocztowy", hint:"Uzupełniony automatycznie — zmień jeśli inny", placeholder:"np. 62-600", req:true, autofill:"location_kod"},
+  {id:"msc", type:"text", title:"Miejscowość", hint:"Uzupełniona automatycznie — zmień jeśli inna", placeholder:"np. Kłodawa", req:true, autofill:"location_msc"},
+  {id:"typ", type:"choice", title:"Typ nieruchomości?", choices:[
+    {icon:"🏠",text:"Dom jednorodzinny"},
+    {icon:"🌾",text:"Gospodarstwo rolne"},
+    {icon:"🏢",text:"Firma / lokal"},
+    {icon:"🏘️",text:"Inne"}
+  ]},
+  {id:"rachunki_ogol", type:"emoji", title:"Rachunki za energię — jak klient to ocenia?", opts:[
+    {emoji:"😌",label:"Spokojnie"},
+    {emoji:"😐",label:"Średnio"},
+    {emoji:"😟",label:"Drogo"},
+    {emoji:"😡",label:"Horror"}
+  ]},
+  {id:"int", type:"multi", title:"Co klienta interesuje? (można zaznaczyć kilka)", choices:[
+    {icon:"☀️",text:"Panele słoneczne"},
+    {icon:"🌡️",text:"Pompa ciepła"},
+    {icon:"🔋",text:"Magazyn energii"},
+    {icon:"🏠",text:"Ocieplenie domu"},
+    {icon:"❄️",text:"Klimatyzacja"}
+  ]},
+  {id:"decyzja", type:"choice", title:"Kiedy klient planuje decyzję?", choices:[
+    {icon:"🚀",text:"Jak najszybciej"},
+    {icon:"📅",text:"W ciągu pół roku"},
+    {icon:"🕐",text:"Za rok lub dłużej"},
+    {icon:"🤔",text:"Jeszcze nie wie"}
+  ]},
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. oboje domownicy zainteresowani, pyta o dofinansowanie..."}
+];
+
+// --- FULL SURVEY ---
+var FLOW_FULL = [
+  {id:"imie", type:"text", title:"Imię i nazwisko", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
+  {id:"tel", type:"text", title:"Numer telefonu", hint:"Obowiązkowe", placeholder:"600 000 000", req:true},
+  {id:"kod", type:"text", title:"Kod pocztowy", hint:"Uzupełniony automatycznie — zmień jeśli inny", placeholder:"np. 62-600", req:true, autofill:"location_kod"},
+  {id:"msc", type:"text", title:"Miejscowość", hint:"Uzupełniona automatycznie — zmień jeśli inna", placeholder:"np. Kłodawa", req:true, autofill:"location_msc"},
+  {id:"typ", type:"choice", title:"Typ nieruchomości?", choices:[
+    {icon:"🏠",text:"Dom jednorodzinny"},
+    {icon:"🌾",text:"Gospodarstwo rolne"},
+    {icon:"🏢",text:"Firma / lokal"},
+    {icon:"🏘️",text:"Inne"}
+  ]},
+  {id:"pv", type:"choice", title:"Czy ma panele fotowoltaiczne?", choices:[
+    {icon:"✅",text:"Tak, działają dobrze"},
+    {icon:"⚠️",text:"Tak, ale ma problemy"},
+    {icon:"🔜",text:"Planuje instalację"},
+    {icon:"❌",text:"Nie ma paneli"}
+  ]},
+  {id:"rachunek", type:"choice", title:"Miesięczny rachunek za prąd?", choices:[
+    {icon:"💸",text:"Ponad 500 zł"},
+    {icon:"💰",text:"300–500 zł"},
+    {icon:"💵",text:"150–300 zł"},
+    {icon:"🪙",text:"Poniżej 150 zł"}
+  ]},
+  {id:"ogrzew", type:"choice", title:"Czym ogrzewa dom?", choices:[
     {icon:"🪨",text:"Węgiel / ekogroszek"},
     {icon:"🔵",text:"Gaz"},
-    {icon:"⚡",text:"Prąd"},
+    {icon:"⚡",text:"Prąd / bojler"},
     {icon:"🌡️",text:"Pompa ciepła"},
     {icon:"🪵",text:"Drewno / inne"}
   ]},
@@ -699,27 +718,27 @@ var FLOW_FULL = [
     {icon:"😐",text:"3 000–6 000 zł"},
     {icon:"😊",text:"Poniżej 3 000 zł"}
   ]},
-  {id:"int", type:"multi", title:"Co Cię interesuje?", choices:[
+  {id:"int", type:"multi", title:"Co klienta interesuje? (można zaznaczyć kilka)", choices:[
     {icon:"☀️",text:"Panele słoneczne"},
     {icon:"🌡️",text:"Pompa ciepła"},
     {icon:"🔋",text:"Magazyn energii"},
     {icon:"🏠",text:"Ocieplenie domu"},
     {icon:"❄️",text:"Klimatyzacja"}
   ]},
-  {id:"motyw", type:"emoji", title:"Co jest główną motywacją?", opts:[
+  {id:"motyw", type:"emoji", title:"Główna motywacja klienta?", opts:[
     {emoji:"💰",label:"Oszczędności"},
     {emoji:"🔌",label:"Niezależność"},
     {emoji:"🌿",label:"Ekologia"},
     {emoji:"📋",label:"Dotacje"}
   ]},
-  {id:"decyzja", type:"choice", title:"Kiedy planuje decyzję?", choices:[
+  {id:"decyzja", type:"choice", title:"Kiedy klient planuje decyzję?", choices:[
     {icon:"🚀",text:"Jak najszybciej"},
     {icon:"📅",text:"W ciągu pół roku"},
     {icon:"🕐",text:"Za rok lub dłużej"},
-    {icon:"🤔",text:"Jeszcze nie wiem"}
+    {icon:"🤔",text:"Jeszcze nie wie"}
   ]},
-  {id:"temp", type:"temp", title:"Temperatura leada?"},
-  {id:"uwagi", type:"textarea", title:"Notatki z rozmowy", placeholder:"Obiekcje, pytania, ciekawostki...", hint:"Opcjonalne"}
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"uwagi", type:"textarea", title:"Notatki z rozmowy", hint:"Opcjonalne", placeholder:"Obiekcje, pytania, zainteresowania..."}
 ];
 
 // ======================================================
@@ -729,7 +748,15 @@ var flows = {};
 
 function buildFlow(containerId, questions, sheetName, color, xpAmount) {
   var container = document.getElementById(containerId);
-  var state = { current: 0, answers: {}, questions: questions, sheetName: sheetName, color: color||'', xpAmount: xpAmount||50 };
+  var answers = {};
+  // Autofill pól lokalizacyjnych z zapisanej lokalizacji
+  questions.forEach(function(q) {
+    if(q.autofill) {
+      var saved = localStorage.getItem('4eco_loc_' + q.autofill);
+      if(saved) answers[q.id] = saved;
+    }
+  });
+  var state = { current: 0, answers: answers, questions: questions, sheetName: sheetName, color: color||'', xpAmount: xpAmount||50 };
   flows[containerId] = state;
   renderQ(containerId);
 }
@@ -975,6 +1002,10 @@ function showSuccess(typ, temp, xp, fid) {
     '<span class="srow-val" style="color:#00ff88">→ ×'+nextMult.toFixed(2)+'</span></div>' :
     '<div class="srow"><span class="srow-label">⚡ MAX COMBO!</span>'+
     '<span class="srow-val" style="color:#00ff88">🏆 ×2.00</span></div>';
+  // Zapisz lokalizację do autofill na następne ankiety
+  if(data.kod_pocztowy) localStorage.setItem('4eco_loc_location_kod', data.kod_pocztowy);
+  if(data.miejscowosc) localStorage.setItem('4eco_loc_location_msc', data.miejscowosc);
+
   var app = document.getElementById('appScreen');
   app.innerHTML = '<div class="success-screen">'+
     '<div class="success-icon">✅</div>'+
@@ -1122,7 +1153,11 @@ function updateUI(name){
   var s=getStats(name),lv=getLv(s.xp);
   document.getElementById('hdrAv').textContent=name.charAt(0).toUpperCase();
   document.getElementById('hdrName').textContent=name;
-  document.getElementById('hdrLv').textContent='Level '+lv.level+' · '+lv.icon+' '+lv.name;
+  var locLabel = '';
+  var locKod = localStorage.getItem('4eco_loc_location_kod');
+  var locMsc = localStorage.getItem('4eco_loc_location_msc');
+  if(locKod||locMsc) locLabel = ' · 📍'+(locMsc||locKod);
+  document.getElementById('hdrLv').textContent='Level '+lv.level+' · '+lv.icon+' '+lv.name+locLabel;
   document.getElementById('xpTotal').textContent=s.xp;
   document.getElementById('xpBarLabel').textContent=lv.icon+' Level '+lv.level+' — '+lv.name;
   document.getElementById('xpBarNext').textContent=s.xp+'/'+lv.nextXp+' XP';
@@ -1203,6 +1238,38 @@ function switchMode(mode){
   document.querySelectorAll('.msb').forEach(function(b){b.classList.remove('active');});
   document.getElementById('panel_'+mode).classList.add('active');
   document.getElementById('msb_'+mode).classList.add('active');
+  if(mode==='lokalizacja') renderLokalizacja();
+}
+
+function renderLokalizacja() {
+  var kod = localStorage.getItem('4eco_loc_location_kod') || '';
+  var msc = localStorage.getItem('4eco_loc_location_msc') || '';
+  document.getElementById('loc_kod').value = kod;
+  document.getElementById('loc_msc').value = msc;
+  var cur = document.getElementById('loc_current');
+  if(kod || msc) {
+    cur.innerHTML = '📍 Aktualna: <strong style="color:var(--text)">' + (kod||'?') + ' ' + (msc||'?') + '</strong>';
+    cur.style.borderColor = 'rgba(0,255,136,0.3)';
+  } else {
+    cur.innerHTML = 'Brak zapisanej lokalizacji';
+    cur.style.borderColor = 'var(--border)';
+  }
+}
+
+function saveLokalizacja() {
+  var kod = document.getElementById('loc_kod').value.trim();
+  var msc = document.getElementById('loc_msc').value.trim();
+  if(kod) localStorage.setItem('4eco_loc_location_kod', kod);
+  if(msc) localStorage.setItem('4eco_loc_location_msc', msc);
+  // Odbuduj wszystkie przepływy z nowym autofill
+  buildFlow('PV',         FLOW_QPV,   'Ankiety_Podstawowe', '',       50);
+  buildFlow('PC',         FLOW_QHEAT, 'Ankiety_Podstawowe', 'blue',   50);
+  buildFlow('NOWY',       FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
+  buildFlow('ROZBUDOWANA',FLOW_FULL,  'Ankiety_Rozbudowane','',      100);
+  var ok = document.getElementById('loc_ok');
+  ok.style.display = 'block';
+  renderLokalizacja();
+  setTimeout(function(){ ok.style.display = 'none'; }, 3500);
 }
 
 function showTab(id, btn){
