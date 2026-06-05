@@ -803,6 +803,9 @@ body.light { --muted:#475569; --muted2:#334155; }
   position:fixed; inset:0; z-index:500;
   background:rgba(0,0,0,0.6); backdrop-filter:blur(6px);
   -webkit-backdrop-filter:blur(6px);
+}
+.profile-overlay.open {
+  display: block;
   animation:fadeIn 0.2s ease;
 }
 .profile-sheet {
@@ -919,9 +922,7 @@ body.light { --muted:#475569; --muted2:#334155; }
   .nav-tiles { grid-template-columns:repeat(8,1fr); }
 }
 
-.profile-overlay.open {
-  display: block;
-}
+
 
 /* ── LIGHT MODE — pełny kontrast ── */
 body.light { --green: #16a34a; --green2: #15803d; }
