@@ -723,6 +723,70 @@ body.light .lead-card.common { background:linear-gradient(135deg,#e2e8f0,#cbd5e1
 body.light .bp-header { background:linear-gradient(135deg,rgba(167,139,250,0.08),rgba(96,165,250,0.05)); }
 body.light .spin-box { background:var(--card); }
 
+/* ── LIGHT MODE - PEŁNE POPRAWKI KONTRASTU ── */
+/* XP / Punkty */
+body.light { --green: #16a34a; }
+body.light .xp-val, 
+body.light [style*="color:var(--green)"] { color:#16a34a !important; }
+
+/* Liczby i statystyki w nagłówku */
+body.light .hdr-xp-num { color:#16a34a; }
+body.light .hdr-lvl    { color:#16a34a; }
+
+/* Panel profilu i rankingi */
+body.light .rank-card   { border:1px solid var(--border2); }
+body.light .stat-val    { color:#0f172a; }
+
+/* Karty leadów w trybie jasnym */
+body.light .lead-card.rare     { background:linear-gradient(135deg,#dbeafe,#bfdbfe); border-color:#3b82f6; color:#1e3a5f; }
+body.light .lead-card.epic     { background:linear-gradient(135deg,#ede9fe,#ddd6fe); border-color:#7c3aed; color:#2d1b69; }
+body.light .lead-card.legendary{ background:linear-gradient(135deg,#fef3c7,#fde68a); border-color:#d97706; color:#451a03; }
+
+/* Battle pass i avatar panel */
+body.light .mpanel { background:var(--card); }
+body.light #panel_avatar .av-tab { color:#475569 !important; }
+body.light #panel_avatar .av-tab.active { color:#000 !important; }
+
+/* Overlaye i popupy (skrzynia, karty) - zawsze ciemne */
+body.light #chestRevealOv,
+body.light #cardDetailOverlay { 
+  background:rgba(0,0,0,0.88) !important; 
+}
+
+/* Spin overlay */
+body.light #spinOverlay { background:rgba(0,0,0,0.85) !important; }
+
+/* Slot maszyna */
+body.light .slot { color:#fff; background:rgba(255,255,255,0.1); }
+
+/* Nawigacja dolna w trybie jasnym */
+body.light .nav-tiles { border-top:1px solid var(--border2); }
+
+/* Formularz ankiety - tło sekcji */
+body.light .step-section { background:var(--card); border:1px solid var(--border2); }
+
+/* Tekst w polu wyszukiwania */
+body.light input, body.light textarea, body.light select { 
+  color:#0f172a; background:var(--card); 
+  border-color:var(--border2);
+}
+
+/* Battle pass postęp */
+body.light .bp-prog-bar { background:var(--bg3); }
+
+/* XP Bar kolor */
+body.light .xpbar-fill { background:linear-gradient(90deg,#16a34a,#22c55e); }
+
+/* Ranking - karty wyników */
+body.light .rank-me { background:linear-gradient(135deg,rgba(22,163,74,0.12),rgba(22,163,74,0.05)); }
+
+/* Osiągnięcia */
+body.light .ach-card { background:var(--card2); border:1px solid var(--border2); }
+body.light .ach-card.unlocked { border-color:#16a34a; }
+
+/* Tekst muted w jasnym trybie - wyraźniejszy */
+body.light { --muted:#475569; --muted2:#334155; }
+
 /* ── HDR AVATAR BUTTON ── */
 .hdr-av-btn {
   background:none; border:none; padding:0; cursor:pointer;
@@ -2263,6 +2327,31 @@ function getAvatar(name) {
   var k = 'av_' + (name||window._user||'anon').toLowerCase();
   try { return JSON.parse(localStorage.getItem(k)) || {icon:'default',color:'green',frame:'none'}; } catch(e) { return {icon:'default',color:'green',frame:'none'}; }
 }
+function saveAvatar(name, icon, color, frame) {
+  if(!name) name = window._user || 'anon';
+  var data = {
+    icon:  icon  || (window._avSel && window._avSel.icon)  || 'default',
+    color: color || (window._avSel && window._avSel.color) || 'green',
+    frame: frame || (window._avSel && window._avSel.frame) || 'none'
+  };
+  var k = 'av_' + name.toLowerCase();
+  localStorage.setItem(k, JSON.stringify(data));
+}
+
+function applyAvatarToHeader() {
+  var av = getAvatar(window._user);
+  var iconObj  = (AV_ICONS  || []).find(function(x){return x.id===(av.icon||'default');})||{emoji:'⚡'};
+  var colorObj = (AV_COLORS || []).find(function(x){return x.id===(av.color||'green');})||{bg:'linear-gradient(135deg,#00ff88,#00cc6a)'};
+  var frameObj = (AV_FRAMES || []).find(function(x){return x.id===(av.frame||'none');})||{css:'none'};
+  var el = document.getElementById('hdrAvatar');
+  if(el) {
+    el.textContent = iconObj.emoji;
+    el.style.background = colorObj.bg;
+    el.style.boxShadow = (frameObj.css && frameObj.css !== 'none') ? frameObj.css : '';
+  }
+}
+
+
 function saveAvatarData(name, data) {
   var k = 'av_' + (name||window._user||'anon').toLowerCase();
   localStorage.setItem(k, JSON.stringify(data));
@@ -2271,519 +2360,213 @@ function saveAvatarData(name, data) {
 function renderAvatar() {
   var xp = getStats(window._user||'').xp;
   var av = getAvatar(window._user);
-  var _selIcon  = av.icon  || 'default';
-  var _selColor = av.color || 'green';
-  var _selFrame = av.frame || 'none';
-  var _selTitle = localStorage.getItem('4eco_av_title_'+(window._user||'')) || 'none';
 
-  var TIER_COLORS = {common:'#94a3b8', rare:'#60a5fa', epic:'#a78bfa', legendary:'#ffd700'};
-  var TIER_LABELS = {common:'●', rare:'◆', epic:'✦', legendary:'★'};
+  // Bieżące wybory - globalne żeby onclick miał do nich dostęp
+  window._avSel = {
+    icon:  av.icon  || 'default',
+    color: av.color || 'green',
+    frame: av.frame || 'none',
+    title: localStorage.getItem('4eco_av_title_'+(window._user||'')) || 'none'
+  };
 
-  function tierBadge(tier) {
-    if(!tier) return '';
-    return '<span style="color:'+TIER_COLORS[tier]+';font-size:0.65em;margin-left:4px" title="'+tier+'">'+TIER_LABELS[tier]+'</span>';
-  }
+  var TC = {common:'#94a3b8', rare:'#60a5fa', epic:'#a78bfa', legendary:'#ffd700'};
+  var TL = {common:'●', rare:'◆', epic:'✦', legendary:'★'};
 
-  function updatePreview() {
-    var iconObj  = AV_ICONS.find(function(x){return x.id===_selIcon;})  || AV_ICONS[0];
-    var colorObj = AV_COLORS.find(function(x){return x.id===_selColor;}) || AV_COLORS[0];
-    var frameObj = AV_FRAMES.find(function(x){return x.id===_selFrame;}) || AV_FRAMES[0];
-    var titleObj = AV_TITLES.find(function(x){return x.id===_selTitle;}) || AV_TITLES[0];
+  // Pomocnicza - wybierz element z tablicy
+  function byId(arr, id) { return arr.find(function(x){return x.id===id;}) || arr[0]; }
+
+  // Odśwież podgląd
+  window._avUpdatePreview = function() {
+    var s = window._avSel;
+    var iconObj  = byId(AV_ICONS,  s.icon);
+    var colorObj = byId(AV_COLORS, s.color);
+    var frameObj = byId(AV_FRAMES, s.frame);
+    var titleObj = byId(AV_TITLES, s.title);
     var prev = document.getElementById('av_preview_big');
     if(!prev) return;
-    prev.textContent = iconObj.emoji;
-    prev.style.background = colorObj.bg;
-    prev.style.boxShadow = frameObj.css !== 'none' ? frameObj.css : '0 0 20px rgba(0,255,136,0.4)';
+    prev.textContent    = iconObj.emoji;
+    prev.style.background  = colorObj.bg;
+    prev.style.boxShadow   = (frameObj.css && frameObj.css!=='none') ? frameObj.css : '0 0 20px rgba(0,255,136,0.3)';
     var nameEl = document.getElementById('av_preview_name');
     if(nameEl) {
-      nameEl.textContent = iconObj.name + ' · ' + colorObj.name;
-      if(titleObj && titleObj.label) {
-        nameEl.innerHTML += '<br><span style="font-size:0.8em;color:'+titleObj.color+'">'+titleObj.label+'</span>';
-      }
+      nameEl.innerHTML = iconObj.name + ' · ' + colorObj.name
+        + (titleObj && titleObj.label ? '<br><span style="font-size:0.8em;color:'+titleObj.color+'">'+titleObj.label+'</span>' : '');
     }
-  }
+  };
 
-  function makeGrid(containerId, items, selectedId, onSelect, showEmoji) {
-    window['__av_cb_'+containerId] = onSelect;
-    var cbKey = '__av_cb_'+containerId;
-    var el = document.getElementById(containerId);
+  // Kliknięcie elementu grida
+  window._avPickItem = function(type, id) {
+    if(!window._avSel) return;
+    window._avSel[type] = id;
+    renderAvGrid(type);
+    window._avUpdatePreview();
+  };
+
+  // Renderuj pojedynczą siatkę (po kliknięciu tylko odśwież aktywny tab)
+  window.renderAvGrid = function(type) {
+    var configs = {
+      icon:  {containerId:'av_panel_icons',  items:AV_ICONS,  showEmoji:true},
+      color: {containerId:'av_panel_colors', items:AV_COLORS, showEmoji:false},
+      frame: {containerId:'av_panel_frames', items:AV_FRAMES, showEmoji:false, isFrame:true},
+      title: {containerId:'av_panel_titles', items:AV_TITLES, isTitle:true}
+    };
+    var cfg = configs[type];
+    if(!cfg) return;
+    var el = document.getElementById(cfg.containerId);
     if(!el) return;
+    var selectedId = window._avSel[type];
     var html = '';
-    var tiers = ['common','rare','epic','legendary'];
-    var grouped = {};
-    tiers.forEach(function(t){ grouped[t] = []; });
-    items.forEach(function(item){ if(grouped[item.tier||'common']) grouped[item.tier||'common'].push(item); else grouped['common'].push(item); });
-    tiers.forEach(function(tier) {
-      var grp = grouped[tier];
-      if(!grp.length) return;
-      html += '<div style="font-size:0.6em;font-weight:900;color:'+TIER_COLORS[tier]+';text-transform:uppercase;letter-spacing:1px;padding:8px 0 4px">'+TIER_LABELS[tier]+' '+tier.toUpperCase()+'</div>';
-      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-bottom:6px">';
-      grp.forEach(function(item) {
-        var locked = xp < item.req;
-        var sel = item.id === selectedId;
-        var border = sel ? '2px solid '+TIER_COLORS[tier||'common'] : '1.5px solid var(--border2)';
-        var opacity = locked ? '0.38' : '1';
-        var cursor = locked ? 'not-allowed' : 'pointer';
-        var bg = sel ? 'rgba(0,0,0,0.4)' : 'var(--card)';
-        html += '<div onclick="'+(locked?'':'window["__av_cb_'+containerId+'"]("'+item.id+'")')+'"'
-             +' style="border:'+border+';border-radius:12px;padding:8px 4px;text-align:center;cursor:'+cursor
-             +';opacity:'+opacity+';background:'+bg+';transition:all 0.15s;position:relative">';
-        if(showEmoji) html += '<div style="font-size:1.6em;line-height:1.2">'+item.emoji+'</div>';
-        else {
-          html += '<div style="width:32px;height:32px;border-radius:50%;background:'+item.bg+';margin:0 auto 4px;box-shadow:'+(item.css||'none')+'"></div>';
-        }
-        html += '<div style="font-size:0.58em;font-weight:700;color:var(--text);line-height:1.2;margin-top:2px">'+item.name+'</div>';
-        if(item.req>0) html += '<div style="font-size:0.52em;color:'+(locked?'var(--muted)':'var(--green)')+'">'+item.req+' XP</div>';
-        if(locked) html += '<div style="position:absolute;top:4px;right:4px;font-size:0.65em">🔒</div>';
-        if(sel) html += '<div style="position:absolute;top:4px;left:4px;font-size:0.65em;color:'+TIER_COLORS[tier||'common']+'">✓</div>';
+
+    if(cfg.isTitle) {
+      // Tytuły - poziome tagi
+      var tiers = ['common','rare','epic','legendary'];
+      var grouped = {}; tiers.forEach(function(t){grouped[t]=[];});
+      cfg.items.forEach(function(item){ (grouped[item.tier||'common']).push(item); });
+      tiers.forEach(function(tier) {
+        var grp = grouped[tier]; if(!grp.length) return;
+        html += '<div style="font-size:0.6em;font-weight:900;color:'+TC[tier]+';text-transform:uppercase;letter-spacing:1px;padding:8px 0 4px">'+TL[tier]+' '+tier.toUpperCase()+'</div>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">';
+        grp.forEach(function(item) {
+          var locked = xp < item.req;
+          var sel = item.id === selectedId;
+          html += '<div '
+            +(locked ? '' : 'onclick="window._avPickItem(\'title\',\''+item.id+'\')" ')
+            +'style="border:'+(sel?'2px solid '+TC[tier]:'1.5px solid var(--border2)')+';'
+            +'border-radius:20px;padding:6px 12px;cursor:'+(locked?'not-allowed':'pointer')+';'
+            +'opacity:'+(locked?'0.38':'1')+';background:'+(sel?'rgba(0,0,0,0.25)':'var(--card)')+';'
+            +'white-space:nowrap;position:relative">'
+            +'<div style="font-size:0.78em;font-weight:800;color:'+(sel?TC[tier]:'var(--muted2)')+'">'+( item.label||'(brak tytułu)')+'</div>'
+            +(item.req>0?'<div style="font-size:0.55em;color:'+(locked?'var(--muted)':'var(--green)')+'">'+item.req+' XP</div>':'')
+            +(locked?' 🔒':'')
+            +'</div>';
+        });
         html += '</div>';
       });
-      html += '</div>';
-    });
-    el.innerHTML = html;
-  }
-
-  function makeFrameGrid(containerId, items, selectedId, onSelect) {
-    window['__av_cb_'+containerId] = onSelect;
-    var cbKey = '__av_cb_'+containerId;
-    var el = document.getElementById(containerId);
-    if(!el) return;
-    var html = '';
-    var tiers = ['common','rare','epic','legendary'];
-    var grouped = {};
-    tiers.forEach(function(t){ grouped[t] = []; });
-    items.forEach(function(item){ if(grouped[item.tier||'common']) grouped[item.tier||'common'].push(item); else grouped['common'].push(item); });
-    tiers.forEach(function(tier) {
-      var grp = grouped[tier];
-      if(!grp.length) return;
-      html += '<div style="font-size:0.6em;font-weight:900;color:'+TIER_COLORS[tier]+';text-transform:uppercase;letter-spacing:1px;padding:8px 0 4px">'+TIER_LABELS[tier]+' '+tier.toUpperCase()+'</div>';
-      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;margin-bottom:6px">';
-      grp.forEach(function(item) {
-        var locked = xp < item.req;
-        var sel = item.id === selectedId;
-        var border = sel ? '2px solid '+TIER_COLORS[tier||'common'] : '1.5px solid var(--border2)';
-        var opacity = locked ? '0.38' : '1';
-        var cursor = locked ? 'not-allowed' : 'pointer';
-        html += '<div onclick="'+(locked?'':'window["__av_cb_'+containerId+'"]("'+item.id+'")')+'"'
-             +' style="border:'+border+';border-radius:12px;padding:8px;text-align:center;cursor:'+cursor
-             +';opacity:'+opacity+';background:var(--card);position:relative">';
-        html += '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--bg3),var(--card2));margin:0 auto 4px;box-shadow:'+(item.css==='none'?'none':item.css)+'"></div>';
-        html += '<div style="font-size:0.58em;font-weight:700;color:var(--text)">'+item.name+'</div>';
-        if(item.req>0) html += '<div style="font-size:0.52em;color:'+(locked?'var(--muted)':'var(--green)')+'">'+item.req+' XP</div>';
-        if(locked) html += '<div style="position:absolute;top:4px;right:4px;font-size:0.65em">🔒</div>';
-        if(sel) html += '<div style="position:absolute;top:4px;left:4px;font-size:0.65em;color:'+TIER_COLORS[tier||'common']+'">✓</div>';
+    } else if(cfg.isFrame) {
+      // Ramki
+      var tiers = ['common','rare','epic','legendary'];
+      var grouped = {}; tiers.forEach(function(t){grouped[t]=[];});
+      cfg.items.forEach(function(item){ (grouped[item.tier||'common']).push(item); });
+      tiers.forEach(function(tier) {
+        var grp = grouped[tier]; if(!grp.length) return;
+        html += '<div style="font-size:0.6em;font-weight:900;color:'+TC[tier]+';text-transform:uppercase;letter-spacing:1px;padding:8px 0 4px">'+TL[tier]+' '+tier.toUpperCase()+'</div>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;margin-bottom:6px">';
+        grp.forEach(function(item) {
+          var locked = xp < item.req;
+          var sel = item.id === selectedId;
+          html += '<div '
+            +(locked ? '' : 'onclick="window._avPickItem(\'frame\',\''+item.id+'\')" ')
+            +'style="border:'+(sel?'2px solid '+TC[tier]:'1.5px solid var(--border2)')+';'
+            +'border-radius:12px;padding:8px;text-align:center;cursor:'+(locked?'not-allowed':'pointer')+';'
+            +'opacity:'+(locked?'0.38':'1')+';background:var(--card);position:relative">'
+            +'<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#333,#555);margin:0 auto 4px;box-shadow:'+(item.css==='none'?'none':item.css)+'"></div>'
+            +'<div style="font-size:0.58em;font-weight:700;color:var(--text)">'+item.name+'</div>'
+            +(item.req>0?'<div style="font-size:0.52em;color:'+(locked?'var(--muted)':'var(--green)')+'">'+item.req+' XP</div>':'')
+            +(locked?'<div style="position:absolute;top:4px;right:4px;font-size:0.65em">🔒</div>':'')
+            +(sel?'<div style="position:absolute;top:4px;left:4px;font-size:0.65em;color:'+TC[tier]+'">✓</div>':'')
+            +'</div>';
+        });
         html += '</div>';
       });
-      html += '</div>';
-    });
-    el.innerHTML = html;
-  }
-
-  function makeTitleGrid(containerId, items, selectedId, onSelect) {
-    window['__av_cb_'+containerId] = onSelect;
-    var cbKey = '__av_cb_'+containerId;
-    var el = document.getElementById(containerId);
-    if(!el) return;
-    var html = '';
-    var tiers = ['common','rare','epic','legendary'];
-    var grouped = {};
-    tiers.forEach(function(t){ grouped[t] = []; });
-    items.forEach(function(item){ if(grouped[item.tier||'common']) grouped[item.tier||'common'].push(item); else grouped['common'].push(item); });
-    tiers.forEach(function(tier) {
-      var grp = grouped[tier];
-      if(!grp.length) return;
-      html += '<div style="font-size:0.6em;font-weight:900;color:'+TIER_COLORS[tier]+';text-transform:uppercase;letter-spacing:1px;padding:8px 0 4px">'+TIER_LABELS[tier]+' '+tier.toUpperCase()+'</div>';
-      html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">';
-      grp.forEach(function(item) {
-        var locked = xp < item.req;
-        var sel = item.id === selectedId;
-        var border = sel ? '2px solid '+TIER_COLORS[tier] : '1.5px solid var(--border2)';
-        var opacity = locked ? '0.38' : '1';
-        var cursor = locked ? 'not-allowed' : 'pointer';
-        html += '<div onclick="'+(locked?'':'window["__av_cb_'+containerId+'"]("'+item.id+'")')+'"'
-             +' style="border:'+border+';border-radius:20px;padding:6px 12px;cursor:'+cursor
-             +';opacity:'+opacity+';background:var(--card);white-space:nowrap;position:relative">';
-        html += '<div style="font-size:0.78em;font-weight:800;color:'+(sel?TIER_COLORS[tier]:'var(--muted2)')+'">'+( item.label||'(brak tytułu)')+'</div>';
-        if(item.req>0) html += '<div style="font-size:0.55em;color:'+(locked?'var(--muted)':'var(--green)')+'">'+item.req+' XP</div>';
-        if(locked) html += ' 🔒';
+    } else {
+      // Ikony / Kolory
+      var tiers = ['common','rare','epic','legendary'];
+      var grouped = {}; tiers.forEach(function(t){grouped[t]=[];});
+      cfg.items.forEach(function(item){ (grouped[item.tier||'common']).push(item); });
+      tiers.forEach(function(tier) {
+        var grp = grouped[tier]; if(!grp.length) return;
+        html += '<div style="font-size:0.6em;font-weight:900;color:'+TC[tier]+';text-transform:uppercase;letter-spacing:1px;padding:8px 0 4px">'+TL[tier]+' '+tier.toUpperCase()+'</div>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-bottom:6px">';
+        grp.forEach(function(item) {
+          var locked = xp < item.req;
+          var sel = item.id === selectedId;
+          var pickType = cfg.showEmoji ? 'icon' : 'color';
+          html += '<div '
+            +(locked ? '' : 'onclick="window._avPickItem(\''+pickType+'\',\''+item.id+'\')" ')
+            +'style="border:'+(sel?'2px solid '+TC[tier]:'1.5px solid var(--border2)')+';'
+            +'border-radius:12px;padding:8px 4px;text-align:center;cursor:'+(locked?'not-allowed':'pointer')+';'
+            +'opacity:'+(locked?'0.38':'1')+';background:'+(sel?'rgba(0,0,0,0.25)':'var(--card)')+';'
+            +'transition:all 0.15s;position:relative">';
+          if(cfg.showEmoji) {
+            html += '<div style="font-size:1.6em;line-height:1.2">'+item.emoji+'</div>';
+          } else {
+            html += '<div style="width:32px;height:32px;border-radius:50%;background:'+item.bg+';margin:0 auto 4px;box-shadow:'+(item.css||'none')+'"></div>';
+          }
+          html += '<div style="font-size:0.58em;font-weight:700;color:var(--text);line-height:1.2;margin-top:2px">'+item.name+'</div>';
+          if(item.req>0) html += '<div style="font-size:0.52em;color:'+(locked?'var(--muted)':'var(--green)')+'">'+item.req+' XP</div>';
+          if(locked) html += '<div style="position:absolute;top:4px;right:4px;font-size:0.65em">🔒</div>';
+          if(sel)    html += '<div style="position:absolute;top:4px;left:4px;font-size:0.65em;color:'+TC[tier]+'">✓</div>';
+          html += '</div>';
+        });
         html += '</div>';
       });
-      html += '</div>';
-    });
+    }
     el.innerHTML = html;
-  }
+  };
 
-  var panel = document.getElementById('panel_avatar');
-  if(!panel) return;
-  panel.innerHTML =
-    '<div style="padding:14px 14px 0">'
-   +'<div style="display:flex;align-items:center;gap:14px;background:var(--card2);border:1px solid var(--border2);border-radius:16px;padding:14px;margin-bottom:16px">'
-   +'<div id="av_preview_big" style="width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2em;font-weight:900;flex-shrink:0">⚡</div>'
-   +'<div><div style="font-size:0.85em;font-weight:900;color:var(--text)">Podgląd avatara</div>'
-   +'<div id="av_preview_name" style="font-size:0.75em;color:var(--muted);margin-top:2px">—</div>'
-   +'<div style="font-size:0.65em;color:var(--green);margin-top:3px">⚡ '+xp+' XP</div></div>'
-   +'<button onclick="saveAvatar(\''+window._user+'\',_selIcon,_selColor,_selFrame);localStorage.setItem(\'4eco_av_title_\'+(window._user||\'\'),_selTitle);applyAvatarToHeader();renderAvatar();" style="margin-left:auto;background:var(--green);color:#000;border:none;border-radius:10px;padding:10px 16px;font-weight:900;font-size:0.8em;cursor:pointer">💾 Zapisz</button>'
-   +'</div>'
-
-   // TABS
-   +'<div id="av_tabs" style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px">'
-   +'<button class="av-tab active" onclick="switchAvTab(\'icons\')" id="avt_icons">🎭 Ikony</button>'
-   +'<button class="av-tab" onclick="switchAvTab(\'colors\')" id="avt_colors">🎨 Kolory</button>'
-   +'<button class="av-tab" onclick="switchAvTab(\'frames\')" id="avt_frames">✨ Ramki</button>'
-   +'<button class="av-tab" onclick="switchAvTab(\'titles\')" id="avt_titles">🏅 Tytuły</button>'
-   +'</div>'
-
-   +'<div id="av_panel_icons"  style="display:block"></div>'
-   +'<div id="av_panel_colors" style="display:none"></div>'
-   +'<div id="av_panel_frames" style="display:none"></div>'
-   +'<div id="av_panel_titles" style="display:none"></div>'
-   +'</div>';
-
-  // Styl tabów
-  var styleTag = document.getElementById('av_tab_style');
-  if(!styleTag) {
-    styleTag = document.createElement('style');
-    styleTag.id = 'av_tab_style';
-    styleTag.textContent = '.av-tab{background:var(--card);border:1.5px solid var(--border2);border-radius:10px;padding:7px 12px;font-size:0.72em;font-weight:800;color:var(--muted2);cursor:pointer;white-space:nowrap;font-family:Inter,sans-serif;transition:all 0.15s}.av-tab.active{background:var(--green);color:#000;border-color:var(--green)}';
-    document.head.appendChild(styleTag);
-  }
-
+  // Zmiana taba
   window.switchAvTab = function(tab) {
-    ['icons','colors','frames','titles'].forEach(function(t) {
-      document.getElementById('av_panel_'+t).style.display = t===tab?'block':'none';
-      var btn = document.getElementById('avt_'+t);
+    ['icon','color','frame','title'].forEach(function(t) {
+      var panelMap = {icon:'av_panel_icons', color:'av_panel_colors', frame:'av_panel_frames', title:'av_panel_titles'};
+      var btnMap   = {icon:'avt_icons',      color:'avt_colors',      frame:'avt_frames',      title:'avt_titles'};
+      document.getElementById(panelMap[t]).style.display = (t===tab) ? 'block' : 'none';
+      var btn = document.getElementById(btnMap[t]);
       if(btn) btn.classList.toggle('active', t===tab);
     });
+    window.renderAvGrid(tab);
   };
 
-  // Gridy - named callbacks żeby uniknąć problemów z arguments.callee
-  function onIconSelect(id)  { _selIcon=id;  makeGrid('av_panel_icons',AV_ICONS,_selIcon,onIconSelect,true); updatePreview(); }
-  function onColorSelect(id) { _selColor=id; makeGrid('av_panel_colors',AV_COLORS,_selColor,onColorSelect,false); updatePreview(); }
-  function onFrameSelect(id) { _selFrame=id; makeFrameGrid('av_panel_frames',AV_FRAMES,_selFrame,onFrameSelect); updatePreview(); }
-  function onTitleSelect(id) { _selTitle=id; makeTitleGrid('av_panel_titles',AV_TITLES,_selTitle,onTitleSelect); updatePreview(); }
-
-  makeGrid('av_panel_icons', AV_ICONS, _selIcon, onIconSelect, true);
-  makeGrid('av_panel_colors', AV_COLORS, _selColor, onColorSelect, false);
-  makeFrameGrid('av_panel_frames', AV_FRAMES, _selFrame, onFrameSelect);
-  makeTitleGrid('av_panel_titles', AV_TITLES, _selTitle, onTitleSelect);
-
-  updatePreview();
-}
-
-function loadCustomSkin(event) {
-  var file = event.target.files[0];
-  if(!file) return;
-  if(file.size > 2*1024*1024) { alert('Plik za duży — max 2MB'); return; }
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var dataUrl = e.target.result;
-    localStorage.setItem('av_custom_' + (window._user||'anon').toLowerCase(), dataUrl);
-    var prev = document.getElementById('custom_skin_preview');
-    prev.src = dataUrl; prev.style.display = 'block';
-    document.getElementById('custom_skin_hint').textContent = '✓ Zdjęcie wgrane!';
-    // Odśwież podgląd główny
-    var bigPrev = document.getElementById('av_preview_big');
-    bigPrev.innerHTML = '<img src="'+dataUrl+'" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">';
-    bigPrev.style.background = 'transparent';
-  };
-  reader.readAsDataURL(file);
-}
-
-function checkCustomSkinUnlock() {
-  var xp = getStats(window._user||'').xp;
-  var lockEl = document.getElementById('custom_skin_lock');
-  var zoneEl = document.getElementById('custom_skin_zone');
-  if(!lockEl || !zoneEl) return;
-  if(xp >= 1000) {
-    lockEl.style.display = 'none';
-    zoneEl.style.display = 'block';
-    var existing = localStorage.getItem('av_custom_' + (window._user||'anon').toLowerCase());
-    if(existing) {
-      var prev = document.getElementById('custom_skin_preview');
-      prev.src = existing; prev.style.display = 'block';
-      document.getElementById('custom_skin_hint').textContent = '✓ Aktualne zdjęcie';
-    }
-  } else {
-    lockEl.style.display = 'block';
-    lockEl.querySelector('div:nth-child(2)').textContent = 'Odblokuj za 1000 XP (masz ' + xp + ' XP)';
-    zoneEl.style.display = 'none';
-  }
-}
-
-function applyAvatarToHeader() {
-  var av = getAvatar(window._user);
-  var iconObj  = AV_ICONS.find(function(x){return x.id===av.icon;}) || AV_ICONS[0];
-  var colorObj = AV_COLORS.find(function(x){return x.id===av.color;}) || AV_COLORS[0];
-  var frameObj = AV_FRAMES.find(function(x){return x.id===av.frame;}) || AV_FRAMES[0];
-  var hdrAv = document.getElementById('hdrAv');
-  var customImg = localStorage.getItem('av_custom_' + (window._user||'anon').toLowerCase());
-  if(customImg) {
-    hdrAv.innerHTML = '<img src="'+customImg+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;display:block;">';
-    hdrAv.style.background = 'transparent';
-    hdrAv.style.padding = '0';
-  } else {
-    hdrAv.innerHTML = '';
-    hdrAv.textContent = iconObj.emoji;
-    hdrAv.style.background = colorObj.bg;
-    hdrAv.style.padding = '';
-  }
-  hdrAv.style.boxShadow = frameObj.css !== 'none' ? frameObj.css : '0 0 12px rgba(0,255,136,0.3)';
-  hdrAv.style.fontSize = '1.2em';
-}
-
-// ============================================================
-// KARTY LEADÓW
-// ============================================================
-var CARD_RARITIES = ['common','rare','epic','legendary'];
-var CARD_RARITY_CHANCE = [0.55, 0.30, 0.12, 0.03];
-var CARD_ICONS = ['🔥','⚡','💎','🏆','🎯','🌟','👑','🦅','🚀','💥','🎪','🔮','🌊','🎲','🦁'];
-
-function rollCardRarity() {
-  var r = Math.random();
-  var cum = 0;
-  for(var i=0;i<CARD_RARITY_CHANCE.length;i++) {
-    cum += CARD_RARITY_CHANCE[i];
-    if(r < cum) return CARD_RARITIES[i];
-  }
-  return 'common';
-}
-
-function addLeadCard(clientName) {
-  var k = '4eco_cards_' + (window._user||'anon').toLowerCase();
-  var cards = [];
-  try { cards = JSON.parse(localStorage.getItem(k)) || []; } catch(e) {}
-  var rarity = rollCardRarity();
-  var icon = CARD_ICONS[Math.floor(Math.random()*CARD_ICONS.length)];
-  var card = {
-    id: Date.now(),
-    name: clientName || 'Nieznany lead',
-    rarity: rarity,
-    icon: icon,
-    date: new Date().toLocaleDateString('pl-PL')
-  };
-  cards.unshift(card);
-  localStorage.setItem(k, JSON.stringify(cards));
-  return card;
-}
-
-// ============================================================
-// PULA KART LEADÓW
-// ============================================================
-var CARD_POOL = {
-  common: [
-    {id:'c_spark',    icon:'⚡', name:'Iskra',           desc:'Pierwszy kontakt z klientem.',          bonus:''},
-    {id:'c_phone',    icon:'📞', name:'Zimny telefon',    desc:'Klasyczny cold call. Fundament.',       bonus:''},
-    {id:'c_door',     icon:'🚪', name:'Pukanie do drzwi', desc:'Klasyczna wizyta terenowa.',            bonus:''},
-    {id:'c_flyer',    icon:'📋', name:'Ulotka',           desc:'Klient zainteresowany ulotkę.',         bonus:''},
-    {id:'c_smile',    icon:'😊', name:'Miły klient',      desc:'Rozmowa poszła zaskakująco dobrze.',    bonus:''},
-    {id:'c_dog',      icon:'🐕', name:'Pies w ogródku',   desc:'Klasyczna przeszkoda terenowca.',       bonus:''},
-    {id:'c_rain',     icon:'🌧️', name:'Deszczowy dzień',  desc:'Pracujesz mimo niesprzyjającej pogody.',bonus:''},
-    {id:'c_sun',      icon:'☀️', name:'Słoneczny dzień',  desc:'Idealne warunki do rozmowy o PV.',      bonus:''},
-    {id:'c_curious',  icon:'🧐', name:'Ciekawski sąsiad', desc:'Klient pyta o sąsiada który kupił PV.', bonus:''},
-    {id:'c_bill',     icon:'🧾', name:'Wysoki rachunek',  desc:'Klient narzeka na rachunki za prąd.',   bonus:''},
-    {id:'c_retired',  icon:'👴', name:'Emeryt',           desc:'Spokojny klient z czasem na rozmowę.',  bonus:''},
-    {id:'c_fence',    icon:'🏡', name:'Dom z płotem',     desc:'Typowa posesja z potencjałem OZE.',     bonus:''}
-  ],
-  rare: [
-    {id:'r_hotlead',  icon:'🔥', name:'Gorący Lead',      desc:'Klient gotowy do spotkania!',           bonus:'+50 XP'},
-    {id:'r_pv_roof',  icon:'🏠', name:'Dach z potencjałem',desc:'Idealna ekspozycja na południe.',      bonus:'+30 XP'},
-    {id:'r_neighbor', icon:'🤝', name:'Polecenie sąsiada', desc:'Klient polecony przez zadowolonego sąsiada.',bonus:'+40 XP'},
-    {id:'r_grant',    icon:'💶', name:'Dotacja rządowa',   desc:'Klient słyszał o programie dofinansowania.',bonus:'+35 XP'},
-    {id:'r_family',   icon:'👨‍👩‍👧', name:'Rodzina decyzyjna',desc:'Wszyscy domownicy obecni i zainteresowani.',bonus:'+45 XP'},
-    {id:'r_bill2k',   icon:'💸', name:'Rachunek 2000+',    desc:'Klient płaci powyżej 2000 zł miesięcznie.',bonus:'+60 XP'},
-    {id:'r_hp',       icon:'🌡️', name:'Pompa ciepła',      desc:'Klient pyta o ogrzewanie pompą ciepła.',bonus:'+40 XP'},
-    {id:'r_storage',  icon:'🔋', name:'Magazyn energii',   desc:'Klient zainteresowany baterią magazynującą.',bonus:'+50 XP'},
-    {id:'r_callback', icon:'📲', name:'Oddzwonienie',      desc:'Klient sam oddzwonił po pierwszym kontakcie!',bonus:'+55 XP'},
-    {id:'r_upgrade',  icon:'⬆️', name:'Rozbudowa PV',      desc:'Klient chce zwiększyć istniejącą instalację.',bonus:'+45 XP'}
-  ],
-  epic: [
-    {id:'e_whale',    icon:'🐋', name:'Wieloryb',          desc:'Klient z budżetem 80k+. Jackpot!',      bonus:'+200 XP'},
-    {id:'e_farmer',   icon:'🌾', name:'Rolnik',            desc:'Działalność rolna + ogromne zapotrzebowanie.',bonus:'+180 XP'},
-    {id:'e_company',  icon:'🏭', name:'Firma B2B',         desc:'Klient biznesowy z dużym zużyciem energii.',bonus:'+160 XP'},
-    {id:'e_multipv',  icon:'🏘️', name:'Multi-nieruchomość',desc:'Klient posiada 2+ nieruchomości do wyposażenia.',bonus:'+150 XP'},
-    {id:'e_referral3',icon:'🌐', name:'Łańcuch poleceń',   desc:'Ten klient polecił już 3 sąsiadów z rzędu.',bonus:'+170 XP'},
-    {id:'e_instant',  icon:'✍️', name:'Instant Close',     desc:'Klient podpisał umowę na miejscu. Mistrzostwo.',bonus:'+250 XP'},
-    {id:'e_battery',  icon:'⚡🔋',name:'Full Stack',        desc:'PV + Pompa ciepła + Magazyn energii w jednym.',bonus:'+200 XP'},
-    {id:'e_thermal',  icon:'🏠🌡️',name:'Termomodernizacja', desc:'Kompleksowa modernizacja energetyczna budynku.',bonus:'+180 XP'}
-  ],
-  legendary: [
-    {id:'l_goat',     icon:'🐐', name:'G.O.A.T.',          desc:'Najlepszy wynik w historii biura. Legenda.',   bonus:'+1000 XP'},
-    {id:'l_closer',   icon:'💎', name:'The Closer',         desc:'Zamknąłeś leada w rekordowym czasie.',         bonus:'+800 XP'},
-    {id:'l_tycoon',   icon:'🏰', name:'Tycoon',            desc:'Klient inwestuje w instalację 1MW+.',          bonus:'+900 XP'},
-    {id:'l_legend',   icon:'🌟', name:'Legenda',            desc:'Twoja historia będzie opowiadana nowym.',      bonus:'+750 XP'},
-    {id:'l_god',      icon:'👑', name:'GOD MODE',           desc:'Perfekcyjny dzień — każdy lead był gorący.',   bonus:'+1000 XP'}
-  ]
-};
-
-function drawRandomCard(forceRarity) {
-  var CARD_WEIGHTS = {common:60, rare:28, epic:10, legendary:2};
-  var rarity = forceRarity;
-  if(!rarity) {
-    var total = Object.values(CARD_WEIGHTS).reduce(function(a,b){return a+b;},0);
-    var r = Math.random()*total, cum=0;
-    var tiers = ['common','rare','epic','legendary'];
-    for(var i=0;i<tiers.length;i++){
-      cum += CARD_WEIGHTS[tiers[i]];
-      if(r < cum){ rarity=tiers[i]; break; }
-    }
-  }
-  var pool = CARD_POOL[rarity] || CARD_POOL.common;
-  var def = pool[Math.floor(Math.random()*pool.length)];
-  return {
-    id:    def.id+'_'+Date.now(),
-    defId: def.id,
-    icon:  def.icon,
-    name:  def.name,
-    desc:  def.desc,
-    bonus: def.bonus,
-    rarity: rarity,
-    date:  new Date().toLocaleDateString('pl-PL')
-  };
-}
-
-function saveCards(user, cards) {
-  var k = '4eco_cards_'+(user||'anon').toLowerCase();
-  localStorage.setItem(k, JSON.stringify(cards));
-}
-
-function awardCard(user, forceRarity) {
-  var cards = getCards();
-  var card = drawRandomCard(forceRarity);
-  cards.unshift(card);
-  if(cards.length > 100) cards = cards.slice(0,100);
-  saveCards(user||window._user||'anon', cards);
-  return card;
-}
-
-
-function getCards() {
-  var k = '4eco_cards_' + (window._user||'anon').toLowerCase();
-  try { return JSON.parse(localStorage.getItem(k)) || []; } catch(e) { return []; }
-}
-
-function renderKarty() {
-  var cards = getCards();
-  var panel = document.getElementById('panel_karty');
+  // Zbuduj panel
+  var panel = document.getElementById('panel_avatar');
   if(!panel) return;
 
-  var RARITY_CFG = {
-    common:    {label:'Common',    color:'#94a3b8', glow:'rgba(148,163,184,0.3)', star:'⬜'},
-    rare:      {label:'Rare',      color:'#60a5fa', glow:'rgba(96,165,250,0.4)',  star:'🔵'},
-    epic:      {label:'Epic',      color:'#a78bfa', glow:'rgba(167,139,250,0.5)', star:'🟣'},
-    legendary: {label:'Legendary', color:'#fbbf24', glow:'rgba(251,191,36,0.6)',  star:'🟡'}
-  };
-
-  // Counts
-  var counts = {common:0, rare:0, epic:0, legendary:0};
-  cards.forEach(function(c){ counts[c.rarity] = (counts[c.rarity]||0)+1; });
-  var totalCards = cards.length;
-
-  // Album progress (unique defs collected)
-  var uniqueIds = {};
-  cards.forEach(function(c){ uniqueIds[c.defId||c.id] = true; });
-  var uniqueCount = Object.keys(uniqueIds).length;
-  var totalDefs = Object.values(CARD_POOL).reduce(function(a,arr){return a+arr.length;},0);
-  var progress = totalDefs > 0 ? Math.round(uniqueCount/totalDefs*100) : 0;
-
-  // Active filter
-  var _filter = window.__karty_filter || 'all';
-
   panel.innerHTML =
-    // HEADER
-    '<div style="padding:14px 14px 8px">'
+    '<div style="padding:14px 14px 0">'
 
-    // Stats row
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'
-    +'<div style="background:var(--card2);border:1px solid var(--border2);border-radius:14px;padding:12px;text-align:center">'
-    +'<div style="font-size:1.8em;font-weight:900;color:var(--yellow)">'+totalCards+'</div>'
-    +'<div style="font-size:0.6em;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Kart łącznie</div>'
+    // Podgląd + Zapisz
+    +'<div style="display:flex;align-items:center;gap:14px;background:var(--card2);border:1px solid var(--border2);border-radius:16px;padding:14px;margin-bottom:16px">'
+    +'<div id="av_preview_big" style="width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2em;font-weight:900;flex-shrink:0;transition:all 0.3s">⚡</div>'
+    +'<div style="flex:1;min-width:0">'
+    +'<div style="font-size:0.82em;font-weight:900;color:var(--text)">Podgląd avatara</div>'
+    +'<div id="av_preview_name" style="font-size:0.72em;color:var(--muted);margin-top:2px">—</div>'
+    +'<div style="font-size:0.62em;color:var(--green);margin-top:3px">⚡ '+xp+' XP</div>'
     +'</div>'
-    +'<div style="background:var(--card2);border:1px solid var(--border2);border-radius:14px;padding:12px;text-align:center">'
-    +'<div style="font-size:1.8em;font-weight:900;color:var(--green)">'+uniqueCount+'/'+totalDefs+'</div>'
-    +'<div style="font-size:0.6em;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Album</div>'
-    +'</div>'
-    +'</div>'
-
-    // Progress bar albumu
-    +'<div style="background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;margin-bottom:12px">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-    +'<span style="font-size:0.7em;font-weight:800;color:var(--text)">📖 Postęp albumu</span>'
-    +'<span style="font-size:0.7em;font-weight:900;color:var(--green)">'+progress+'%</span>'
-    +'</div>'
-    +'<div style="height:6px;background:var(--bg3);border-radius:6px;overflow:hidden">'
-    +'<div style="height:100%;width:'+progress+'%;background:linear-gradient(90deg,var(--green),#00ccff);border-radius:6px;transition:width 0.5s"></div>'
-    +'</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px">'
-    +['common','rare','epic','legendary'].map(function(r){
-        var cfg=RARITY_CFG[r];
-        var poolSize=CARD_POOL[r].length;
-        var uniq=0;
-        var seenDefs={};
-        cards.forEach(function(c){if(c.rarity===r) seenDefs[c.defId||c.id]=true;});
-        uniq=Object.keys(seenDefs).length;
-        return '<div style="text-align:center;background:var(--bg3);border-radius:8px;padding:6px 2px">'
-          +'<div style="font-size:0.55em;color:'+cfg.color+';font-weight:900">'+cfg.star+' '+cfg.label+'</div>'
-          +'<div style="font-size:0.8em;font-weight:900;color:var(--text)">'+uniq+'/'+poolSize+'</div>'
-          +'</div>';
-      }).join('')
-    +'</div>'
+    +'<button onclick="'
+      +'saveAvatar(window._user, window._avSel.icon, window._avSel.color, window._avSel.frame);'
+      +'localStorage.setItem(\'4eco_av_title_\'+(window._user||\'\'), window._avSel.title);'
+      +'applyAvatarToHeader();'
+      +'var b=this;b.textContent=\'✓ Zapisano!\';setTimeout(function(){b.textContent=\'💾 Zapisz\';},1500);" '
+    +'style="flex-shrink:0;background:var(--green);color:#000;border:none;border-radius:10px;padding:10px 14px;font-weight:900;font-size:0.78em;cursor:pointer">💾 Zapisz</button>'
     +'</div>'
 
-    // Filter tabs
-    +'<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px" id="karty_filter_row">'
-    +['all','common','rare','epic','legendary'].map(function(f){
-        var cfg = f==='all' ? {label:'Wszystkie',color:'var(--text)',star:'🃏'} : RARITY_CFG[f];
-        var cnt = f==='all' ? totalCards : counts[f]||0;
-        var active = _filter===f;
-        return '<button onclick="window.__karty_filter=\''+f+'\';renderKarty();"'
-          +' style="flex-shrink:0;background:'+(active?'var(--card2)':'var(--card)')+';'
-          +'border:'+(active?'2px solid '+(f==='all'?'var(--green)':RARITY_CFG[f]?RARITY_CFG[f].color:'var(--green)'):'1.5px solid var(--border2)')+';'
-          +'border-radius:10px;padding:6px 12px;font-size:0.68em;font-weight:800;color:'+(active?(f==='all'?'var(--green)':RARITY_CFG[f].color):'var(--muted2)')+';cursor:pointer;font-family:Inter,sans-serif">'
-          +(f==='all'?'🃏':RARITY_CFG[f].star)+' '+(f==='all'?'Wszystkie':RARITY_CFG[f].label)+' ('+cnt+')'
-          +'</button>';
-      }).join('')
+    // Taby
+    +'<div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px">'
+    +'<button class="av-tab active" onclick="switchAvTab(\'icon\')"  id="avt_icons">🎭 Ikony</button>'
+    +'<button class="av-tab"        onclick="switchAvTab(\'color\')" id="avt_colors">🎨 Kolory</button>'
+    +'<button class="av-tab"        onclick="switchAvTab(\'frame\')" id="avt_frames">✨ Ramki</button>'
+    +'<button class="av-tab"        onclick="switchAvTab(\'title\')" id="avt_titles">🏅 Tytuły</button>'
     +'</div>'
 
-    // Karty button
-    +'<button onclick="showCardReveal(drawRandomCard(null));" '
-    +'style="width:100%;background:var(--card2);color:var(--muted2);border:1.5px dashed var(--border2);border-radius:14px;padding:11px;font-size:0.78em;font-weight:700;cursor:pointer;margin-bottom:10px;letter-spacing:0.3px">🎴 Podgląd losowania (nie zapisuje)</button>'
-
-    // Grid kart
-    +'<div id="cards_grid" class="cards-grid"></div>'
+    +'<div id="av_panel_icons"  style="display:block"></div>'
+    +'<div id="av_panel_colors" style="display:none"></div>'
+    +'<div id="av_panel_frames" style="display:none"></div>'
+    +'<div id="av_panel_titles" style="display:none"></div>'
     +'</div>';
 
-  // Renderuj grida
-  var filtered = _filter === 'all' ? cards : cards.filter(function(c){return c.rarity===_filter;});
-
-  var el = document.getElementById('cards_grid');
-  if(!el) return;
-
-  if(filtered.length===0) {
-    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--muted)">'
-      +(totalCards===0
-        ? '🃏 Brak kart<br><span style="font-size:0.85em">Zdobywaj karty za każdy Gorący lead!</span>'
-        : '🔍 Brak kart w tej kategorii')
-      +'</div>';
-    return;
+  // Styl tabów
+  if(!document.getElementById('av_tab_style')) {
+    var st = document.createElement('style');
+    st.id = 'av_tab_style';
+    st.textContent = '.av-tab{background:var(--card);border:1.5px solid var(--border2);border-radius:10px;padding:7px 12px;font-size:0.72em;font-weight:800;color:var(--muted2);cursor:pointer;white-space:nowrap;font-family:Inter,sans-serif;transition:all 0.15s}.av-tab.active{background:var(--green);color:#000;border-color:var(--green)}';
+    document.head.appendChild(st);
   }
 
-  el.innerHTML = filtered.slice(0,60).map(function(c){
-    var cfg = RARITY_CFG[c.rarity] || RARITY_CFG.common;
-    var isLeg = c.rarity==='legendary';
-    return '<div class="lead-card '+c.rarity+'" onclick="showCardDetail('+JSON.stringify(c)+')" style="cursor:pointer;box-shadow:0 4px 16px '+cfg.glow+'">'
-      +'<div style="position:absolute;top:8px;right:8px;font-size:0.5em;font-weight:900;color:'+cfg.color+';letter-spacing:1px;text-transform:uppercase">'+cfg.star+' '+cfg.label+'</div>'
-      +(isLeg?'<div class="card-shine"></div>':'')
-      +'<div style="font-size:2.2em;margin:8px 0 4px;filter:drop-shadow(0 0 8px '+cfg.glow+')">'+c.icon+'</div>'
-      +'<div style="font-size:0.78em;font-weight:900;color:var(--text);line-height:1.2;margin-bottom:4px">'+c.name+'</div>'
-      +(c.bonus?'<div style="font-size:0.58em;color:'+cfg.color+';font-weight:800;margin-bottom:2px">'+c.bonus+'</div>':'')
-      +'<div style="font-size:0.52em;color:var(--muted);margin-top:4px">'+c.date+'</div>'
-      +'</div>';
-  }).join('');
-
-  if(filtered.length > 60) {
-    el.innerHTML += '<div style="grid-column:1/-1;text-align:center;padding:12px;font-size:0.7em;color:var(--muted)">...i jeszcze '+(filtered.length-60)+' kart</div>';
-  }
+  // Renderuj ikony (domyślny tab) i ustaw podgląd
+  window.renderAvGrid('icon');
+  window._avUpdatePreview();
 }
+
+
 
 function showCardDetail(card) {
   var RARITY_CFG = {
