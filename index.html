@@ -2185,32 +2185,90 @@ function setRankTab(tab) {
 // AVATAR SYSTEM
 // ============================================================
 var AV_ICONS = [
-  {id:'default', emoji:'⚡', name:'Domyślny', req:0},
-  {id:'fire',    emoji:'🔥', name:'Ogień',    req:100},
-  {id:'target',  emoji:'🎯', name:'Snajper',  req:300},
-  {id:'diamond', emoji:'💎', name:'Diament',  req:600},
-  {id:'crown',   emoji:'👑', name:'Korona',   req:1000},
-  {id:'alien',   emoji:'👽', name:'Alien',    req:1800},
-  {id:'ninja',   emoji:'🥷', name:'Ninja',    req:3000},
-  {id:'god',     emoji:'🌟', name:'GOD',      req:5000}
+  // DARMOWE (0 XP)
+  {id:'default',  emoji:'⚡', name:'Energetyk',   req:0,    tier:'common'},
+  {id:'seedling', emoji:'🌱', name:'Ekolog',       req:0,    tier:'common'},
+  {id:'handshake',emoji:'🤝', name:'Networker',    req:0,    tier:'common'},
+  // COMMON (50-300 XP)
+  {id:'fire',     emoji:'🔥', name:'Żywy ogień',   req:50,   tier:'common'},
+  {id:'bolt',     emoji:'⚡', name:'Błyskawica',   req:80,   tier:'common'},
+  {id:'rocket',   emoji:'🚀', name:'Rakieta',      req:120,  tier:'common'},
+  {id:'muscle',   emoji:'💪', name:'Siłacz',       req:180,  tier:'common'},
+  {id:'chart',    emoji:'📈', name:'Analityk',     req:250,  tier:'common'},
+  // RARE (400-1500 XP)
+  {id:'target',   emoji:'🎯', name:'Snajper',      req:400,  tier:'rare'},
+  {id:'diamond',  emoji:'💎', name:'Diament',      req:600,  tier:'rare'},
+  {id:'wizard',   emoji:'🧙', name:'Czarodziej',   req:800,  tier:'rare'},
+  {id:'robot',    emoji:'🤖', name:'Cyber Agent',  req:1000, tier:'rare'},
+  {id:'detective',emoji:'🕵️', name:'Detektyw',     req:1200, tier:'rare'},
+  {id:'wolf',     emoji:'🐺', name:'Samotny wilk', req:1500, tier:'rare'},
+  // EPIC (2000-4000 XP)
+  {id:'crown',    emoji:'👑', name:'Królewska',    req:2000, tier:'epic'},
+  {id:'alien',    emoji:'👽', name:'Extraterrestrial',req:2500,tier:'epic'},
+  {id:'ninja',    emoji:'🥷', name:'Shadow Ninja', req:3000, tier:'epic'},
+  {id:'dragon',   emoji:'🐉', name:'Smok',         req:3500, tier:'epic'},
+  {id:'phoenix',  emoji:'🦅', name:'Feniks',       req:4000, tier:'epic'},
+  // LEGENDARY (5000+ XP)
+  {id:'skull',    emoji:'💀', name:'Dark Lord',    req:5000, tier:'legendary'},
+  {id:'unicorn',  emoji:'🦄', name:'Jednorożec',   req:6000, tier:'legendary'},
+  {id:'galaxy',   emoji:'🌌', name:'Galaxy Brain',  req:8000, tier:'legendary'},
+  {id:'god',      emoji:'🌟', name:'GOD MODE',     req:10000,tier:'legendary'},
+  {id:'goat',     emoji:'🐐', name:'G.O.A.T.',     req:15000,tier:'legendary'}
 ];
 var AV_COLORS = [
-  {id:'green',   bg:'linear-gradient(135deg,#00ff88,#00cc6a)',   name:'Neon',    req:0},
-  {id:'blue',    bg:'linear-gradient(135deg,#60a5fa,#3b82f6)',   name:'Błękit',  req:100},
-  {id:'purple',  bg:'linear-gradient(135deg,#a78bfa,#7c3aed)',   name:'Fiolet',  req:300},
-  {id:'orange',  bg:'linear-gradient(135deg,#fb923c,#f97316)',   name:'Ogień',   req:600},
-  {id:'red',     bg:'linear-gradient(135deg,#f87171,#ef4444)',   name:'Czerwień',req:1000},
-  {id:'gold',    bg:'linear-gradient(135deg,#fbbf24,#d97706)',   name:'Złoto',   req:1800},
-  {id:'rainbow', bg:'linear-gradient(135deg,#f87171,#fbbf24,#00ff88,#60a5fa,#a78bfa)', name:'Tęcza', req:3000},
-  {id:'dark',    bg:'linear-gradient(135deg,#1e293b,#475569)',   name:'Shadow',  req:5000}
+  // DARMOWE
+  {id:'green',    bg:'linear-gradient(135deg,#00ff88,#00cc6a)',              name:'Neon Green',  req:0,    tier:'common'},
+  {id:'blue',     bg:'linear-gradient(135deg,#60a5fa,#3b82f6)',              name:'Ocean',       req:0,    tier:'common'},
+  // COMMON
+  {id:'teal',     bg:'linear-gradient(135deg,#2dd4bf,#0d9488)',              name:'Teal',        req:150,  tier:'common'},
+  {id:'pink',     bg:'linear-gradient(135deg,#f472b6,#ec4899)',              name:'Bubblegum',   req:250,  tier:'common'},
+  {id:'orange',   bg:'linear-gradient(135deg,#fb923c,#f97316)',              name:'Sunset',      req:400,  tier:'common'},
+  {id:'purple',   bg:'linear-gradient(135deg,#a78bfa,#7c3aed)',              name:'Galaxy',      req:500,  tier:'common'},
+  // RARE
+  {id:'red',      bg:'linear-gradient(135deg,#f87171,#ef4444)',              name:'Blood Moon',  req:800,  tier:'rare'},
+  {id:'gold',     bg:'linear-gradient(135deg,#fbbf24,#d97706)',              name:'Złoto',       req:1200, tier:'rare'},
+  {id:'cyber',    bg:'linear-gradient(135deg,#00f5ff,#0088ff)',              name:'Cyber Blue',  req:1500, tier:'rare'},
+  {id:'forest',   bg:'linear-gradient(135deg,#4ade80,#166534)',              name:'Deep Forest', req:2000, tier:'rare'},
+  // EPIC
+  {id:'rainbow',  bg:'linear-gradient(135deg,#f87171,#fbbf24,#00ff88,#60a5fa,#a78bfa)', name:'Tęcza', req:3000, tier:'epic'},
+  {id:'lava',     bg:'linear-gradient(135deg,#ff6b00,#ff0000,#800000)',      name:'Lava',        req:3500, tier:'epic'},
+  {id:'neon',     bg:'linear-gradient(135deg,#ff00ff,#00ffff)',              name:'Neon Vice',   req:4000, tier:'epic'},
+  // LEGENDARY
+  {id:'dark',     bg:'linear-gradient(135deg,#1e293b,#475569)',              name:'Shadow',      req:5000, tier:'legendary'},
+  {id:'void',     bg:'linear-gradient(135deg,#000000,#1a0030,#000000)',      name:'Void',        req:8000, tier:'legendary'},
+  {id:'god',      bg:'linear-gradient(135deg,#fff7ae,#ffd700,#ff8c00,#ffd700)', name:'Divine Gold', req:12000,tier:'legendary'}
 ];
 var AV_FRAMES = [
-  {id:'none',    css:'none',   name:'Brak',    req:0},
-  {id:'glow',    css:'0 0 12px rgba(0,255,136,0.7)', name:'Glow',  req:200},
-  {id:'pulse',   css:'0 0 0 3px rgba(0,255,136,0.5)', name:'Pulse', req:500},
-  {id:'gold',    css:'0 0 16px rgba(245,158,11,0.8)', name:'Złota', req:1000},
-  {id:'rainbow', css:'0 0 20px rgba(167,139,250,0.9)', name:'Tęcza', req:2000},
-  {id:'fire',    css:'0 0 24px rgba(251,146,60,1)',   name:'Ogień', req:3500}
+  {id:'none',     css:'none',                                      name:'Brak',         req:0,    tier:'common'},
+  {id:'glow',     css:'0 0 12px rgba(0,255,136,0.7)',              name:'Zielony glow', req:200,  tier:'common'},
+  {id:'blue_glow',css:'0 0 12px rgba(96,165,250,0.8)',             name:'Niebieski glow',req:400, tier:'common'},
+  {id:'pulse',    css:'0 0 0 3px rgba(0,255,136,0.6),0 0 16px rgba(0,255,136,0.3)', name:'Pulse', req:600, tier:'rare'},
+  {id:'pink_halo',css:'0 0 16px rgba(244,114,182,0.9)',            name:'Pink Halo',    req:900,  tier:'rare'},
+  {id:'gold',     css:'0 0 16px rgba(245,158,11,0.9),0 0 0 2px rgba(245,158,11,0.4)', name:'Złota', req:1200, tier:'rare'},
+  {id:'cyber',    css:'0 0 0 2px #00f5ff,0 0 20px rgba(0,245,255,0.5)', name:'Cyber',  req:1800, tier:'rare'},
+  {id:'rainbow',  css:'0 0 20px rgba(167,139,250,0.9)',            name:'Aura Tęczy',   req:2500, tier:'epic'},
+  {id:'fire',     css:'0 0 24px rgba(251,146,60,1),0 0 0 2px rgba(239,68,68,0.6)', name:'Płomień', req:3500, tier:'epic'},
+  {id:'void',     css:'0 0 0 3px rgba(139,92,246,0.8),0 0 24px rgba(139,92,246,0.5),0 0 40px rgba(139,92,246,0.2)', name:'Void Aura', req:5000, tier:'epic'},
+  {id:'divine',   css:'0 0 0 3px rgba(255,215,0,1),0 0 30px rgba(255,215,0,0.7),0 0 60px rgba(255,165,0,0.4)', name:'Divine',    req:8000, tier:'legendary'},
+  {id:'singularity',css:'0 0 0 2px #fff,0 0 20px #fff,0 0 40px rgba(255,255,255,0.5),0 0 80px rgba(200,200,255,0.3)', name:'Singularity', req:12000, tier:'legendary'}
+];
+
+// Tytuły (badges pod nickiem)
+var AV_TITLES = [
+  {id:'none',         label:'',                    req:0,     tier:'common',    color:'var(--muted)'},
+  {id:'rookie',       label:'🌱 Nowy',              req:0,     tier:'common',    color:'#4ade80'},
+  {id:'scout',        label:'👁️ Scout',             req:100,   tier:'common',    color:'#60a5fa'},
+  {id:'hunter',       label:'🎯 Łowca',             req:300,   tier:'common',    color:'#fb923c'},
+  {id:'closer',       label:'🤝 Closer',            req:600,   tier:'rare',      color:'#a78bfa'},
+  {id:'shark',        label:'🦈 Rekin sprzedaży',   req:1000,  tier:'rare',      color:'#f87171'},
+  {id:'ace',          label:'🃏 Ace',               req:1500,  tier:'rare',      color:'#fbbf24'},
+  {id:'cold_caller',  label:'📞 Cold Call Master',  req:2000,  tier:'rare',      color:'#2dd4bf'},
+  {id:'eco_warrior',  label:'🌿 Eco Warrior',       req:2500,  tier:'epic',      color:'#4ade80'},
+  {id:'phantom',      label:'👻 Phantom',           req:3000,  tier:'epic',      color:'#c084fc'},
+  {id:'boss',         label:'😎 The Boss',          req:4000,  tier:'epic',      color:'#f97316'},
+  {id:'legend',       label:'🏆 Legend',            req:5000,  tier:'legendary', color:'#ffd700'},
+  {id:'god_mode',     label:'⚡ GOD MODE',          req:10000, tier:'legendary', color:'linear-gradient(90deg,#ffd700,#ff8c00)'},
+  {id:'goat',         label:'🐐 G.O.A.T.',          req:15000, tier:'legendary', color:'linear-gradient(90deg,#fff,#ffd700,#ff8c00)'}
 ];
 
 function getAvatar(name) {
@@ -2225,60 +2283,203 @@ function saveAvatarData(name, data) {
 function renderAvatar() {
   var xp = getStats(window._user||'').xp;
   var av = getAvatar(window._user);
-  var _selIcon  = av.icon;
-  var _selColor = av.color;
-  var _selFrame = av.frame;
+  var _selIcon  = av.icon  || 'default';
+  var _selColor = av.color || 'green';
+  var _selFrame = av.frame || 'none';
+  var _selTitle = localStorage.getItem('4eco_av_title_'+(window._user||'')) || 'none';
+
+  var TIER_COLORS = {common:'#94a3b8', rare:'#60a5fa', epic:'#a78bfa', legendary:'#ffd700'};
+  var TIER_LABELS = {common:'●', rare:'◆', epic:'✦', legendary:'★'};
+
+  function tierBadge(tier) {
+    if(!tier) return '';
+    return '<span style="color:'+TIER_COLORS[tier]+';font-size:0.65em;margin-left:4px" title="'+tier+'">'+TIER_LABELS[tier]+'</span>';
+  }
 
   function updatePreview() {
-    var iconObj  = AV_ICONS.find(function(x){return x.id===_selIcon;}) || AV_ICONS[0];
+    var iconObj  = AV_ICONS.find(function(x){return x.id===_selIcon;})  || AV_ICONS[0];
     var colorObj = AV_COLORS.find(function(x){return x.id===_selColor;}) || AV_COLORS[0];
     var frameObj = AV_FRAMES.find(function(x){return x.id===_selFrame;}) || AV_FRAMES[0];
+    var titleObj = AV_TITLES.find(function(x){return x.id===_selTitle;}) || AV_TITLES[0];
     var prev = document.getElementById('av_preview_big');
+    if(!prev) return;
     prev.textContent = iconObj.emoji;
     prev.style.background = colorObj.bg;
     prev.style.boxShadow = frameObj.css !== 'none' ? frameObj.css : '0 0 20px rgba(0,255,136,0.4)';
-    document.getElementById('av_preview_name').textContent = iconObj.name + ' · ' + colorObj.name;
+    var nameEl = document.getElementById('av_preview_name');
+    if(nameEl) {
+      nameEl.textContent = iconObj.name + ' · ' + colorObj.name;
+      if(titleObj && titleObj.label) {
+        nameEl.innerHTML += '<br><span style="font-size:0.8em;color:'+titleObj.color+'">'+titleObj.label+'</span>';
+      }
+    }
   }
 
-  function makeGrid(containerId, items, selectedId, onSelect) {
+  function makeGrid(containerId, items, selectedId, onSelect, showEmoji) {
+    window['__av_cb_'+containerId] = onSelect;
+    var cbKey = '__av_cb_'+containerId;
+    var el = document.getElementById(containerId);
+    if(!el) return;
     var html = '';
-    items.forEach(function(item) {
-      var locked = xp < item.req;
-      var sel = selectedId === item.id;
-      html += '<div class="av-item'+(sel?' selected':'')+(locked?' locked':'')+'" onclick="'+(locked?'':'')+'">';
-      if(item.emoji) html += '<span class="av-emoji">'+item.emoji+'</span>';
-      else html += '<span class="av-emoji" style="display:block;width:32px;height:32px;border-radius:50%;background:'+item.bg+';margin:0 auto"></span>';
-      html += '<span class="av-name">'+(locked?'🔒 '+item.req+'XP':item.name)+'</span>';
+    var tiers = ['common','rare','epic','legendary'];
+    var grouped = {};
+    tiers.forEach(function(t){ grouped[t] = []; });
+    items.forEach(function(item){ if(grouped[item.tier||'common']) grouped[item.tier||'common'].push(item); else grouped['common'].push(item); });
+    tiers.forEach(function(tier) {
+      var grp = grouped[tier];
+      if(!grp.length) return;
+      html += '<div style="font-size:0.6em;font-weight:900;color:'+TIER_COLORS[tier]+';text-transform:uppercase;letter-spacing:1px;padding:8px 0 4px">'+TIER_LABELS[tier]+' '+tier.toUpperCase()+'</div>';
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-bottom:6px">';
+      grp.forEach(function(item) {
+        var locked = xp < item.req;
+        var sel = item.id === selectedId;
+        var border = sel ? '2px solid '+TIER_COLORS[tier||'common'] : '1.5px solid var(--border2)';
+        var opacity = locked ? '0.38' : '1';
+        var cursor = locked ? 'not-allowed' : 'pointer';
+        var bg = sel ? 'rgba(0,0,0,0.4)' : 'var(--card)';
+        html += '<div onclick="'+(locked?'':'('+onSelect+')(\''+item.id+'\')')+'"'
+             +' style="border:'+border+';border-radius:12px;padding:8px 4px;text-align:center;cursor:'+cursor
+             +';opacity:'+opacity+';background:'+bg+';transition:all 0.15s;position:relative">';
+        if(showEmoji) html += '<div style="font-size:1.6em;line-height:1.2">'+item.emoji+'</div>';
+        else {
+          html += '<div style="width:32px;height:32px;border-radius:50%;background:'+item.bg+';margin:0 auto 4px;box-shadow:'+(item.css||'none')+'"></div>';
+        }
+        html += '<div style="font-size:0.58em;font-weight:700;color:var(--text);line-height:1.2;margin-top:2px">'+item.name+'</div>';
+        if(item.req>0) html += '<div style="font-size:0.52em;color:'+(locked?'var(--muted)':'var(--green)')+'">'+item.req+' XP</div>';
+        if(locked) html += '<div style="position:absolute;top:4px;right:4px;font-size:0.65em">🔒</div>';
+        if(sel) html += '<div style="position:absolute;top:4px;left:4px;font-size:0.65em;color:'+TIER_COLORS[tier||'common']+'">✓</div>';
+        html += '</div>';
+      });
       html += '</div>';
     });
-    var el = document.getElementById(containerId);
     el.innerHTML = html;
-    el.querySelectorAll('.av-item:not(.locked)').forEach(function(el2, i) {
-      el2.addEventListener('click', function() {
-        var id = items.filter(function(x){return xp>=x.req;})[i].id;
-        onSelect(id);
-        el.querySelectorAll('.av-item').forEach(function(e){e.classList.remove('selected');});
-        el2.classList.add('selected');
-        updatePreview();
-      });
-    });
   }
 
-  makeGrid('av_icons_grid',  AV_ICONS,  _selIcon,  function(id){_selIcon=id;});
-  makeGrid('av_colors_grid', AV_COLORS, _selColor, function(id){_selColor=id;});
-  makeGrid('av_frames_grid', AV_FRAMES, _selFrame, function(id){_selFrame=id;});
-  updatePreview();
+  function makeFrameGrid(containerId, items, selectedId, onSelect) {
+    window['__av_cb_'+containerId] = onSelect;
+    var cbKey = '__av_cb_'+containerId;
+    var el = document.getElementById(containerId);
+    if(!el) return;
+    var html = '';
+    var tiers = ['common','rare','epic','legendary'];
+    var grouped = {};
+    tiers.forEach(function(t){ grouped[t] = []; });
+    items.forEach(function(item){ if(grouped[item.tier||'common']) grouped[item.tier||'common'].push(item); else grouped['common'].push(item); });
+    tiers.forEach(function(tier) {
+      var grp = grouped[tier];
+      if(!grp.length) return;
+      html += '<div style="font-size:0.6em;font-weight:900;color:'+TIER_COLORS[tier]+';text-transform:uppercase;letter-spacing:1px;padding:8px 0 4px">'+TIER_LABELS[tier]+' '+tier.toUpperCase()+'</div>';
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;margin-bottom:6px">';
+      grp.forEach(function(item) {
+        var locked = xp < item.req;
+        var sel = item.id === selectedId;
+        var border = sel ? '2px solid '+TIER_COLORS[tier||'common'] : '1.5px solid var(--border2)';
+        var opacity = locked ? '0.38' : '1';
+        var cursor = locked ? 'not-allowed' : 'pointer';
+        html += '<div onclick="'+(locked?'':'('+onSelect+')(\''+item.id+'\')')+'"'
+             +' style="border:'+border+';border-radius:12px;padding:8px;text-align:center;cursor:'+cursor
+             +';opacity:'+opacity+';background:var(--card);position:relative">';
+        html += '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--bg3),var(--card2));margin:0 auto 4px;box-shadow:'+(item.css==='none'?'none':item.css)+'"></div>';
+        html += '<div style="font-size:0.58em;font-weight:700;color:var(--text)">'+item.name+'</div>';
+        if(item.req>0) html += '<div style="font-size:0.52em;color:'+(locked?'var(--muted)':'var(--green)')+'">'+item.req+' XP</div>';
+        if(locked) html += '<div style="position:absolute;top:4px;right:4px;font-size:0.65em">🔒</div>';
+        if(sel) html += '<div style="position:absolute;top:4px;left:4px;font-size:0.65em;color:'+TIER_COLORS[tier||'common']+'">✓</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+    });
+    el.innerHTML = html;
+  }
 
-  document.getElementById('av_ok').style.display='none';
-  checkCustomSkinUnlock();
-  // Przechowaj wybory przez closure w save button
-  document.querySelector('[onclick="saveAvatar()"]').onclick = function() {
-    saveAvatarData(window._user, {icon:_selIcon, color:_selColor, frame:_selFrame});
-    applyAvatarToHeader();
-    var ok = document.getElementById('av_ok');
-    ok.style.display='block';
-    setTimeout(function(){ok.style.display='none';},2500);
+  function makeTitleGrid(containerId, items, selectedId, onSelect) {
+    window['__av_cb_'+containerId] = onSelect;
+    var cbKey = '__av_cb_'+containerId;
+    var el = document.getElementById(containerId);
+    if(!el) return;
+    var html = '';
+    var tiers = ['common','rare','epic','legendary'];
+    var grouped = {};
+    tiers.forEach(function(t){ grouped[t] = []; });
+    items.forEach(function(item){ if(grouped[item.tier||'common']) grouped[item.tier||'common'].push(item); else grouped['common'].push(item); });
+    tiers.forEach(function(tier) {
+      var grp = grouped[tier];
+      if(!grp.length) return;
+      html += '<div style="font-size:0.6em;font-weight:900;color:'+TIER_COLORS[tier]+';text-transform:uppercase;letter-spacing:1px;padding:8px 0 4px">'+TIER_LABELS[tier]+' '+tier.toUpperCase()+'</div>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">';
+      grp.forEach(function(item) {
+        var locked = xp < item.req;
+        var sel = item.id === selectedId;
+        var border = sel ? '2px solid '+TIER_COLORS[tier] : '1.5px solid var(--border2)';
+        var opacity = locked ? '0.38' : '1';
+        var cursor = locked ? 'not-allowed' : 'pointer';
+        html += '<div onclick="'+(locked?'':'('+onSelect+')(\''+item.id+'\')')+'"'
+             +' style="border:'+border+';border-radius:20px;padding:6px 12px;cursor:'+cursor
+             +';opacity:'+opacity+';background:var(--card);white-space:nowrap;position:relative">';
+        html += '<div style="font-size:0.78em;font-weight:800;color:'+(sel?TIER_COLORS[tier]:'var(--muted2)')+'">'+( item.label||'(brak tytułu)')+'</div>';
+        if(item.req>0) html += '<div style="font-size:0.55em;color:'+(locked?'var(--muted)':'var(--green)')+'">'+item.req+' XP</div>';
+        if(locked) html += ' 🔒';
+        html += '</div>';
+      });
+      html += '</div>';
+    });
+    el.innerHTML = html;
+  }
+
+  var panel = document.getElementById('panel_avatar');
+  if(!panel) return;
+  panel.innerHTML =
+    '<div style="padding:14px 14px 0">'
+   +'<div style="display:flex;align-items:center;gap:14px;background:var(--card2);border:1px solid var(--border2);border-radius:16px;padding:14px;margin-bottom:16px">'
+   +'<div id="av_preview_big" style="width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2em;font-weight:900;flex-shrink:0">⚡</div>'
+   +'<div><div style="font-size:0.85em;font-weight:900;color:var(--text)">Podgląd avatara</div>'
+   +'<div id="av_preview_name" style="font-size:0.75em;color:var(--muted);margin-top:2px">—</div>'
+   +'<div style="font-size:0.65em;color:var(--green);margin-top:3px">⚡ '+xp+' XP</div></div>'
+   +'<button onclick="saveAvatar(\''+window._user+'\',_selIcon,_selColor,_selFrame);localStorage.setItem(\'4eco_av_title_\'+(window._user||\'\'),_selTitle);applyAvatarToHeader();renderAvatar();" style="margin-left:auto;background:var(--green);color:#000;border:none;border-radius:10px;padding:10px 16px;font-weight:900;font-size:0.8em;cursor:pointer">💾 Zapisz</button>'
+   +'</div>'
+
+   // TABS
+   +'<div id="av_tabs" style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px">'
+   +'<button class="av-tab active" onclick="switchAvTab(\'icons\')" id="avt_icons">🎭 Ikony</button>'
+   +'<button class="av-tab" onclick="switchAvTab(\'colors\')" id="avt_colors">🎨 Kolory</button>'
+   +'<button class="av-tab" onclick="switchAvTab(\'frames\')" id="avt_frames">✨ Ramki</button>'
+   +'<button class="av-tab" onclick="switchAvTab(\'titles\')" id="avt_titles">🏅 Tytuły</button>'
+   +'</div>'
+
+   +'<div id="av_panel_icons"  style="display:block"></div>'
+   +'<div id="av_panel_colors" style="display:none"></div>'
+   +'<div id="av_panel_frames" style="display:none"></div>'
+   +'<div id="av_panel_titles" style="display:none"></div>'
+   +'</div>';
+
+  // Styl tabów
+  var styleTag = document.getElementById('av_tab_style');
+  if(!styleTag) {
+    styleTag = document.createElement('style');
+    styleTag.id = 'av_tab_style';
+    styleTag.textContent = '.av-tab{background:var(--card);border:1.5px solid var(--border2);border-radius:10px;padding:7px 12px;font-size:0.72em;font-weight:800;color:var(--muted2);cursor:pointer;white-space:nowrap;font-family:Inter,sans-serif;transition:all 0.15s}.av-tab.active{background:var(--green);color:#000;border-color:var(--green)}';
+    document.head.appendChild(styleTag);
+  }
+
+  window.switchAvTab = function(tab) {
+    ['icons','colors','frames','titles'].forEach(function(t) {
+      document.getElementById('av_panel_'+t).style.display = t===tab?'block':'none';
+      var btn = document.getElementById('avt_'+t);
+      if(btn) btn.classList.toggle('active', t===tab);
+    });
   };
+
+  // Gridy - named callbacks żeby uniknąć problemów z arguments.callee
+  function onIconSelect(id)  { _selIcon=id;  makeGrid('av_panel_icons',AV_ICONS,_selIcon,onIconSelect,true); updatePreview(); }
+  function onColorSelect(id) { _selColor=id; makeGrid('av_panel_colors',AV_COLORS,_selColor,onColorSelect,false); updatePreview(); }
+  function onFrameSelect(id) { _selFrame=id; makeFrameGrid('av_panel_frames',AV_FRAMES,_selFrame,onFrameSelect); updatePreview(); }
+  function onTitleSelect(id) { _selTitle=id; makeTitleGrid('av_panel_titles',AV_TITLES,_selTitle,onTitleSelect); updatePreview(); }
+
+  makeGrid('av_panel_icons', AV_ICONS, _selIcon, onIconSelect, true);
+  makeGrid('av_panel_colors', AV_COLORS, _selColor, onColorSelect, false);
+  makeFrameGrid('av_panel_frames', AV_FRAMES, _selFrame, onFrameSelect);
+  makeTitleGrid('av_panel_titles', AV_TITLES, _selTitle, onTitleSelect);
+
+  updatePreview();
 }
 
 function loadCustomSkin(event) {
