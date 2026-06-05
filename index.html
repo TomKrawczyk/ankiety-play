@@ -518,7 +518,7 @@ body {
 .custom-skin-preview { width:64px; height:64px; border-radius:50%; object-fit:cover; margin:0 auto 8px; display:none; }
 
 /* ── KARTY LEADÓW ── */
-.cards-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px; }
+.cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; padding:12px 0; }
 .lead-card {
   border-radius:18px; padding:18px 12px; text-align:center; position:relative;
   overflow:hidden; border:2px solid transparent; animation:cardIn 0.4s cubic-bezier(.34,1.56,.64,1);
@@ -1040,18 +1040,6 @@ body.light .spin-box { background:var(--card); }
   </div>
 
   <div id="panel_karty" class="mpanel">
-    <div style="padding:14px 14px 0;display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div style="font-size:1em;font-weight:900;color:var(--text)">🃏 Kolekcja kart</div>
-        <div style="font-size:0.72em;color:var(--muted);margin-top:2px">Gorący lead = losowa karta</div>
-      </div>
-      <div style="text-align:right">
-        <div id="karty_total" style="font-size:1.6em;font-weight:900;color:var(--yellow)">0</div>
-        <div style="font-size:0.6em;color:var(--muted)">kart total</div>
-      </div>
-    </div>
-    <div class="cards-counter" id="cards_counter"></div>
-    <div id="cards_grid" class="cards-grid"></div>
   </div>
 
   <div id="panel_battlepass" class="mpanel">
@@ -2578,6 +2566,96 @@ function addLeadCard(clientName) {
   return card;
 }
 
+// ============================================================
+// PULA KART LEADÓW
+// ============================================================
+var CARD_POOL = {
+  common: [
+    {id:'c_spark',    icon:'⚡', name:'Iskra',           desc:'Pierwszy kontakt z klientem.',          bonus:''},
+    {id:'c_phone',    icon:'📞', name:'Zimny telefon',    desc:'Klasyczny cold call. Fundament.',       bonus:''},
+    {id:'c_door',     icon:'🚪', name:'Pukanie do drzwi', desc:'Klasyczna wizyta terenowa.',            bonus:''},
+    {id:'c_flyer',    icon:'📋', name:'Ulotka',           desc:'Klient zainteresowany ulotkę.',         bonus:''},
+    {id:'c_smile',    icon:'😊', name:'Miły klient',      desc:'Rozmowa poszła zaskakująco dobrze.',    bonus:''},
+    {id:'c_dog',      icon:'🐕', name:'Pies w ogródku',   desc:'Klasyczna przeszkoda terenowca.',       bonus:''},
+    {id:'c_rain',     icon:'🌧️', name:'Deszczowy dzień',  desc:'Pracujesz mimo niesprzyjającej pogody.',bonus:''},
+    {id:'c_sun',      icon:'☀️', name:'Słoneczny dzień',  desc:'Idealne warunki do rozmowy o PV.',      bonus:''},
+    {id:'c_curious',  icon:'🧐', name:'Ciekawski sąsiad', desc:'Klient pyta o sąsiada który kupił PV.', bonus:''},
+    {id:'c_bill',     icon:'🧾', name:'Wysoki rachunek',  desc:'Klient narzeka na rachunki za prąd.',   bonus:''},
+    {id:'c_retired',  icon:'👴', name:'Emeryt',           desc:'Spokojny klient z czasem na rozmowę.',  bonus:''},
+    {id:'c_fence',    icon:'🏡', name:'Dom z płotem',     desc:'Typowa posesja z potencjałem OZE.',     bonus:''}
+  ],
+  rare: [
+    {id:'r_hotlead',  icon:'🔥', name:'Gorący Lead',      desc:'Klient gotowy do spotkania!',           bonus:'+50 XP'},
+    {id:'r_pv_roof',  icon:'🏠', name:'Dach z potencjałem',desc:'Idealna ekspozycja na południe.',      bonus:'+30 XP'},
+    {id:'r_neighbor', icon:'🤝', name:'Polecenie sąsiada', desc:'Klient polecony przez zadowolonego sąsiada.',bonus:'+40 XP'},
+    {id:'r_grant',    icon:'💶', name:'Dotacja rządowa',   desc:'Klient słyszał o programie dofinansowania.',bonus:'+35 XP'},
+    {id:'r_family',   icon:'👨‍👩‍👧', name:'Rodzina decyzyjna',desc:'Wszyscy domownicy obecni i zainteresowani.',bonus:'+45 XP'},
+    {id:'r_bill2k',   icon:'💸', name:'Rachunek 2000+',    desc:'Klient płaci powyżej 2000 zł miesięcznie.',bonus:'+60 XP'},
+    {id:'r_hp',       icon:'🌡️', name:'Pompa ciepła',      desc:'Klient pyta o ogrzewanie pompą ciepła.',bonus:'+40 XP'},
+    {id:'r_storage',  icon:'🔋', name:'Magazyn energii',   desc:'Klient zainteresowany baterią magazynującą.',bonus:'+50 XP'},
+    {id:'r_callback', icon:'📲', name:'Oddzwonienie',      desc:'Klient sam oddzwonił po pierwszym kontakcie!',bonus:'+55 XP'},
+    {id:'r_upgrade',  icon:'⬆️', name:'Rozbudowa PV',      desc:'Klient chce zwiększyć istniejącą instalację.',bonus:'+45 XP'}
+  ],
+  epic: [
+    {id:'e_whale',    icon:'🐋', name:'Wieloryb',          desc:'Klient z budżetem 80k+. Jackpot!',      bonus:'+200 XP'},
+    {id:'e_farmer',   icon:'🌾', name:'Rolnik',            desc:'Działalność rolna + ogromne zapotrzebowanie.',bonus:'+180 XP'},
+    {id:'e_company',  icon:'🏭', name:'Firma B2B',         desc:'Klient biznesowy z dużym zużyciem energii.',bonus:'+160 XP'},
+    {id:'e_multipv',  icon:'🏘️', name:'Multi-nieruchomość',desc:'Klient posiada 2+ nieruchomości do wyposażenia.',bonus:'+150 XP'},
+    {id:'e_referral3',icon:'🌐', name:'Łańcuch poleceń',   desc:'Ten klient polecił już 3 sąsiadów z rzędu.',bonus:'+170 XP'},
+    {id:'e_instant',  icon:'✍️', name:'Instant Close',     desc:'Klient podpisał umowę na miejscu. Mistrzostwo.',bonus:'+250 XP'},
+    {id:'e_battery',  icon:'⚡🔋',name:'Full Stack',        desc:'PV + Pompa ciepła + Magazyn energii w jednym.',bonus:'+200 XP'},
+    {id:'e_thermal',  icon:'🏠🌡️',name:'Termomodernizacja', desc:'Kompleksowa modernizacja energetyczna budynku.',bonus:'+180 XP'}
+  ],
+  legendary: [
+    {id:'l_goat',     icon:'🐐', name:'G.O.A.T.',          desc:'Najlepszy wynik w historii biura. Legenda.',   bonus:'+1000 XP'},
+    {id:'l_closer',   icon:'💎', name:'The Closer',         desc:'Zamknąłeś leada w rekordowym czasie.',         bonus:'+800 XP'},
+    {id:'l_tycoon',   icon:'🏰', name:'Tycoon',            desc:'Klient inwestuje w instalację 1MW+.',          bonus:'+900 XP'},
+    {id:'l_legend',   icon:'🌟', name:'Legenda',            desc:'Twoja historia będzie opowiadana nowym.',      bonus:'+750 XP'},
+    {id:'l_god',      icon:'👑', name:'GOD MODE',           desc:'Perfekcyjny dzień — każdy lead był gorący.',   bonus:'+1000 XP'}
+  ]
+};
+
+function drawRandomCard(forceRarity) {
+  var CARD_WEIGHTS = {common:60, rare:28, epic:10, legendary:2};
+  var rarity = forceRarity;
+  if(!rarity) {
+    var total = Object.values(CARD_WEIGHTS).reduce(function(a,b){return a+b;},0);
+    var r = Math.random()*total, cum=0;
+    var tiers = ['common','rare','epic','legendary'];
+    for(var i=0;i<tiers.length;i++){
+      cum += CARD_WEIGHTS[tiers[i]];
+      if(r < cum){ rarity=tiers[i]; break; }
+    }
+  }
+  var pool = CARD_POOL[rarity] || CARD_POOL.common;
+  var def = pool[Math.floor(Math.random()*pool.length)];
+  return {
+    id:    def.id+'_'+Date.now(),
+    defId: def.id,
+    icon:  def.icon,
+    name:  def.name,
+    desc:  def.desc,
+    bonus: def.bonus,
+    rarity: rarity,
+    date:  new Date().toLocaleDateString('pl-PL')
+  };
+}
+
+function saveCards(user, cards) {
+  var k = '4eco_cards_'+(user||'anon').toLowerCase();
+  localStorage.setItem(k, JSON.stringify(cards));
+}
+
+function awardCard(user, forceRarity) {
+  var cards = getCards();
+  var card = drawRandomCard(forceRarity);
+  cards.unshift(card);
+  if(cards.length > 100) cards = cards.slice(0,100);
+  saveCards(user||window._user||'anon', cards);
+  return card;
+}
+
+
 function getCards() {
   var k = '4eco_cards_' + (window._user||'anon').toLowerCase();
   try { return JSON.parse(localStorage.getItem(k)) || []; } catch(e) { return []; }
@@ -2585,32 +2663,191 @@ function getCards() {
 
 function renderKarty() {
   var cards = getCards();
+  var panel = document.getElementById('panel_karty');
+  if(!panel) return;
+
+  var RARITY_CFG = {
+    common:    {label:'Common',    color:'#94a3b8', glow:'rgba(148,163,184,0.3)', star:'⬜'},
+    rare:      {label:'Rare',      color:'#60a5fa', glow:'rgba(96,165,250,0.4)',  star:'🔵'},
+    epic:      {label:'Epic',      color:'#a78bfa', glow:'rgba(167,139,250,0.5)', star:'🟣'},
+    legendary: {label:'Legendary', color:'#fbbf24', glow:'rgba(251,191,36,0.6)',  star:'🟡'}
+  };
+
+  // Counts
+  var counts = {common:0, rare:0, epic:0, legendary:0};
+  cards.forEach(function(c){ counts[c.rarity] = (counts[c.rarity]||0)+1; });
+  var totalCards = cards.length;
+
+  // Album progress (unique defs collected)
+  var uniqueIds = {};
+  cards.forEach(function(c){ uniqueIds[c.defId||c.id] = true; });
+  var uniqueCount = Object.keys(uniqueIds).length;
+  var totalDefs = Object.values(CARD_POOL).reduce(function(a,arr){return a+arr.length;},0);
+  var progress = totalDefs > 0 ? Math.round(uniqueCount/totalDefs*100) : 0;
+
+  // Active filter
+  var _filter = window.__karty_filter || 'all';
+
+  panel.innerHTML =
+    // HEADER
+    '<div style="padding:14px 14px 8px">'
+
+    // Stats row
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'
+    +'<div style="background:var(--card2);border:1px solid var(--border2);border-radius:14px;padding:12px;text-align:center">'
+    +'<div style="font-size:1.8em;font-weight:900;color:var(--yellow)">'+totalCards+'</div>'
+    +'<div style="font-size:0.6em;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Kart łącznie</div>'
+    +'</div>'
+    +'<div style="background:var(--card2);border:1px solid var(--border2);border-radius:14px;padding:12px;text-align:center">'
+    +'<div style="font-size:1.8em;font-weight:900;color:var(--green)">'+uniqueCount+'/'+totalDefs+'</div>'
+    +'<div style="font-size:0.6em;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Album</div>'
+    +'</div>'
+    +'</div>'
+
+    // Progress bar albumu
+    +'<div style="background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;margin-bottom:12px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+    +'<span style="font-size:0.7em;font-weight:800;color:var(--text)">📖 Postęp albumu</span>'
+    +'<span style="font-size:0.7em;font-weight:900;color:var(--green)">'+progress+'%</span>'
+    +'</div>'
+    +'<div style="height:6px;background:var(--bg3);border-radius:6px;overflow:hidden">'
+    +'<div style="height:100%;width:'+progress+'%;background:linear-gradient(90deg,var(--green),#00ccff);border-radius:6px;transition:width 0.5s"></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px">'
+    +['common','rare','epic','legendary'].map(function(r){
+        var cfg=RARITY_CFG[r];
+        var poolSize=CARD_POOL[r].length;
+        var uniq=0;
+        var seenDefs={};
+        cards.forEach(function(c){if(c.rarity===r) seenDefs[c.defId||c.id]=true;});
+        uniq=Object.keys(seenDefs).length;
+        return '<div style="text-align:center;background:var(--bg3);border-radius:8px;padding:6px 2px">'
+          +'<div style="font-size:0.55em;color:'+cfg.color+';font-weight:900">'+cfg.star+' '+cfg.label+'</div>'
+          +'<div style="font-size:0.8em;font-weight:900;color:var(--text)">'+uniq+'/'+poolSize+'</div>'
+          +'</div>';
+      }).join('')
+    +'</div>'
+    +'</div>'
+
+    // Filter tabs
+    +'<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px" id="karty_filter_row">'
+    +['all','common','rare','epic','legendary'].map(function(f){
+        var cfg = f==='all' ? {label:'Wszystkie',color:'var(--text)',star:'🃏'} : RARITY_CFG[f];
+        var cnt = f==='all' ? totalCards : counts[f]||0;
+        var active = _filter===f;
+        return '<button onclick="window.__karty_filter=\''+f+'\';renderKarty();"'
+          +' style="flex-shrink:0;background:'+(active?'var(--card2)':'var(--card)')+';'
+          +'border:'+(active?'2px solid '+(f==='all'?'var(--green)':RARITY_CFG[f]?RARITY_CFG[f].color:'var(--green)'):'1.5px solid var(--border2)')+';'
+          +'border-radius:10px;padding:6px 12px;font-size:0.68em;font-weight:800;color:'+(active?(f==='all'?'var(--green)':RARITY_CFG[f].color):'var(--muted2)')+';cursor:pointer;font-family:Inter,sans-serif">'
+          +(f==='all'?'🃏':RARITY_CFG[f].star)+' '+(f==='all'?'Wszystkie':RARITY_CFG[f].label)+' ('+cnt+')'
+          +'</button>';
+      }).join('')
+    +'</div>'
+
+    // Karty button
+    +'<button onclick="var c=awardCard(window._user,null);renderKarty();showCardReveal(c);" '
+    +'style="width:100%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;border:none;border-radius:14px;padding:13px;font-size:0.85em;font-weight:900;cursor:pointer;margin-bottom:10px;letter-spacing:0.3px">🎴 Losuj kartę (demo)</button>'
+
+    // Grid kart
+    +'<div id="cards_grid" class="cards-grid"></div>'
+    +'</div>';
+
+  // Renderuj grida
+  var filtered = _filter === 'all' ? cards : cards.filter(function(c){return c.rarity===_filter;});
+
   var el = document.getElementById('cards_grid');
-  var counter = document.getElementById('cards_counter');
-  var total = document.getElementById('karty_total');
-  total.textContent = cards.length;
+  if(!el) return;
 
-  var counts = {common:0,rare:0,epic:0,legendary:0};
-  cards.forEach(function(c){counts[c.rarity]=(counts[c.rarity]||0)+1;});
-  var rarityLabels = {common:'⬜ Common',rare:'🔵 Rare',epic:'🟣 Epic',legendary:'🟡 Legendary'};
-  counter.innerHTML = Object.keys(counts).filter(function(r){return counts[r]>0;}).map(function(r){
-    return '<span class="cc-badge '+r+'">'+rarityLabels[r]+' ×'+counts[r]+'</span>';
-  }).join('');
-
-  if(cards.length===0) {
-    el.innerHTML = '<div class="cards-empty" style="grid-column:1/-1">🃏 Brak kart<br><span style="font-size:0.85em">Zdobywaj karty za każdy Gorący lead!</span></div>';
+  if(filtered.length===0) {
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--muted)">'
+      +(totalCards===0
+        ? '🃏 Brak kart<br><span style="font-size:0.85em">Zdobywaj karty za każdy Gorący lead!</span>'
+        : '🔍 Brak kart w tej kategorii')
+      +'</div>';
     return;
   }
-  el.innerHTML = cards.slice(0,30).map(function(c){
-    return '<div class="lead-card '+c.rarity+'">' +
-      '<div class="card-rarity '+c.rarity+'">'+c.rarity.toUpperCase()+'</div>'+
-      '<div class="card-icon">'+c.icon+'</div>'+
-      '<div class="card-name">'+c.name+'</div>'+
-      '<div class="card-date">'+c.date+'</div>'+
-      '<div class="card-shine"></div>'+
-      '</div>';
+
+  el.innerHTML = filtered.slice(0,60).map(function(c){
+    var cfg = RARITY_CFG[c.rarity] || RARITY_CFG.common;
+    var isLeg = c.rarity==='legendary';
+    return '<div class="lead-card '+c.rarity+'" onclick="showCardDetail('+JSON.stringify(c)+')" style="cursor:pointer;box-shadow:0 4px 16px '+cfg.glow+'">'
+      +'<div style="position:absolute;top:8px;right:8px;font-size:0.5em;font-weight:900;color:'+cfg.color+';letter-spacing:1px;text-transform:uppercase">'+cfg.star+' '+cfg.label+'</div>'
+      +(isLeg?'<div class="card-shine"></div>':'')
+      +'<div style="font-size:2.2em;margin:8px 0 4px;filter:drop-shadow(0 0 8px '+cfg.glow+')">'+c.icon+'</div>'
+      +'<div style="font-size:0.78em;font-weight:900;color:var(--text);line-height:1.2;margin-bottom:4px">'+c.name+'</div>'
+      +(c.bonus?'<div style="font-size:0.58em;color:'+cfg.color+';font-weight:800;margin-bottom:2px">'+c.bonus+'</div>':'')
+      +'<div style="font-size:0.52em;color:var(--muted);margin-top:4px">'+c.date+'</div>'
+      +'</div>';
   }).join('');
+
+  if(filtered.length > 60) {
+    el.innerHTML += '<div style="grid-column:1/-1;text-align:center;padding:12px;font-size:0.7em;color:var(--muted)">...i jeszcze '+(filtered.length-60)+' kart</div>';
+  }
 }
+
+function showCardDetail(card) {
+  var RARITY_CFG = {
+    common:    {label:'Common',    color:'#94a3b8', bg:'linear-gradient(135deg,#1e293b,#334155)', glow:'rgba(148,163,184,0.3)'},
+    rare:      {label:'Rare',      color:'#60a5fa', bg:'linear-gradient(135deg,#1e3a5f,#1d4ed8)', glow:'rgba(96,165,250,0.4)'},
+    epic:      {label:'Epic',      color:'#a78bfa', bg:'linear-gradient(135deg,#2d1b69,#7c3aed)', glow:'rgba(167,139,250,0.5)'},
+    legendary: {label:'Legendary', color:'#fbbf24', bg:'linear-gradient(135deg,#451a03,#b45309)', glow:'rgba(251,191,36,0.6)'}
+  };
+  var cfg = RARITY_CFG[card.rarity]||RARITY_CFG.common;
+
+  var ov = document.getElementById('cardDetailOverlay');
+  if(!ov) {
+    ov = document.createElement('div');
+    ov.id = 'cardDetailOverlay';
+    ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)';
+    ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML =
+    '<div style="background:'+cfg.bg+';border:2px solid '+cfg.color+';border-radius:24px;padding:32px 24px;text-align:center;max-width:300px;width:100%;box-shadow:0 0 40px '+cfg.glow+';animation:cardIn 0.35s cubic-bezier(.34,1.56,.64,1)">'
+    +'<div style="font-size:0.6em;font-weight:900;color:'+cfg.color+';letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">'+cfg.label+'</div>'
+    +'<div style="font-size:4em;margin:8px 0;filter:drop-shadow(0 0 12px '+cfg.glow+')">'+card.icon+'</div>'
+    +'<div style="font-size:1.1em;font-weight:900;color:#fff;margin:8px 0">'+card.name+'</div>'
+    +'<div style="font-size:0.75em;color:rgba(255,255,255,0.7);margin:8px 0 16px;line-height:1.4">'+card.desc+'</div>'
+    +(card.bonus?'<div style="display:inline-block;background:rgba(0,0,0,0.3);border:1px solid '+cfg.color+';border-radius:20px;padding:6px 16px;font-size:0.72em;font-weight:900;color:'+cfg.color+';margin-bottom:16px">'+card.bonus+'</div><br>':'')
+    +'<div style="font-size:0.6em;color:rgba(255,255,255,0.4);margin-bottom:20px">Zdobyta: '+card.date+'</div>'
+    +'<button onclick="document.getElementById(\'cardDetailOverlay\').remove()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:10px 28px;color:#fff;font-size:0.8em;font-weight:800;cursor:pointer;font-family:Inter,sans-serif">Zamknij</button>'
+    +'</div>';
+  ov.style.display='flex';
+}
+
+function showCardReveal(card) {
+  var RARITY_CFG = {
+    common:    {label:'Common',    color:'#94a3b8', bg:'linear-gradient(135deg,#1e293b,#334155)', glow:'rgba(148,163,184,0.3)', fanfare:''},
+    rare:      {label:'Rare',      color:'#60a5fa', bg:'linear-gradient(135deg,#1e3a5f,#1d4ed8)', glow:'rgba(96,165,250,0.4)', fanfare:'🎉'},
+    epic:      {label:'Epic',      color:'#a78bfa', bg:'linear-gradient(135deg,#2d1b69,#7c3aed)', glow:'rgba(167,139,250,0.5)', fanfare:'✨🎉✨'},
+    legendary: {label:'Legendary', color:'#fbbf24', bg:'linear-gradient(135deg,#451a03,#b45309)', glow:'rgba(251,191,36,0.6)', fanfare:'🌟👑🌟 LEGENDARY! 👑🌟'}
+  };
+  var cfg = RARITY_CFG[card.rarity]||RARITY_CFG.common;
+
+  var ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(12px)';
+  
+  if(card.rarity==='legendary'||card.rarity==='epic') {
+    ov.style.background = 'radial-gradient(circle at center, rgba('+( card.rarity==='legendary'?'251,191,36':'167,139,250')+',0.15) 0%, rgba(0,0,0,0.95) 70%)';
+  }
+
+  ov.innerHTML =
+    '<div style="font-size:0.85em;color:var(--muted);margin-bottom:20px;text-align:center">'+( cfg.fanfare||'Nowa karta!')+'</div>'
+    +'<div style="background:'+cfg.bg+';border:2px solid '+cfg.color+';border-radius:24px;padding:36px 28px;text-align:center;max-width:280px;width:100%;box-shadow:0 0 60px '+cfg.glow+',0 0 120px '+cfg.glow+';animation:cardIn 0.5s cubic-bezier(.34,1.56,.64,1)">'
+    +'<div style="font-size:0.6em;font-weight:900;color:'+cfg.color+';letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">'+cfg.label+'</div>'
+    +'<div style="font-size:4.5em;margin:8px 0 16px;animation:cardIn 0.6s cubic-bezier(.34,1.56,.64,1)">'+card.icon+'</div>'
+    +'<div style="font-size:1.15em;font-weight:900;color:#fff;margin-bottom:8px">'+card.name+'</div>'
+    +'<div style="font-size:0.72em;color:rgba(255,255,255,0.7);line-height:1.4;margin-bottom:14px">'+card.desc+'</div>'
+    +(card.bonus?'<div style="background:rgba(0,0,0,0.4);border:1px solid '+cfg.color+';border-radius:20px;padding:7px 18px;font-size:0.75em;font-weight:900;color:'+cfg.color+';margin-bottom:4px;display:inline-block">'+card.bonus+'</div>':'')
+    +'</div>'
+    +'<button onclick="this.parentElement.remove()" style="margin-top:24px;background:var(--green);color:#000;border:none;border-radius:14px;padding:14px 40px;font-size:0.9em;font-weight:900;cursor:pointer;font-family:Inter,sans-serif">OK!</button>';
+
+  document.body.appendChild(ov);
+  if(card.rarity==='legendary') {
+    setTimeout(function(){ floatXP('🌟 LEGENDARY! 🌟'); }, 300);
+  }
+}
+
 
 function showNewCard(card, clientName) {
   var rarityNames = {common:'Common 🃏',rare:'Rare 🔵',epic:'Epic 🟣',legendary:'LEGENDARY 🟡'};
@@ -2842,9 +3079,16 @@ var _origShowSuccess = showSuccess;
 showSuccess = function(xp, temp, typ, data) {
   _origShowSuccess(xp, temp, typ, data);
   if(temp === 'Gorący') {
-    var card = addLeadCard(data && data.imie ? data.imie : 'Lead');
-    showNewCard(card, data && data.imie ? data.imie : 'Lead');
-    setTimeout(function(){ showSpin(xp); }, 2500);
+    // Losuj kartę - gorący lead = min. rare
+    var weights = [0, 55, 35, 10]; // [common=0%, rare=55%, epic=35%, legendary=10%]
+    var total = weights.reduce(function(a,b){return a+b;},0);
+    var r = Math.random()*total, cum=0;
+    var tiers=['common','rare','epic','legendary'];
+    var forceRarity = 'rare';
+    for(var i=0;i<weights.length;i++){cum+=weights[i];if(r<cum){forceRarity=tiers[i];break;}}
+    var card = awardCard(window._user, forceRarity);
+    showCardReveal(card);
+    setTimeout(function(){ showSpin(xp); }, 3000);
   }
 };
 
