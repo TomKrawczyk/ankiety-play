@@ -320,7 +320,7 @@ function renderKarty() {
     sorted.forEach(function(card) {
       var rc = RARITY_COLORS[card.rarity||'common'];
       var cardJson = JSON.stringify(card).replace(/"/g,'&quot;');
-      html += '<div onclick="showCardDetail('+cardJson+')" style="background:var(--card2);border:1.5px solid '+rc+';border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;box-shadow:0 0 12px rgba(0,0,0,0.3);transition:transform 0.15s;position:relative;-webkit-tap-highlight-color:transparent" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">' +
+      html += '<div onclick="showCardDetail('+cardJson+')" style="background:var(--card2);border:1.5px solid '+rc+';border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;box-shadow:0 0 12px rgba(0,0,0,0.3);transition:transform 0.15s;position:relative;-webkit-tap-highlight-color:transparent" class="card-tap">' +
         '<div style="position:absolute;top:6px;right:8px;font-size:0.48em;font-weight:900;color:'+rc+';text-transform:uppercase;letter-spacing:0.5px">'+RARITY_LABELS[card.rarity||'common']+'</div>' +
         '<div style="font-size:2.2em;margin:8px 0 6px;filter:drop-shadow(0 0 6px rgba(0,0,0,0.5))">'+card.icon+'</div>' +
         '<div style="font-size:0.7em;font-weight:900;color:var(--text);line-height:1.2">'+card.name+'</div>' +
