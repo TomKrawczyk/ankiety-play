@@ -153,6 +153,7 @@ body {
 }
 .hdr-name { font-weight:800; font-size:0.88em; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px; }
 .hdr-lv { font-size:0.68em; color:var(--green); font-weight:700; }
+.hdr-title { font-size:0.66em; font-weight:800; line-height:1.2; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px; }
 .hdr-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
 .xp-pill {
   background:var(--bg3); border:1px solid rgba(0,255,136,0.25); border-radius:20px;

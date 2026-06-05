@@ -80,6 +80,14 @@ var AV_TITLES = [
   {id:'goat',       label:'🐐 G.O.A.T.',         req:15000,tier:'legendary', color:'#ffd700'}
 ];
 
+// ── Tytuł avatara danego usera (z localStorage) ───────────────
+function getTitle(name) {
+  var key = '4eco_av_title_' + (name || window._user || '');
+  var id  = localStorage.getItem(key) || 'none';
+  var t   = AV_TITLES.find(function(x){ return x.id === id; }) || AV_TITLES[0];
+  return t; // {id,label,req,tier,color}
+}
+
 // ── LocalStorage helpers ──────────────────────────────────────
 function getAvatar(name) {
   var k = 'av_' + (name || window._user || 'anon').toLowerCase();

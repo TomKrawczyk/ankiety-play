@@ -106,6 +106,21 @@ function updateUI(name) {
   el = document.getElementById('stStreak');   if(el) el.textContent = s.streak + '🔥';
   el = document.getElementById('stHot');      if(el) el.textContent = s.hot;
   el = document.getElementById('stToday');    if(el) el.textContent = s.today;
+  // Tytuł avatara w nagłówku
+  if (typeof getTitle === 'function') {
+    var _t = getTitle(name);
+    el = document.getElementById('hdrTitle');
+    if (el) {
+      if (_t && _t.label) {
+        el.innerHTML = _t.label;
+        el.style.color = _t.color || 'var(--muted2)';
+        el.style.display = 'block';
+      } else {
+        el.textContent = '';
+        el.style.display = 'none';
+      }
+    }
+  }
   el = document.getElementById('profileName'); if(el) el.textContent = name;
   el = document.getElementById('profileLevel');if(el) el.textContent = lv.icon + ' ' + lv.name + ' — Level ' + lv.level;
   renderMissions(s);
