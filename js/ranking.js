@@ -47,7 +47,7 @@ function _drawRankingLocal() {
 function _avHTML(name, size, fontSize) {
   var av        = (typeof getAvatar === 'function') ? getAvatar(name) : {};
   var ico       = AV_ICONS.find(function(x){return x.id===(av.icon||'default');})  || {emoji:'⚡'};
-  var clr       = AV_COLORS.find(function(x){return x.id===(av.color||'green');}) || {bg:'linear-gradient(135deg,#00ff88,#00cc6a)'};
+  var clr       = AV_COLORS.find(function(x){return x.id===(av.color||'green');}) || {bg:'linear-gradient(135deg,#10d873,#0baf5e)'};
   var frm       = AV_FRAMES.find(function(x){return x.id===(av.frame||'none');})  || {css:'none'};
   var customImg = localStorage.getItem('av_custom_' + (name||'').toLowerCase());
   var avBg      = customImg ? 'transparent' : clr.bg;
@@ -156,7 +156,7 @@ function _drawRanking(list) {
       var val    = u[_rankTab] || 0;
       var pct    = maxVal > 0 ? Math.round((val / maxVal) * 100) : 0;
       var borderClr = isMe ? 'var(--green)' : 'var(--border2)';
-      var cardBg    = isMe ? 'linear-gradient(135deg,rgba(0,255,136,0.08),rgba(0,255,136,0.03))' : 'var(--card)';
+      var cardBg    = isMe ? 'linear-gradient(135deg,rgba(16,216,115,0.08),rgba(16,216,115,0.03))' : 'var(--card)';
       var ttlLine = (ttl && ttl.label)
         ? ' \u00b7 <span style="color:'+ttl.color+';font-weight:800">'+ttl.label+'</span>'
         : '';

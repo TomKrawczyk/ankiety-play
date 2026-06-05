@@ -171,7 +171,7 @@ function lvFlash() {
 }
 
 function confettiBlast() {
-  var cols = ['#00ff88','#a78bfa','#60a5fa','#fb923c','#fbbf24','#f87171'];
+  var cols = ['#10d873','#a78bfa','#60a5fa','#fb923c','#fbbf24','#f87171'];
   for (var i = 0; i < 50; i++) {
     var el = document.createElement('div'); el.className = 'confetti-p';
     el.style.cssText = 'left:'+Math.random()*100+'vw;top:-10px;width:'+(5+Math.random()*6)+'px;height:'+(5+Math.random()*6)+'px;background:'+cols[Math.floor(Math.random()*cols.length)]+';animation-duration:'+(0.8+Math.random()*0.9)+'s;animation-delay:'+Math.random()*0.4+'s';
@@ -217,7 +217,7 @@ function renderLokalizacja() {
   if (!cur) return;
   if (kod || msc) {
     cur.innerHTML = '📍 Aktualna: <strong style="color:var(--text)">' + (kod||'?') + ' ' + (msc||'?') + '</strong>';
-    cur.style.borderColor = 'rgba(0,255,136,0.3)';
+    cur.style.borderColor = 'rgba(16,216,115,0.3)';
   } else {
     cur.innerHTML = 'Brak zapisanej lokalizacji';
     cur.style.borderColor = 'var(--border)';

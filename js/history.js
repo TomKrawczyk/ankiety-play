@@ -33,7 +33,7 @@ function renderHistory() {
     el.innerHTML = '<div class="hempty">📭 Brak zapisanych ankiet<br><span style="font-size:0.85em">Zapisane ankiety pojawią się tutaj</span></div>';
     return;
   }
-  var tempCol = {Zimny:'#60a5fa',Letni:'#fbbf24',Ciepły:'#fb923c',Gorący:'#00ff88'};
+  var tempCol = {Zimny:'#60a5fa',Letni:'#fbbf24',Ciepły:'#fb923c',Gorący:'#10d873'};
   var tempEm  = {Zimny:'🔵',Letni:'🟡',Ciepły:'🟠',Gorący:'🔥'};
   var html = '<div style="font-size:0.72em;color:var(--muted);margin-bottom:10px">'+hist.length+' zapisanych ankiet</div>';
   hist.forEach(function(h, i) {

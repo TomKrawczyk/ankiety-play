@@ -26,11 +26,21 @@ var AV_ICONS = [
   {id:'unicorn',  emoji:'🦄', name:'Jednorożec',         req:6000, tier:'legendary'},
   {id:'galaxy',   emoji:'🌌', name:'Galaxy Brain',       req:8000, tier:'legendary'},
   {id:'god',      emoji:'🌟', name:'GOD MODE',           req:10000,tier:'legendary'},
-  {id:'goat',     emoji:'🐐', name:'G.O.A.T.',           req:15000,tier:'legendary'}
+  {id:'goat',     emoji:'🐐', name:'G.O.A.T.',           req:15000,tier:'legendary'},
+  {id:'sun',      emoji:'☀️', name:'Słońce',             req:90,   tier:'common'},
+  {id:'leaf',     emoji:'🍃', name:'Liść',               req:160,  tier:'common'},
+  {id:'lightning2',emoji:'🌩️', name:'Burza',             req:320,  tier:'rare'},
+  {id:'fox',      emoji:'🦊', name:'Lis',                req:550,  tier:'rare'},
+  {id:'owl',      emoji:'🦉', name:'Sowa Mędrzec',       req:700,  tier:'rare'},
+  {id:'tiger',    emoji:'🐯', name:'Tygrys',             req:1700, tier:'epic'},
+  {id:'comet',    emoji:'☄️', name:'Kometa',             req:2800, tier:'epic'},
+  {id:'shield',   emoji:'🛡️', name:'Strażnik',           req:4500, tier:'epic'},
+  {id:'trophy',   emoji:'🏆', name:'Mistrz',             req:7000, tier:'legendary'},
+  {id:'infinity', emoji:'♾️', name:'Infinity',           req:20000,tier:'legendary'}
 ];
 
 var AV_COLORS = [
-  {id:'green',   bg:'linear-gradient(135deg,#00ff88,#00cc6a)',                  name:'Neon Green',  req:0,    tier:'common'},
+  {id:'green',   bg:'linear-gradient(135deg,#10d873,#0baf5e)',                  name:'Neon Green',  req:0,    tier:'common'},
   {id:'blue',    bg:'linear-gradient(135deg,#60a5fa,#3b82f6)',                  name:'Ocean',       req:0,    tier:'common'},
   {id:'teal',    bg:'linear-gradient(135deg,#2dd4bf,#0d9488)',                  name:'Teal',        req:150,  tier:'common'},
   {id:'pink',    bg:'linear-gradient(135deg,#f472b6,#ec4899)',                  name:'Bubblegum',   req:250,  tier:'common'},
@@ -38,29 +48,49 @@ var AV_COLORS = [
   {id:'purple',  bg:'linear-gradient(135deg,#a78bfa,#7c3aed)',                  name:'Galaxy',      req:500,  tier:'common'},
   {id:'red',     bg:'linear-gradient(135deg,#f87171,#ef4444)',                  name:'Blood Moon',  req:800,  tier:'rare'},
   {id:'gold',    bg:'linear-gradient(135deg,#fbbf24,#d97706)',                  name:'Złoto',       req:1200, tier:'rare'},
-  {id:'cyber',   bg:'linear-gradient(135deg,#00f5ff,#0088ff)',                  name:'Cyber Blue',  req:1500, tier:'rare'},
+  {id:'cyber',   bg:'linear-gradient(135deg,#22b8d6,#2563eb)',                  name:'Cyber Blue',  req:1500, tier:'rare'},
   {id:'forest',  bg:'linear-gradient(135deg,#4ade80,#166534)',                  name:'Deep Forest', req:2000, tier:'rare'},
-  {id:'rainbow', bg:'linear-gradient(135deg,#f87171,#fbbf24,#00ff88,#60a5fa,#a78bfa)', name:'Tęcza', req:3000, tier:'epic'},
-  {id:'lava',    bg:'linear-gradient(135deg,#ff6b00,#ff0000,#800000)',          name:'Lava',        req:3500, tier:'epic'},
-  {id:'neon',    bg:'linear-gradient(135deg,#ff00ff,#00ffff)',                  name:'Neon Vice',   req:4000, tier:'epic'},
+  {id:'rainbow', bg:'linear-gradient(135deg,#f87171,#fbbf24,#34d399,#60a5fa,#a78bfa)', name:'Tęcza', req:3000, tier:'epic'},
+  {id:'lava',    bg:'linear-gradient(135deg,#ea580c,#b91c1c,#7f1d1d)',          name:'Lava',        req:3500, tier:'epic'},
+  {id:'neon',    bg:'linear-gradient(135deg,#c026d3,#06b6d4)',                  name:'Neon Vice',   req:4000, tier:'epic'},
   {id:'dark',    bg:'linear-gradient(135deg,#1e293b,#475569)',                  name:'Shadow',      req:5000, tier:'legendary'},
   {id:'void',    bg:'linear-gradient(135deg,#000000,#1a0030,#000000)',          name:'Void',        req:8000, tier:'legendary'},
-  {id:'divine',  bg:'linear-gradient(135deg,#fff7ae,#ffd700,#ff8c00,#ffd700)', name:'Divine Gold', req:12000,tier:'legendary'}
+  {id:'divine',  bg:'linear-gradient(135deg,#fff7ae,#ffd700,#ff8c00,#ffd700)', name:'Divine Gold', req:12000,tier:'legendary'},
+  {id:'mint',    bg:'linear-gradient(135deg,#6ee7b7,#34d399)',                  name:'Mięta',       req:0,    tier:'common'},
+  {id:'sky',     bg:'linear-gradient(135deg,#93c5fd,#60a5fa)',                  name:'Niebo',       req:120,  tier:'common'},
+  {id:'lavender',bg:'linear-gradient(135deg,#c4b5fd,#a78bfa)',                  name:'Lawenda',     req:300,  tier:'common'},
+  {id:'coral',   bg:'linear-gradient(135deg,#fda4af,#fb7185)',                  name:'Koral',       req:450,  tier:'common'},
+  {id:'amber',   bg:'linear-gradient(135deg,#fcd34d,#f59e0b)',                  name:'Bursztyn',    req:650,  tier:'rare'},
+  {id:'slate',   bg:'linear-gradient(135deg,#94a3b8,#475569)',                  name:'Grafit',      req:1000, tier:'rare'},
+  {id:'emerald', bg:'linear-gradient(135deg,#34d399,#059669)',                  name:'Szmaragd',    req:1600, tier:'rare'},
+  {id:'plum',    bg:'linear-gradient(135deg,#d8b4fe,#9333ea,#6b21a8)',          name:'Śliwka',      req:2400, tier:'epic'},
+  {id:'aurora',  bg:'linear-gradient(135deg,#5eead4,#818cf8,#c084fc)',          name:'Zorza',       req:4200, tier:'epic'},
+  {id:'obsidian',bg:'linear-gradient(135deg,#334155,#0f172a,#1e293b)',          name:'Obsydian',    req:9000, tier:'legendary'}
 ];
 
 var AV_FRAMES = [
   {id:'none',       css:'none',                                                                      name:'Brak',          req:0,    tier:'common'},
-  {id:'glow',       css:'0 0 12px rgba(0,255,136,0.7)',                                              name:'Zielony glow',  req:200,  tier:'common'},
+  {id:'glow',       css:'0 0 12px rgba(16,216,115,0.7)',                                              name:'Zielony glow',  req:200,  tier:'common'},
   {id:'blue_glow',  css:'0 0 12px rgba(96,165,250,0.8)',                                             name:'Niebieski glow',req:400,  tier:'common'},
-  {id:'pulse',      css:'0 0 0 3px rgba(0,255,136,0.6),0 0 16px rgba(0,255,136,0.3)',                name:'Pulse',         req:600,  tier:'rare'},
+  {id:'pulse',      css:'0 0 0 3px rgba(16,216,115,0.6),0 0 16px rgba(16,216,115,0.3)',                name:'Pulse',         req:600,  tier:'rare'},
   {id:'pink_halo',  css:'0 0 16px rgba(244,114,182,0.9)',                                            name:'Pink Halo',     req:900,  tier:'rare'},
   {id:'gold',       css:'0 0 16px rgba(245,158,11,0.9),0 0 0 2px rgba(245,158,11,0.4)',              name:'Złota',         req:1200, tier:'rare'},
-  {id:'cyber',      css:'0 0 0 2px #00f5ff,0 0 20px rgba(0,245,255,0.5)',                            name:'Cyber',         req:1800, tier:'rare'},
+  {id:'cyber',      css:'0 0 0 2px #22b8d6,0 0 18px rgba(34,184,214,0.4)',                            name:'Cyber',         req:1800, tier:'rare'},
   {id:'rainbow',    css:'0 0 20px rgba(167,139,250,0.9)',                                            name:'Aura Tęczy',    req:2500, tier:'epic'},
   {id:'fire',       css:'0 0 24px rgba(251,146,60,1),0 0 0 2px rgba(239,68,68,0.6)',                 name:'Płomień',       req:3500, tier:'epic'},
   {id:'void',       css:'0 0 0 3px rgba(139,92,246,0.8),0 0 24px rgba(139,92,246,0.5),0 0 40px rgba(139,92,246,0.2)', name:'Void Aura', req:5000, tier:'epic'},
   {id:'divine',     css:'0 0 0 3px rgba(255,215,0,1),0 0 30px rgba(255,215,0,0.7),0 0 60px rgba(255,165,0,0.4)',     name:'Divine',    req:8000, tier:'legendary'},
-  {id:'singularity',css:'0 0 0 2px #fff,0 0 20px #fff,0 0 40px rgba(255,255,255,0.5)',               name:'Singularity',  req:12000,tier:'legendary'}
+  {id:'singularity',css:'0 0 0 2px #fff,0 0 20px #fff,0 0 40px rgba(255,255,255,0.5)',               name:'Singularity',  req:12000,tier:'legendary'},
+  {id:'soft_mint', css:'0 0 12px rgba(52,211,153,0.55)',                                            name:'Miętowy blask',  req:120,  tier:'common'},
+  {id:'sky_ring',  css:'0 0 0 2px rgba(96,165,250,0.5),0 0 14px rgba(96,165,250,0.4)',              name:'Niebieski pierścień',req:350,tier:'common'},
+  {id:'amber_soft',css:'0 0 14px rgba(245,158,11,0.55)',                                            name:'Bursztynowa poświata',req:700,tier:'rare'},
+  {id:'lavender_halo',css:'0 0 16px rgba(167,139,250,0.6)',                                         name:'Lawendowe halo', req:1000, tier:'rare'},
+  {id:'coral_glow',css:'0 0 14px rgba(251,113,133,0.55)',                                           name:'Koralowy blask', req:1400, tier:'rare'},
+  {id:'emerald_ring',css:'0 0 0 2px rgba(16,185,129,0.6),0 0 16px rgba(16,185,129,0.35)',           name:'Szmaragdowy ring',req:2000,tier:'epic'},
+  {id:'dual_ring', css:'0 0 0 2px rgba(96,165,250,0.6),0 0 0 4px rgba(167,139,250,0.4)',            name:'Podwójny pierścień',req:3000,tier:'epic'},
+  {id:'aurora_aura',css:'0 0 18px rgba(129,140,248,0.5),0 0 30px rgba(192,132,252,0.3)',            name:'Aura zorzy',     req:4500, tier:'epic'},
+  {id:'frost',     css:'0 0 0 2px rgba(186,230,253,0.7),0 0 20px rgba(125,211,252,0.4)',            name:'Szron',          req:6500, tier:'legendary'},
+  {id:'eclipse',   css:'0 0 0 3px rgba(15,23,42,0.9),0 0 0 5px rgba(148,163,184,0.5),0 0 22px rgba(100,116,139,0.4)', name:'Zaćmienie', req:10000,tier:'legendary'}
 ];
 
 var AV_TITLES = [
@@ -108,7 +138,7 @@ function saveAvatar(name, icon, color, frame) {
 function applyAvatarToHeader() {
   var av  = getAvatar(window._user);
   var ico = AV_ICONS.find(function(x){return x.id === (av.icon||'default');}) || {emoji:'⚡'};
-  var clr = AV_COLORS.find(function(x){return x.id === (av.color||'green');}) || {bg:'linear-gradient(135deg,#00ff88,#00cc6a)'};
+  var clr = AV_COLORS.find(function(x){return x.id === (av.color||'green');}) || {bg:'linear-gradient(135deg,#10d873,#0baf5e)'};
   var frm = AV_FRAMES.find(function(x){return x.id === (av.frame||'none');}) || {css:'none'};
   // UWAGA: element ma id="hdrAv" (nie hdrAvatar)
   var el = document.getElementById('hdrAv');
@@ -148,7 +178,7 @@ function toggleProfileOverlay() {
     // odśwież avatar w overlay
     var av  = getAvatar(window._user);
     var ico = AV_ICONS.find(function(x){return x.id===(av.icon||'default');}) || {emoji:'⚡'};
-    var clr = AV_COLORS.find(function(x){return x.id===(av.color||'green');}) || {bg:'linear-gradient(135deg,#00ff88,#00cc6a)'};
+    var clr = AV_COLORS.find(function(x){return x.id===(av.color||'green');}) || {bg:'linear-gradient(135deg,#10d873,#0baf5e)'};
     var frm = AV_FRAMES.find(function(x){return x.id===(av.frame||'none');}) || {css:'none'};
     var ovAv = document.getElementById('ovAvatar');
     if (ovAv) {

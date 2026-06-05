@@ -398,23 +398,23 @@ function afterSave(data, xp, isHot, fid) {
 function showSuccess(typ, temp, xp, fid) {
   var stats = getStats(window._user||'');
   var lv = getLv(stats.xp);
-  var tCol = {Zimny:'#60a5fa',Letni:'#fbbf24',Ciepły:'#fb923c',Gorący:'#00ff88'}[temp]||'#aaa';
+  var tCol = {Zimny:'#60a5fa',Letni:'#fbbf24',Ciepły:'#fb923c',Gorący:'#10d873'}[temp]||'#aaa';
   var tEm = {Zimny:'🔵',Letni:'🟡',Ciepły:'🟠',Gorący:'🔥'}[temp]||'';
   // Combo info
   var curStep = getCurrentStep();
   var mult    = COMBO_STEPS[curStep];
   var nextMult= curStep < COMBO_STEPS.length-1 ? COMBO_STEPS[curStep+1] : null;
   var comboCls= COMBO_CLASSES[curStep];
-  var comboColors = {x1:'#aaa', x125:'#fbbf24', x150:'#fb923c', x175:'#f87171', x200:'#00ff88'};
+  var comboColors = {x1:'#aaa', x125:'#fbbf24', x150:'#fb923c', x175:'#f87171', x200:'#10d873'};
   var comboCol = comboColors[comboCls]||'#aaa';
   var comboRow = '<div class="srow" style="border-top:1px solid rgba(255,255,255,0.07);margin-top:8px;padding-top:8px">'+
     '<span class="srow-label">⚡ Mnożnik XP</span>'+
     '<span class="srow-val" style="color:'+comboCol+';font-size:1.1em">×'+mult.toFixed(2)+'</span></div>';
   var nextRow = nextMult ?
     '<div class="srow"><span class="srow-label">Kolejna ankieta</span>'+
-    '<span class="srow-val" style="color:#00ff88">→ ×'+nextMult.toFixed(2)+'</span></div>' :
+    '<span class="srow-val" style="color:#10d873">→ ×'+nextMult.toFixed(2)+'</span></div>' :
     '<div class="srow"><span class="srow-label">⚡ MAX COMBO!</span>'+
-    '<span class="srow-val" style="color:#00ff88">🏆 ×2.00</span></div>';
+    '<span class="srow-val" style="color:#10d873">🏆 ×2.00</span></div>';
   // Zapisz lokalizację do autofill na następne ankiety
   if(data.kod_pocztowy) localStorage.setItem('4eco_loc_location_kod', data.kod_pocztowy);
   if(data.miejscowosc) localStorage.setItem('4eco_loc_location_msc', data.miejscowosc);
@@ -437,7 +437,7 @@ function showSuccess(typ, temp, xp, fid) {
         '<div class="sgrid-item"><div class="sv" style="color:var(--orange)">'+stats.streak+'🔥</div><div class="sl">Streak</div></div>'+
       '</div>'+
       '<div style="height:7px;background:var(--bg3);border-radius:7px;overflow:hidden">'+
-        '<div style="height:100%;width:'+lv.progress+'%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:7px;box-shadow:0 0 8px rgba(0,255,136,0.4)"></div>'+
+        '<div style="height:100%;width:'+lv.progress+'%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:7px;box-shadow:0 0 8px rgba(16,216,115,0.4)"></div>'+
       '</div>'+
       '<div style="display:flex;justify-content:space-between;font-size:0.68em;color:var(--muted);margin-top:4px"><span>Level '+lv.level+'</span><span>'+stats.xp+' / '+lv.nextXp+' XP</span></div>'+
     '</div>'+
