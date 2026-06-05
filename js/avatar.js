@@ -81,16 +81,16 @@ var AV_FRAMES = [
   {id:'void',       css:'0 0 0 3px rgba(139,92,246,0.8),0 0 24px rgba(139,92,246,0.5),0 0 40px rgba(139,92,246,0.2)', name:'Void Aura', req:5000, tier:'epic'},
   {id:'divine',     css:'0 0 0 3px rgba(255,215,0,1),0 0 30px rgba(255,215,0,0.7),0 0 60px rgba(255,165,0,0.4)',     name:'Divine',    req:8000, tier:'legendary'},
   {id:'singularity',css:'0 0 0 2px #fff,0 0 20px #fff,0 0 40px rgba(255,255,255,0.5)',               name:'Singularity',  req:12000,tier:'legendary'},
-  {id:'soft_mint', css:'0 0 12px rgba(52,211,153,0.55)',                                            name:'Miętowy blask',  req:120,  tier:'common'},
-  {id:'sky_ring',  css:'0 0 0 2px rgba(96,165,250,0.5),0 0 14px rgba(96,165,250,0.4)',              name:'Niebieski pierścień',req:350,tier:'common'},
-  {id:'amber_soft',css:'0 0 14px rgba(245,158,11,0.55)',                                            name:'Bursztynowa poświata',req:700,tier:'rare'},
-  {id:'lavender_halo',css:'0 0 16px rgba(167,139,250,0.6)',                                         name:'Lawendowe halo', req:1000, tier:'rare'},
-  {id:'coral_glow',css:'0 0 14px rgba(251,113,133,0.55)',                                           name:'Koralowy blask', req:1400, tier:'rare'},
-  {id:'emerald_ring',css:'0 0 0 2px rgba(16,185,129,0.6),0 0 16px rgba(16,185,129,0.35)',           name:'Szmaragdowy ring',req:2000,tier:'epic'},
-  {id:'dual_ring', css:'0 0 0 2px rgba(96,165,250,0.6),0 0 0 4px rgba(167,139,250,0.4)',            name:'Podwójny pierścień',req:3000,tier:'epic'},
-  {id:'aurora_aura',css:'0 0 18px rgba(129,140,248,0.5),0 0 30px rgba(192,132,252,0.3)',            name:'Aura zorzy',     req:4500, tier:'epic'},
-  {id:'frost',     css:'0 0 0 2px rgba(186,230,253,0.7),0 0 20px rgba(125,211,252,0.4)',            name:'Szron',          req:6500, tier:'legendary'},
-  {id:'eclipse',   css:'0 0 0 3px rgba(15,23,42,0.9),0 0 0 5px rgba(148,163,184,0.5),0 0 22px rgba(100,116,139,0.4)', name:'Zaćmienie', req:10000,tier:'legendary'}
+  {id:'soft_mint', css:'0 0 16px rgba(52,211,153,0.9)',                                            name:'Miętowy blask',  req:120,  tier:'common'},
+  {id:'sky_ring',  css:'0 0 0 2px rgba(96,165,250,0.85),0 0 18px rgba(96,165,250,0.7)',              name:'Niebieski pierścień',req:350,tier:'common'},
+  {id:'amber_soft',css:'0 0 18px rgba(245,158,11,0.9),0 0 0 2px rgba(245,158,11,0.5)',                                            name:'Bursztynowa poświata',req:700,tier:'rare'},
+  {id:'lavender_halo',css:'0 0 20px rgba(167,139,250,0.95)',                                         name:'Lawendowe halo', req:1000, tier:'rare'},
+  {id:'coral_glow',css:'0 0 18px rgba(251,113,133,0.9)',                                           name:'Koralowy blask', req:1400, tier:'rare'},
+  {id:'emerald_ring',css:'0 0 0 2px rgba(16,185,129,0.9),0 0 20px rgba(16,185,129,0.6)',           name:'Szmaragdowy ring',req:2000,tier:'epic'},
+  {id:'dual_ring', css:'0 0 0 2px rgba(96,165,250,0.95),0 0 0 4px rgba(167,139,250,0.8),0 0 16px rgba(129,140,248,0.5)',            name:'Podwójny pierścień',req:3000,tier:'epic'},
+  {id:'aurora_aura',css:'0 0 22px rgba(129,140,248,0.85),0 0 36px rgba(192,132,252,0.6)',            name:'Aura zorzy',     req:4500, tier:'epic'},
+  {id:'frost',     css:'0 0 0 2px rgba(186,230,253,0.95),0 0 24px rgba(125,211,252,0.7)',            name:'Szron',          req:6500, tier:'legendary'},
+  {id:'eclipse',   css:'0 0 0 3px rgba(15,23,42,0.95),0 0 0 5px rgba(148,163,184,0.85),0 0 26px rgba(148,163,184,0.6)', name:'Zaćmienie', req:10000,tier:'legendary'}
 ];
 
 var AV_TITLES = [
