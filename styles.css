@@ -1037,3 +1037,16 @@ body.light .bp-season-bar{background:rgba(0,0,0,0.08);}
 .bp-wk-xp{font-size:0.74em;font-weight:900;color:var(--green);}
 .bp-wk-prog{font-size:0.66em;color:var(--muted);margin-top:2px;}
 body.light .bp-wk{box-shadow:0 0 10px rgba(22,163,74,0.18);}
+
+/* ── KARTY NAGRÓD SEZONU (drabinka) ── */
+.bp-rw{display:flex;align-items:center;gap:11px;background:var(--card2);border:1px solid var(--border2);
+  border-radius:12px;padding:11px 13px;margin:0 0 8px;transition:opacity .2s,transform .15s;}
+.bp-rw.done{opacity:0.55;}
+.bp-rw.next{box-shadow:0 0 18px rgba(16,216,115,0.12);border-color:var(--green);}
+.bp-rw-ic{font-size:1.45em;width:42px;height:42px;display:flex;align-items:center;justify-content:center;
+  border-radius:11px;flex-shrink:0;}
+.bp-rw-mid{flex:1;min-width:0;}
+.bp-rw-name{font-size:0.84em;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bp-rw-tier{font-size:0.64em;font-weight:900;letter-spacing:0.5px;margin-top:2px;}
+.bp-rw-st{flex-shrink:0;text-align:right;font-size:1.1em;font-weight:900;min-width:46px;}
+.bp-rewards{padding:0 14px 18px;}
