@@ -1195,3 +1195,13 @@ body.kb-open .qflow { padding-bottom:45vh; }
   background:rgba(37,99,235,0.92);padding:1px 6px;border-radius:8px;white-space:nowrap;
   box-shadow:0 1px 4px rgba(0,0,0,0.3)}
 .mate-pin-wrap{background:transparent;border:none}
+
+/* ── ŚLAD TRASY ── */
+.map-track-stats{font-size:0.82em;color:var(--text);background:var(--card2);
+  border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:8px}
+.map-track-stats b{color:var(--green)}
+.map-track-btns{display:flex;gap:8px;margin-bottom:10px}
+.map-track-btns .map-share{flex:1;margin-bottom:0}
+.track-mini{flex-shrink:0;width:44px;border:1px solid var(--border2);cursor:pointer;
+  background:var(--card2);color:var(--text);border-radius:12px;font-size:1.1em;transition:all .15s}
+.track-mini:active{transform:scale(0.94)}

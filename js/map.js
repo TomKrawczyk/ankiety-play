@@ -134,6 +134,9 @@ function onGeoOk(pos) {
   var first = !MAP.lastPos;
   MAP.lastPos = { lat: lat, lng: lng, acc: acc };
 
+  // zapis śladu trasy (filtr: tylko sensowne kroki, dobry GPS)
+  recordTrackPoint(lat, lng, acc);
+
   if (!MAP.meMarker) {
     MAP.meMarker = L.marker([lat, lng], { icon: makeMeIcon(), zIndexOffset: 1000 }).addTo(MAP.obj);
     MAP.meAccuracy = L.circle([lat, lng], {
@@ -292,6 +295,7 @@ function renderMapa() {
     updateNearbyHint();
     updateShareBtn();
     startPresence();
+    initTrack();
   }, 60);
 }
 
@@ -442,4 +446,116 @@ function startPresence() {
   fetchMates();     // od razu pobierz kolegów
   MATE.sendTimer  = setInterval(sendPresence, PRESENCE_SEND_EVERY);   // co 2 min
   MATE.fetchTimer = setInterval(fetchMates,   PRESENCE_FETCH_EVERY);  // co 3 min
+}
+
+// ============================================================
+// ŚLAD TRASY — gdzie ankieter dziś chodził
+// ============================================================
+// Punkty GPS z dzisiejszego dnia zapisywane lokalnie (per użytkownik+data).
+// Filtr: dopisujemy punkt tylko gdy dokładność jest sensowna i przeszliśmy
+// co najmniej MIN_STEP_M od ostatniego — żeby nie tworzyć tysięcy punktów w miejscu.
+
+var TRACK = { line: null, points: [], shown: true };
+var MIN_STEP_M = 12;     // min. przesunięcie, by zapisać nowy punkt (metry)
+var MAX_ACC_M  = 60;     // ignoruj odczyty gorsze niż 60 m (szum GPS)
+
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2);
+}
+function trackKey() { return mapKey('track_' + todayStr()); }
+
+function loadTrack() {
+  try { return JSON.parse(localStorage.getItem(trackKey()) || '[]'); }
+  catch (e) { return []; }
+}
+function saveTrack(arr) {
+  try { localStorage.setItem(trackKey(), JSON.stringify(arr)); } catch (e) {}
+}
+
+// odległość Haversine (metry)
+function distM(a, b) {
+  var R = 6371000, toR = Math.PI/180;
+  var dLat = (b.lat-a.lat)*toR, dLng = (b.lng-a.lng)*toR;
+  var la1 = a.lat*toR, la2 = b.lat*toR;
+  var h = Math.sin(dLat/2)*Math.sin(dLat/2) +
+          Math.cos(la1)*Math.cos(la2)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+
+// dopisz punkt trasy (woła onGeoOk)
+function recordTrackPoint(lat, lng, acc) {
+  if (acc && acc > MAX_ACC_M) return;        // zbyt słaby sygnał — pomiń
+  if (!TRACK.points.length) TRACK.points = loadTrack();
+  var pt = { lat: lat, lng: lng, t: Date.now() };
+  var last = TRACK.points[TRACK.points.length - 1];
+  if (last && distM(last, pt) < MIN_STEP_M) return;  // za blisko — nie dubluj
+  TRACK.points.push(pt);
+  saveTrack(TRACK.points);
+  drawTrack();
+  updateTrackStats();
+}
+
+// narysuj polyline trasy
+function drawTrack() {
+  if (!MAP.ready) return;
+  if (TRACK.line) { MAP.obj.removeLayer(TRACK.line); TRACK.line = null; }
+  if (!TRACK.shown || TRACK.points.length < 2) return;
+  var latlngs = TRACK.points.map(function(p){ return [p.lat, p.lng]; });
+  TRACK.line = L.polyline(latlngs, {
+    color: '#16a34a', weight: 4, opacity: 0.85,
+    lineJoin: 'round', lineCap: 'round', dashArray: '1,8'
+  }).addTo(MAP.obj);
+}
+
+// łączny dystans trasy (metry)
+function trackDistance() {
+  var d = 0;
+  for (var i = 1; i < TRACK.points.length; i++) d += distM(TRACK.points[i-1], TRACK.points[i]);
+  return d;
+}
+
+function updateTrackStats() {
+  var el = document.getElementById('trackStats');
+  if (!el) return;
+  var m = trackDistance();
+  var txt = m >= 1000 ? (m/1000).toFixed(2) + ' km' : Math.round(m) + ' m';
+  el.innerHTML = '🚶 Dziś: <b>' + txt + '</b> · <b>' + TRACK.points.length + '</b> pkt';
+}
+
+// pokaż/ukryj trasę
+function toggleTrack() {
+  TRACK.shown = !TRACK.shown;
+  drawTrack();
+  updateTrackBtn();
+}
+function updateTrackBtn() {
+  var b = document.getElementById('trackBtn');
+  if (!b) return;
+  b.className = 'map-share ' + (TRACK.shown ? 'on' : 'off');
+  b.innerHTML = TRACK.shown ? '🟢 Ślad trasy: widoczny' : '⚪ Ślad trasy: ukryty';
+}
+
+// wyśrodkuj mapę na całej trasie
+function fitTrack() {
+  if (!MAP.ready || TRACK.points.length < 2) { centerOnMe(); return; }
+  var latlngs = TRACK.points.map(function(p){ return [p.lat, p.lng]; });
+  MAP.obj.fitBounds(L.latLngBounds(latlngs), { padding: [40, 40] });
+}
+
+// wyczyść dzisiejszą trasę
+function clearTrack() {
+  if (!confirm('Wyczyścić dzisiejszy ślad trasy? Tej operacji nie można cofnąć.')) return;
+  TRACK.points = [];
+  saveTrack([]);
+  drawTrack();
+  updateTrackStats();
+}
+
+// init przy otwarciu mapy
+function initTrack() {
+  TRACK.points = loadTrack();
+  drawTrack();
+  updateTrackStats();
+  updateTrackBtn();
 }

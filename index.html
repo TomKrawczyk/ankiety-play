@@ -235,6 +235,12 @@
     <div id="mapNearby" class="map-nearby"></div>
     <button id="shareBtn" class="map-share on" onclick="toggleSharing()">📡 Udostępniam pozycję</button>
     <div id="mapTeam" class="map-team"></div>
+    <div id="trackStats" class="map-track-stats"></div>
+    <div class="map-track-btns">
+      <button id="trackBtn" class="map-share on" onclick="toggleTrack()">🟢 Ślad trasy: widoczny</button>
+      <button class="track-mini" onclick="fitTrack()" title="Pokaż całą trasę">🔍</button>
+      <button class="track-mini" onclick="clearTrack()" title="Wyczyść dzisiejszą trasę">🗑️</button>
+    </div>
     <div class="map-wrap">
       <div id="mapCanvas"></div>
       <button class="map-locate-btn" onclick="centerOnMe()" title="Wyśrodkuj na mnie">🎯</button>
