@@ -12,6 +12,11 @@ var HEADERS_PRESENCE = [
 ];
 var PRESENCE_TTL_MS = 3 * 60 * 1000;  // aktywny = sygnal w ostatnich 3 min
 
+var SHEET_TRACKS = "Trasy";
+var HEADERS_TRACKS = [
+  "Data","Ankieter","Punkty JSON","Dystans(m)","Liczba pkt","Aktualizacja(PL)"
+];
+
 var HEADERS_ANKIETY = [
   "Data zapisu","Typ ankiety","Ankieter","Data wizyty","Miejscowość",
   "Imię klienta","Telefon","Kod pocztowy","Typ obiektu","Rachunek prąd",
@@ -47,6 +52,10 @@ function doPost(e) {
       return handleUpdatePresence(d);
     }
 
+    if (d.action === 'updateTrack') {
+      return handleUpdateTrack(d);
+    }
+
     // Domyślnie: zapis ankiety
     return handleSaveAnkieta(d);
 
@@ -63,6 +72,9 @@ function doGet(e) {
     }
     if (action === 'getPresence') {
       return handleGetPresence();
+    }
+    if (action === 'getTracks') {
+      return handleGetTracks(e.parameter.date || '');
     }
     return jsonResp({ status: "error", message: "Nieznana akcja GET" });
   } catch(err) {
@@ -256,6 +268,67 @@ function handleGetPresence() {
     }
   }
   return jsonResp({ status: "ok", agents: out, ttlSec: PRESENCE_TTL_MS / 1000 });
+}
+
+// ============================================================
+// TRASY — slad gdzie ankieter dzis chodzil (cala flota)
+// ============================================================
+// Model: 1 wiersz na (data + ankieter), nadpisywany. Apka wysyla cala
+// dzisiejsza trase (lekka — punkty filtrowane co ~12m) co kilka minut.
+
+function handleUpdateTrack(d) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = getOrCreateSheet(ss, SHEET_TRACKS, HEADERS_TRACKS, "#0d6b4f");
+
+  var name = (d.ankieter || "").toString().trim();
+  var date = (d.date || "").toString().trim();
+  if (!name || !date) return jsonResp({ status: "error", message: "brak ankietera/daty" });
+
+  var pts = Array.isArray(d.points) ? d.points : [];
+  var ptsJson = JSON.stringify(pts);
+  var dist = Number(d.dist) || 0;
+  var nowPl = new Date().toLocaleString("pl-PL", { timeZone: "Europe/Warsaw" });
+
+  // znajdz istniejacy wiersz (data + ankieter)
+  var lastRow = sh.getLastRow();
+  var rowIdx = -1;
+  if (lastRow >= 2) {
+    var vals = sh.getRange(2, 1, lastRow - 1, 2).getValues();
+    for (var i = 0; i < vals.length; i++) {
+      if ((vals[i][0]||"").toString().trim() === date &&
+          (vals[i][1]||"").toString().trim() === name) { rowIdx = i + 2; break; }
+    }
+  }
+  var rowData = [date, name, ptsJson, Math.round(dist), pts.length, nowPl];
+  if (rowIdx === -1) sh.appendRow(rowData);
+  else sh.getRange(rowIdx, 1, 1, rowData.length).setValues([rowData]);
+
+  return jsonResp({ status: "ok" });
+}
+
+function handleGetTracks(date) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(SHEET_TRACKS);
+  var out = [];
+  if (!date) {
+    var d = new Date();
+    date = d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
+  }
+  if (sh && sh.getLastRow() >= 2) {
+    var rows = sh.getRange(2, 1, sh.getLastRow() - 1, HEADERS_TRACKS.length).getValues();
+    for (var i = 0; i < rows.length; i++) {
+      if ((rows[i][0]||"").toString().trim() !== date) continue;
+      var pts = [];
+      try { pts = JSON.parse(rows[i][2] || "[]"); } catch(e) { pts = []; }
+      out.push({
+        name: (rows[i][1]||"").toString().trim(),
+        points: pts,
+        dist: Number(rows[i][3]) || 0,
+        count: Number(rows[i][4]) || 0
+      });
+    }
+  }
+  return jsonResp({ status: "ok", date: date, tracks: out });
 }
 
 // ============================================================

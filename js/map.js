@@ -296,6 +296,8 @@ function renderMapa() {
     updateShareBtn();
     startPresence();
     initTrack();
+    startTrackSync();
+    updateTeamModeBtn();
   }, 60);
 }
 
@@ -559,3 +561,120 @@ function initTrack() {
   updateTrackStats();
   updateTrackBtn();
 }
+
+// ============================================================
+// TRASY ZESPOŁU — gdzie dziś chodził każdy (widok floty)
+// ============================================================
+// Własna trasa wysyłana na webhook co TRACK_SEND_EVERY. Tryb "Zespół"
+// pobiera i rysuje trasy wszystkich w odrębnych kolorach.
+
+var TRACK_SEND_EVERY = 240000;   // 4 min — wysyłka własnej trasy
+var TEAM = { mode: 'me', layers: [], timer: null, colors: [
+  '#16a34a','#2563eb','#db2777','#ea580c','#9333ea','#0891b2','#ca8a04','#dc2626',
+  '#15803d','#7c3aed','#c026d3','#0d9488','#b45309','#4f46e5'
+] };
+
+function colorForName(name) {
+  var h = 0;
+  for (var i = 0; i < name.length; i++) h = (h*31 + name.charCodeAt(i)) >>> 0;
+  return TEAM.colors[h % TEAM.colors.length];
+}
+
+// ── WYŚLIJ własną trasę na serwer ──
+function sendTrack() {
+  if (!window._user || TRACK.points.length < 2) return;
+  // wysyłamy odchudzoną trasę (max ~300 pkt, próbkowane) by payload był lekki
+  var pts = TRACK.points;
+  if (pts.length > 300) {
+    var step = Math.ceil(pts.length / 300), thin = [];
+    for (var i = 0; i < pts.length; i += step) thin.push(pts[i]);
+    thin.push(pts[pts.length-1]);
+    pts = thin;
+  }
+  var slim = pts.map(function(p){ return { lat: +p.lat.toFixed(5), lng: +p.lng.toFixed(5) }; });
+  try {
+    fetch(WEBHOOK, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'updateTrack', ankieter: window._user,
+        date: todayStr(), points: slim, dist: trackDistance()
+      })
+    }).catch(function(){});
+  } catch (e) {}
+}
+
+function startTrackSync() {
+  if (TEAM.timer) return;
+  setTimeout(sendTrack, 5000);                 // pierwsza wysyłka po 5s
+  TEAM.timer = setInterval(sendTrack, TRACK_SEND_EVERY);
+}
+
+// ── Przełącz Moja / Zespół ──
+function toggleTeamMode() {
+  TEAM.mode = TEAM.mode === 'me' ? 'team' : 'me';
+  updateTeamModeBtn();
+  clearTeamLayers();
+  if (TEAM.mode === 'team') {
+    if (TRACK.line) { MAP.obj.removeLayer(TRACK.line); TRACK.line = null; }  // schowaj solo
+    fetchTeamTracks();
+  } else {
+    drawTrack();   // wróć do własnej trasy
+  }
+}
+function updateTeamModeBtn() {
+  var b = document.getElementById('teamModeBtn');
+  if (!b) return;
+  if (TEAM.mode === 'team') { b.className = 'map-share on'; b.innerHTML = '👥 Trasy zespołu (kliknij: moja)'; }
+  else { b.className = 'map-share off'; b.innerHTML = '🚶 Moja trasa (kliknij: zespół)'; }
+}
+
+function clearTeamLayers() {
+  TEAM.layers.forEach(function(l){ MAP.obj.removeLayer(l); });
+  TEAM.layers = [];
+}
+
+// ── POBIERZ i narysuj trasy wszystkich ──
+function fetchTeamTracks() {
+  if (TEAM.mode !== 'team') return;
+  var el = document.getElementById('teamTracksList');
+  if (el) el.innerHTML = '<div class="team-empty">Ładuję trasy zespołu…</div>';
+  fetch(WEBHOOK + '?action=getTracks&date=' + todayStr())
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (!res || res.status !== 'ok' || !Array.isArray(res.tracks)) return;
+      drawTeamTracks(res.tracks);
+    })
+    .catch(function(){ if (el) el.innerHTML = '<div class="team-empty">Nie udało się pobrać tras.</div>'; });
+}
+
+function drawTeamTracks(tracks) {
+  clearTeamLayers();
+  var allBounds = [];
+  var listHtml = '';
+  tracks.sort(function(a,b){ return (b.dist||0)-(a.dist||0); });
+  tracks.forEach(function(t){
+    if (!t.points || t.points.length < 2) {
+      listHtml += teamRow(t, true);
+      return;
+    }
+    var color = colorForName(t.name);
+    var latlngs = t.points.map(function(p){ return [p.lat, p.lng]; });
+    var line = L.polyline(latlngs, { color: color, weight: 4, opacity: 0.8, lineJoin:'round', lineCap:'round' }).addTo(MAP.obj);
+    line.bindPopup('<b style="color:'+color+'">'+t.name+'</b><br>'+fmtDist(t.dist)+' · '+t.count+' pkt');
+    TEAM.layers.push(line);
+    // kropka startu i końca
+    var end = L.circleMarker(latlngs[latlngs.length-1], { radius:6, color:'#fff', weight:2, fillColor:color, fillOpacity:1 }).addTo(MAP.obj);
+    TEAM.layers.push(end);
+    allBounds = allBounds.concat(latlngs);
+    listHtml += teamRow(t, false, color);
+  });
+  if (allBounds.length) MAP.obj.fitBounds(L.latLngBounds(allBounds), { padding:[40,40] });
+  var el = document.getElementById('teamTracksList');
+  if (el) el.innerHTML = listHtml || '<div class="team-empty">Brak tras na dziś.</div>';
+}
+
+function teamRow(t, empty, color) {
+  return '<div class="team-row"><span class="team-dot" style="background:'+(color||'#94a3b8')+'"></span>' +
+         '<b>'+t.name+'</b><span class="team-ago">'+(empty ? 'brak trasy' : fmtDist(t.dist))+'</span></div>';
+}
+function fmtDist(m) { m = m||0; return m>=1000 ? (m/1000).toFixed(2)+' km' : Math.round(m)+' m'; }

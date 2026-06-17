@@ -241,6 +241,8 @@
       <button class="track-mini" onclick="fitTrack()" title="Pokaż całą trasę">🔍</button>
       <button class="track-mini" onclick="clearTrack()" title="Wyczyść dzisiejszą trasę">🗑️</button>
     </div>
+    <button id="teamModeBtn" class="map-share off" onclick="toggleTeamMode()">🚶 Moja trasa (kliknij: zespół)</button>
+    <div id="teamTracksList" class="map-team"></div>
     <div class="map-wrap">
       <div id="mapCanvas"></div>
       <button class="map-locate-btn" onclick="centerOnMe()" title="Wyśrodkuj na mnie">🎯</button>
