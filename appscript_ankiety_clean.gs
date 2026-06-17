@@ -14,7 +14,7 @@ var PRESENCE_TTL_MS = 3 * 60 * 1000;  // aktywny = sygnal w ostatnich 3 min
 
 var SHEET_TRACKS = "Trasy";
 var HEADERS_TRACKS = [
-  "Data","Ankieter","Punkty JSON","Dystans(m)","Liczba pkt","Aktualizacja(PL)"
+  "Data","Ankieter","Punkty JSON","Dystans(m)","Liczba pkt","Strefy","Aktualizacja(PL)"
 ];
 
 var HEADERS_ANKIETY = [
@@ -287,6 +287,7 @@ function handleUpdateTrack(d) {
   var pts = Array.isArray(d.points) ? d.points : [];
   var ptsJson = JSON.stringify(pts);
   var dist = Number(d.dist) || 0;
+  var zones = Number(d.zones) || 0;
   var nowPl = new Date().toLocaleString("pl-PL", { timeZone: "Europe/Warsaw" });
 
   // znajdz istniejacy wiersz (data + ankieter)
@@ -299,7 +300,7 @@ function handleUpdateTrack(d) {
           (vals[i][1]||"").toString().trim() === name) { rowIdx = i + 2; break; }
     }
   }
-  var rowData = [date, name, ptsJson, Math.round(dist), pts.length, nowPl];
+  var rowData = [date, name, ptsJson, Math.round(dist), pts.length, zones, nowPl];
   if (rowIdx === -1) sh.appendRow(rowData);
   else sh.getRange(rowIdx, 1, 1, rowData.length).setValues([rowData]);
 
@@ -324,7 +325,8 @@ function handleGetTracks(date) {
         name: (rows[i][1]||"").toString().trim(),
         points: pts,
         dist: Number(rows[i][3]) || 0,
-        count: Number(rows[i][4]) || 0
+        count: Number(rows[i][4]) || 0,
+        zones: Number(rows[i][5]) || 0
       });
     }
   }

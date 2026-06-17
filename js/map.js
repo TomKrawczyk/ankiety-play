@@ -597,7 +597,8 @@ function sendTrack() {
       method: 'POST', headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({
         action: 'updateTrack', ankieter: window._user,
-        date: todayStr(), points: slim, dist: trackDistance()
+        date: todayStr(), points: slim, dist: trackDistance(),
+        zones: Object.keys(loadCells()).length
       })
     }).catch(function(){});
   } catch (e) {}
@@ -678,3 +679,82 @@ function teamRow(t, empty, color) {
          '<b>'+t.name+'</b><span class="team-ago">'+(empty ? 'brak trasy' : fmtDist(t.dist))+'</span></div>';
 }
 function fmtDist(m) { m = m||0; return m>=1000 ? (m/1000).toFixed(2)+' km' : Math.round(m)+' m'; }
+
+// ============================================================
+// HEATMAPA POKRYCIA — gdzie zespół już był, a gdzie białe plamy
+// ============================================================
+// Lekka siatka (~150m). Z punktów tras zespołu liczymy ile osób/przejść
+// trafiło w każdą komórkę i kolorujemy od chłodnego (mało) do gorącego (dużo).
+
+var HEAT = { layer: null, on: false, cell: 0.00135 }; // ~150m w stopniach szer.
+
+function toggleHeat() {
+  HEAT.on = !HEAT.on;
+  updateHeatBtn();
+  if (HEAT.on) {
+    if (TEAM.mode !== 'team') { fetchTeamTracks(); } // upewnij się że mamy dane
+    fetchHeat();
+  } else {
+    clearHeat();
+  }
+}
+function updateHeatBtn() {
+  var b = document.getElementById('heatBtn');
+  if (!b) return;
+  b.className = 'map-share ' + (HEAT.on ? 'on' : 'off');
+  b.innerHTML = HEAT.on ? '🔥 Pokrycie: włączone' : '🗺️ Pokrycie terenu (heatmapa)';
+}
+function clearHeat() {
+  if (HEAT.layer) { MAP.obj.removeLayer(HEAT.layer); HEAT.layer = null; }
+}
+
+function fetchHeat() {
+  fetch(WEBHOOK + '?action=getTracks&date=' + todayStr())
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (!res || res.status !== 'ok') return;
+      drawHeat(res.tracks || []);
+    }).catch(function(){});
+}
+
+function drawHeat(tracks) {
+  clearHeat();
+  if (!HEAT.on) return;
+  // zlicz trafienia w komórki siatki
+  var grid = {}, maxHits = 0;
+  tracks.forEach(function(t){
+    if (!t.points) return;
+    var seenCell = {}; // jedna osoba liczy się raz na komórkę (pokrycie, nie czas postoju)
+    t.points.forEach(function(p){
+      var gx = Math.floor(p.lat / HEAT.cell);
+      var gy = Math.floor(p.lng / HEAT.cell);
+      var key = gx + '_' + gy;
+      if (seenCell[key]) return;
+      seenCell[key] = true;
+      grid[key] = (grid[key] || 0) + 1;
+      if (grid[key] > maxHits) maxHits = grid[key];
+    });
+  });
+  if (!maxHits) return;
+  var rects = [];
+  Object.keys(grid).forEach(function(key){
+    var parts = key.split('_'), gx = +parts[0], gy = +parts[1];
+    var hits = grid[key];
+    var lat0 = gx * HEAT.cell, lng0 = gy * HEAT.cell;
+    var bounds = [[lat0, lng0], [lat0 + HEAT.cell, lng0 + HEAT.cell]];
+    var ratio = hits / maxHits;
+    rects.push(L.rectangle(bounds, {
+      stroke: false, fillColor: heatColor(ratio), fillOpacity: 0.45
+    }));
+  });
+  HEAT.layer = L.layerGroup(rects).addTo(MAP.obj);
+  HEAT.layer.eachLayer(function(l){ l.bringToBack && l.bringToBack(); });
+}
+
+function heatColor(r) {
+  // chłodny niebieski (mało) -> zielony -> żółty -> czerwony (dużo)
+  if (r < 0.25) return '#3b82f6';
+  if (r < 0.5)  return '#10d873';
+  if (r < 0.75) return '#facc15';
+  return '#dc2626';
+}

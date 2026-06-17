@@ -1205,3 +1205,29 @@ body.kb-open .qflow { padding-bottom:45vh; }
 .track-mini{flex-shrink:0;width:44px;border:1px solid var(--border2);cursor:pointer;
   background:var(--card2);color:var(--text);border-radius:12px;font-size:1.1em;transition:all .15s}
 .track-mini:active{transform:scale(0.94)}
+
+/* ── PANEL LIDERA ── */
+.lider-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:14px}
+.lider-kpi{background:var(--card2);border:1px solid var(--border);border-radius:14px;
+  padding:12px 8px;text-align:center}
+.lk-ico{font-size:1.3em;margin-bottom:2px}
+.lk-val{font-size:1.15em;font-weight:800;color:var(--text);line-height:1.1}
+.lk-lab{font-size:0.68em;color:var(--text);opacity:0.6;margin-top:3px}
+.lider-sec-h{font-size:0.85em;font-weight:800;color:var(--text);margin:14px 0 8px}
+.lider-bar-row{margin-bottom:9px}
+.lbr-top{display:flex;justify-content:space-between;font-size:0.82em;color:var(--text);margin-bottom:3px}
+.lbr-top b{font-weight:700}.lbr-top span{opacity:0.7}
+.lbr-track{height:8px;background:var(--card2);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.lbr-fill{height:100%;background:linear-gradient(90deg,#16a34a,#10d873);border-radius:6px;transition:width .4s}
+
+/* ── LIGA TERENOWA ── */
+.liga-info{font-size:0.72em;color:var(--text);opacity:0.55;margin-bottom:8px}
+.liga-row{display:flex;align-items:center;gap:10px;padding:9px 12px;
+  background:var(--card2);border:1px solid var(--border);border-radius:12px;margin-bottom:6px}
+.liga-pos{font-size:1.2em;min-width:28px;text-align:center}
+.liga-rank{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;
+  background:var(--border);border-radius:50%;font-size:0.75em;font-weight:800;color:var(--text)}
+.liga-mid{flex:1;display:flex;flex-direction:column}
+.liga-mid b{font-weight:700;color:var(--text);font-size:0.9em}
+.liga-meta{font-size:0.7em;color:var(--text);opacity:0.6;margin-top:1px}
+.liga-pts{font-weight:800;color:var(--green);font-size:0.95em}

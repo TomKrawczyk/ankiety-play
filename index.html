@@ -170,6 +170,9 @@
     <button class="nav-tile" id="msb_mapa" onclick="switchMode('mapa')">
       <span class="nt-icon">🗺️</span><span class="nt-label">Mapa</span>
     </button>
+    <button class="nav-tile" id="msb_lider" onclick="switchMode('lider')">
+      <span class="nt-icon">📊</span><span class="nt-label">Lider</span>
+    </button>
     <button class="nav-tile" id="msb_karty" onclick="switchMode('karty')">
       <span class="nt-icon">🃏</span><span class="nt-label">Karty</span>
     </button>
@@ -242,6 +245,7 @@
       <button class="track-mini" onclick="clearTrack()" title="Wyczyść dzisiejszą trasę">🗑️</button>
     </div>
     <button id="teamModeBtn" class="map-share off" onclick="toggleTeamMode()">🚶 Moja trasa (kliknij: zespół)</button>
+    <button id="heatBtn" class="map-share off" onclick="toggleHeat()">🗺️ Pokrycie terenu (heatmapa)</button>
     <div id="teamTracksList" class="map-team"></div>
     <div class="map-wrap">
       <div id="mapCanvas"></div>
@@ -256,6 +260,7 @@
   </div>
 
   <div id="panel_karty" class="mpanel"></div>
+  <div id="panel_lider" class="mpanel"></div>
 
   <!-- PANEL: BATTLE PASS -->
   <div id="panel_battlepass" class="mpanel">
@@ -334,6 +339,7 @@
 <script src="js/gamification.js?v=20260605182029"></script>
 <script src="js/cards.js?v=20260605182029"></script>
 <script src="js/map.js?v=20260617"></script>
+<script src="js/lider.js?v=20260617"></script>
 
 </body>
 </html>
