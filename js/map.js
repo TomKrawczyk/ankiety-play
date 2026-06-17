@@ -301,8 +301,9 @@ function renderMapa() {
 // Wysyłanie własnej pozycji + pobieranie kolegów co PRESENCE_EVERY ms.
 // Wyłączenie udostępniania = status "ukryty" (sygnał dla lidera, że nie pracuje).
 
-var PRESENCE_EVERY = 180000;       // 3 min — wysyłka i odświeżanie kolegów
-var MATE = { markers: {}, timer: null, lastFetch: 0 };
+var PRESENCE_SEND_EVERY  = 120000;  // 2 min — wysyłka własnej pozycji
+var PRESENCE_FETCH_EVERY = 180000;  // 3 min — pobieranie kolegów
+var MATE = { markers: {}, sendTimer: null, fetchTimer: null };
 
 // ── Udostępnianie lokalizacji: domyślnie WŁĄCZONE ──
 function isSharing() {
@@ -435,12 +436,10 @@ function agoTxt(sec) {
 
 // ── START / STOP pętli presence ──
 function startPresence() {
-  if (MATE.timer) return;
+  if (MATE.sendTimer || MATE.fetchTimer) return;
   updateShareBtn();
   sendPresence();   // od razu zgłoś obecność
   fetchMates();     // od razu pobierz kolegów
-  MATE.timer = setInterval(function(){
-    sendPresence();
-    fetchMates();
-  }, PRESENCE_EVERY);
+  MATE.sendTimer  = setInterval(sendPresence, PRESENCE_SEND_EVERY);   // co 2 min
+  MATE.fetchTimer = setInterval(fetchMates,   PRESENCE_FETCH_EVERY);  // co 3 min
 }
