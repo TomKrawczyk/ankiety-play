@@ -43,6 +43,11 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
 
 <link rel="stylesheet" href="styles.css?v=20260605182029">
+  <!-- Leaflet (mapa Pokémon GO-style) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 
 <body>
@@ -162,6 +167,9 @@
     <button class="nav-tile" id="msb_lokalizacja" onclick="switchMode('lokalizacja')">
       <span class="nt-icon">📍</span><span class="nt-label">Lokalizacja</span>
     </button>
+    <button class="nav-tile" id="msb_mapa" onclick="switchMode('mapa')">
+      <span class="nt-icon">🗺️</span><span class="nt-label">Mapa</span>
+    </button>
     <button class="nav-tile" id="msb_karty" onclick="switchMode('karty')">
       <span class="nt-icon">🃏</span><span class="nt-label">Karty</span>
     </button>
@@ -219,6 +227,24 @@
   </div>
 
   <!-- PANEL: KARTY — zawartość renderowana przez renderKarty() -->
+  <div id="panel_mapa" class="mpanel">
+    <div class="map-head">
+      <div class="map-title">🗺️ Mapa łowów</div>
+      <div id="geoStatus" class="map-geo">📡 Włącz lokalizację, żeby zacząć łowy</div>
+    </div>
+    <div id="mapNearby" class="map-nearby"></div>
+    <div class="map-wrap">
+      <div id="mapCanvas"></div>
+      <button class="map-locate-btn" onclick="centerOnMe()" title="Wyśrodkuj na mnie">🎯</button>
+    </div>
+    <div class="map-legend">
+      <span><i style="background:#10d873"></i>🔥 Gorący</span>
+      <span><i style="background:#fb923c"></i>🟠 Ciepły</span>
+      <span><i style="background:#fbbf24"></i>🟡 Letni</span>
+      <span><i style="background:#60a5fa"></i>🔵 Zimny</span>
+    </div>
+  </div>
+
   <div id="panel_karty" class="mpanel"></div>
 
   <!-- PANEL: BATTLE PASS -->
@@ -297,6 +323,7 @@
 <script src="js/ranking.js?v=20260605182029"></script>
 <script src="js/gamification.js?v=20260605182029"></script>
 <script src="js/cards.js?v=20260605182029"></script>
+<script src="js/map.js?v=20260617"></script>
 
 </body>
 </html>

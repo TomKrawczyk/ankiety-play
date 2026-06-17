@@ -266,6 +266,7 @@ function switchMode(mode) {
   if (mode === 'avatar')      renderAvatar();
   if (mode === 'ranking')     { renderRanking(); renderDuel(); }
   if (mode === 'history')     renderHistory();
+  if (mode === 'mapa')        renderMapa();
 }
 
 function renderLokalizacja() {

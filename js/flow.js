@@ -409,6 +409,26 @@ function afterSave(data, xp, isHot, fid) {
   if(isHot) setTimeout(function(){floatXP('🔥 HOT!');},400);
   var multTxt = mult > 1 ? ' (×'+mult.toFixed(2)+' combo!)' : '';
   showToast(isHot?'🔥 GORĄCY LEAD! +'+finalXp+' XP'+multTxt:'✅ Zapisano! +'+finalXp+' XP'+multTxt);
+
+  // ── ŁAPANIE NA MAPIE (Pokémon GO): pin w pozycji GPS + bonus za nowy teren ──
+  try {
+    if (typeof catchLead === 'function') {
+      var temp = data.temp_leada || 'Zimny';
+      var res = catchLead(temp, data.imie, data.miejscowosc, finalXp);
+      if (res && res.caught) {
+        playCatchAnim(temp, res.newTerritory);
+        if (res.newTerritory) {
+          // bonus XP za odkrycie nowej strefy terenu
+          var BONUS = 30;
+          if (window._user) addXP(window._user, BONUS, false);
+          setTimeout(function(){ floatXP('🗺️ +'+BONUS+' XP nowy teren!'); }, 900);
+        }
+      } else if (res && res.reason === 'no_gps') {
+        setTimeout(function(){ showToast('📍 Włącz lokalizację w zakładce Mapa, by łapać leady na mapie'); }, 1400);
+      }
+    }
+  } catch (e) { /* mapa opcjonalna — nigdy nie blokuje zapisu */ }
+
   setTimeout(function(){showSuccess(data.typ_ankiety, data.temp_leada, finalXp, fid);},700);
 }
 
