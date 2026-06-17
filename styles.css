@@ -1160,3 +1160,38 @@ body.kb-open .qflow { padding-bottom:45vh; }
 
 /* Leaflet divIcon nie powinien mieć tła */
 .catch-pin-wrap,.me-pin-wrap{background:transparent;border:none}
+
+/* ── PRESENCE: udostępnianie + zespół w terenie ── */
+.map-share{width:100%;border:none;cursor:pointer;border-radius:12px;
+  padding:10px 14px;font-size:0.85em;font-weight:700;font-family:Inter,sans-serif;
+  margin-bottom:10px;transition:all .15s}
+.map-share.on{background:rgba(16,216,115,0.15);color:var(--green);
+  border:1px solid rgba(16,216,115,0.4)}
+.map-share.off{background:rgba(248,113,113,0.12);color:var(--red);
+  border:1px solid rgba(248,113,113,0.4)}
+.map-share:active{transform:scale(0.98)}
+
+.map-team{margin-bottom:10px}
+.team-h{font-size:0.82em;font-weight:800;color:var(--text);margin-bottom:6px}
+.team-empty{font-size:0.8em;color:var(--text);opacity:0.55;padding:6px 0}
+.team-row{display:flex;align-items:center;gap:8px;padding:6px 10px;
+  background:var(--card2);border:1px solid var(--border);border-radius:10px;
+  margin-bottom:5px;font-size:0.82em;color:var(--text)}
+.team-row.hidden{opacity:0.6}
+.team-row b{font-weight:700}
+.team-ago{margin-left:auto;font-size:0.92em;opacity:0.7}
+.team-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.team-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+.team-dot.off{background:var(--red)}
+
+/* ── Marker kolegi na mapie ── */
+.mate-pin{position:relative;display:flex;flex-direction:column;align-items:center}
+.mate-pin.stale{opacity:0.55}
+.mate-dot{width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9em;
+  border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4)}
+.mate-name{margin-top:2px;font-size:0.62em;font-weight:700;color:#fff;
+  background:rgba(37,99,235,0.92);padding:1px 6px;border-radius:8px;white-space:nowrap;
+  box-shadow:0 1px 4px rgba(0,0,0,0.3)}
+.mate-pin-wrap{background:transparent;border:none}

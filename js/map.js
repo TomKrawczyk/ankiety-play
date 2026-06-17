@@ -290,5 +290,157 @@ function renderMapa() {
     initMap();
     if (MAP.obj) MAP.obj.invalidateSize();
     updateNearbyHint();
+    updateShareBtn();
+    startPresence();
   }, 60);
+}
+
+// ============================================================
+// PRESENCE — żywe pozycje zespołu (kto jest teraz w terenie)
+// ============================================================
+// Wysyłanie własnej pozycji + pobieranie kolegów co PRESENCE_EVERY ms.
+// Wyłączenie udostępniania = status "ukryty" (sygnał dla lidera, że nie pracuje).
+
+var PRESENCE_EVERY = 180000;       // 3 min — wysyłka i odświeżanie kolegów
+var MATE = { markers: {}, timer: null, lastFetch: 0 };
+
+// ── Udostępnianie lokalizacji: domyślnie WŁĄCZONE ──
+function isSharing() {
+  return localStorage.getItem(mapKey('sharing')) !== 'off';
+}
+function setSharing(on) {
+  localStorage.setItem(mapKey('sharing'), on ? 'on' : 'off');
+  updateShareBtn();
+  // natychmiast wyślij nowy status (aktywny/ukryty)
+  sendPresence();
+  // jeśli wyłączono — zdejmij ewentualny własny duplikat z widoku kolegów
+  if (!on) fetchMates();
+}
+function toggleSharing() { setSharing(!isSharing()); }
+
+function updateShareBtn() {
+  var btn = document.getElementById('shareBtn');
+  if (!btn) return;
+  if (isSharing()) {
+    btn.className = 'map-share on';
+    btn.innerHTML = '📡 Udostępniam pozycję';
+  } else {
+    btn.className = 'map-share off';
+    btn.innerHTML = '🚫 Pozycja ukryta (lider widzi „nie pracuje”)';
+  }
+}
+
+// ── WYŚLIJ swoją pozycję na wspólny webhook ──
+function sendPresence() {
+  if (!window._user) return;
+  var sharing = isSharing();
+  var payload = {
+    action: 'updatePresence',
+    ankieter: window._user,
+    sharing: sharing,
+    lat: (sharing && MAP.lastPos) ? MAP.lastPos.lat : null,
+    lng: (sharing && MAP.lastPos) ? MAP.lastPos.lng : null,
+    acc: (sharing && MAP.lastPos) ? MAP.lastPos.acc : null
+  };
+  try {
+    fetch(WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    }).catch(function(){});
+  } catch (e) {}
+}
+
+// ── POBIERZ kolegów i narysuj ich na mapie ──
+function fetchMates() {
+  if (!MAP.ready) return;
+  fetch(WEBHOOK + '?action=getPresence')
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (!res || res.status !== 'ok' || !Array.isArray(res.agents)) return;
+      drawMates(res.agents);
+    })
+    .catch(function(){});
+}
+
+function makeMateIcon(name, ageSec) {
+  var initial = (name || '?').trim().charAt(0).toUpperCase();
+  var stale = ageSec > 90; // sygnał starszy niż 1.5 min → lekko przygaszony
+  return L.divIcon({
+    className: 'mate-pin-wrap',
+    html: '<div class="mate-pin' + (stale ? ' stale' : '') + '">' +
+          '<div class="mate-dot">' + initial + '</div>' +
+          '<div class="mate-name">' + name + '</div></div>',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+  });
+}
+
+function drawMates(agents) {
+  var seen = {};
+  agents.forEach(function(a){
+    // pomiń samego siebie (mam już własny zielony marker)
+    if (a.name && window._user && a.name.trim() === window._user.trim()) return;
+    // ukryci / bez pozycji — nie rysujemy pinu (są w panelu statusu)
+    if (a.status === 'ukryty' || typeof a.lat !== 'number' || typeof a.lng !== 'number') return;
+    seen[a.name] = true;
+    var icon = makeMateIcon(a.name, a.ageSec || 0);
+    if (MATE.markers[a.name]) {
+      MATE.markers[a.name].setLatLng([a.lat, a.lng]).setIcon(icon);
+    } else {
+      MATE.markers[a.name] = L.marker([a.lat, a.lng], { icon: icon, zIndexOffset: 500 }).addTo(MAP.obj);
+    }
+  });
+  // usuń markery osób, które zniknęły (nieaktywne >3 min — backend już je odfiltrował)
+  Object.keys(MATE.markers).forEach(function(name){
+    if (!seen[name]) {
+      MAP.obj.removeLayer(MATE.markers[name]);
+      delete MATE.markers[name];
+    }
+  });
+  // panel listy zespołu (łącznie z ukrytymi)
+  renderTeamPanel(agents);
+}
+
+// ── PANEL: lista zespołu w terenie (kto aktywny / kto ukryty) ──
+function renderTeamPanel(agents) {
+  var el = document.getElementById('mapTeam');
+  if (!el) return;
+  var others = agents.filter(function(a){
+    return !(a.name && window._user && a.name.trim() === window._user.trim());
+  });
+  if (others.length === 0) {
+    el.innerHTML = '<div class="team-empty">Nikt inny nie jest teraz w terenie.</div>';
+    return;
+  }
+  var active = others.filter(function(a){ return a.status !== 'ukryty'; });
+  var hidden = others.filter(function(a){ return a.status === 'ukryty'; });
+  var html = '<div class="team-h">👥 Zespół w terenie (' + active.length + ' aktywnych)</div>';
+  active.forEach(function(a){
+    html += '<div class="team-row"><span class="team-dot ok"></span>' +
+            '<b>' + a.name + '</b><span class="team-ago">' + agoTxt(a.ageSec) + '</span></div>';
+  });
+  hidden.forEach(function(a){
+    html += '<div class="team-row hidden"><span class="team-dot off"></span>' +
+            '<b>' + a.name + '</b><span class="team-ago">🚫 ukryta pozycja</span></div>';
+  });
+  el.innerHTML = html;
+}
+
+function agoTxt(sec) {
+  if (sec == null) return '';
+  if (sec < 60) return 'teraz';
+  return Math.round(sec / 60) + ' min temu';
+}
+
+// ── START / STOP pętli presence ──
+function startPresence() {
+  if (MATE.timer) return;
+  updateShareBtn();
+  sendPresence();   // od razu zgłoś obecność
+  fetchMates();     // od razu pobierz kolegów
+  MATE.timer = setInterval(function(){
+    sendPresence();
+    fetchMates();
+  }, PRESENCE_EVERY);
 }
