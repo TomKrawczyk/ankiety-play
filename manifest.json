@@ -1,0 +1,12 @@
+{
+  "name": "Ankiety Play — 4ECO",
+  "short_name": "Ankiety Play",
+  "description": "Terenowe ankiety z grywalizacją — misje, eventy, mapa leadów",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0a0c10",
+  "theme_color": "#10d873",
+  "icons": [
+    { "src": "icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

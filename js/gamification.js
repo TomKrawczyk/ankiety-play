@@ -613,6 +613,7 @@ function launchApp(name) {
   buildFlow('PC',          FLOW_QHEAT, 'Ankiety_Podstawowe', 'blue',   50);
   buildFlow('NOWY',        FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
   buildFlow('ROZBUDOWANA', FLOW_FULL,  'Ankiety_Rozbudowane','',      100);
+  try { if (typeof initPush === 'function') initPush(); } catch(e){}
 }
 
 window.addEventListener('DOMContentLoaded', function() {

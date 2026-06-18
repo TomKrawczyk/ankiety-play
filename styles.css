@@ -1385,3 +1385,24 @@ body.light .success-overlay{ background:var(--bg, #f4f6fb); }
 }
 @keyframes dmPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.06); } }
 .dm-claim:active{ transform:scale(.94); }
+
+/* ===== 🏔️ WEEKEND MEGA-EVENT ===== */
+.weekend-event{
+  border-width:2px;
+  background:linear-gradient(165deg, color-mix(in srgb, var(--ev) 20%, #0a0c10), #0a0c10);
+  box-shadow:0 0 28px color-mix(in srgb, var(--ev) 35%, transparent);
+  position:relative; overflow:hidden;
+}
+.weekend-event::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(120deg, transparent 30%, color-mix(in srgb, var(--ev) 18%, transparent) 50%, transparent 70%);
+  background-size:200% 100%; animation:weShine 3.5s linear infinite;
+}
+@keyframes weShine{ 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+.we-banner{
+  text-align:center; font-size:11px; font-weight:900; letter-spacing:1px;
+  color:#0a0c10; background:var(--ev); border-radius:9px; padding:4px;
+  margin-bottom:10px; position:relative; z-index:1;
+  text-shadow:0 1px 0 color-mix(in srgb, var(--ev) 50%, #fff);
+}
+.weekend-event .de-head,.weekend-event .de-status,.weekend-event .de-list{ position:relative; z-index:1; }

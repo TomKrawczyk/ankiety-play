@@ -104,6 +104,8 @@ function statValue(stat, s) {
 function renderDailyEvent(s) {
   var mr = document.getElementById('missionRow');
   if (!mr) return;
+  // ── W weekend pokazujemy MEGA-EVENT zamiast zwykłego ──
+  if (typeof isWeekend === 'function' && isWeekend()) { renderWeekendEvent(); return; }
   var ev = todaysEvent();
   var claims = loadDailyClaims();
   var doneCount = 0, totalXp = 0, claimedXp = 0;
@@ -195,4 +197,140 @@ function claimDaily(mid) {
   // odśwież widok
   var s2 = (typeof getStats === 'function') ? getStats(window._user) : {};
   renderDailyEvent(s2);
+}
+
+// ============================================================
+// 🏔️ WEEKEND MEGA-EVENT — sobota + niedziela jako jedno wyzwanie
+// ============================================================
+// W weekend zamiast dwóch osobnych eventów leci JEDEN wielki event
+// rozłożony na 2 dni. Wspólny postęp (sob+nd), grubsze cele i nagrody,
+// plus mega-bonus za sklarowanie całości. Vibe: weekendowy rajd.
+
+var WEEKEND_EVENT = {
+  id:'megaweekend', name:'WEEKEND RAID', emoji:'🏔️', vibe:'#f59e0b',
+  tag:'2 dni, full send — no days off 😤',
+  // cele liczone z postępu WEEKENDOWEGO (sob+nd razem)
+  missions:[
+    {id:'w_s12', icon:'⚔️', label:'12 ankiet przez cały weekend', stat:'we_surveys', target:12, xp:300},
+    {id:'w_h5',  icon:'🔥', label:'5 gorących leadów — raid boss', stat:'we_hot', target:5, xp:350},
+    {id:'w_2d',  icon:'📆', label:'Działaj w SOBOTĘ i NIEDZIELĘ', stat:'we_days', target:2, xp:200}
+  ],
+  comboBonus: 250 // mega-bonus za komplet
+};
+
+function isWeekend() { var d = new Date().getDay(); return d === 0 || d === 6; }
+
+// klucz weekendu: rok + numer soboty (sob i nd dzielą ten sam klucz)
+function weekendKey() {
+  var now = new Date();
+  var d = new Date(now);
+  if (d.getDay() === 0) d.setDate(d.getDate() - 1); // niedziela -> przypisz do soboty
+  return '4eco_we_' + (window._user || 'anon').toLowerCase() + '_' + d.getFullYear() + '_' + d.getMonth() + '_' + d.getDate();
+}
+
+// stan weekendu: skumulowany postęp sob+nd
+function loadWeekendState() {
+  try {
+    var o = JSON.parse(localStorage.getItem(weekendKey()) || '{}');
+    return { surveys: o.surveys || 0, hot: o.hot || 0, days: o.days || [], claimed: o.claimed || [] };
+  } catch (e) { return { surveys: 0, hot: 0, days: [], claimed: [] }; }
+}
+function saveWeekendState(o) {
+  try { localStorage.setItem(weekendKey(), JSON.stringify(o)); } catch (e) {}
+}
+
+// wywoływane po zapisie ankiety w weekend — kumuluje postęp
+function trackWeekendProgress(isHot) {
+  if (!isWeekend()) return;
+  var st = loadWeekendState();
+  st.surveys += 1;
+  if (isHot) st.hot += 1;
+  var today = new Date().toLocaleDateString('pl-PL');
+  if (st.days.indexOf(today) === -1) st.days.push(today);
+  saveWeekendState(st);
+}
+
+// wartość statystyki weekendowej dla misji
+function weStatValue(stat, st) {
+  if (stat === 'we_surveys') return st.surveys || 0;
+  if (stat === 'we_hot')     return st.hot || 0;
+  if (stat === 'we_days')    return (st.days || []).length;
+  return 0;
+}
+
+// render weekendowego mega-eventu (zastępuje zwykły event w sob/nd)
+function renderWeekendEvent() {
+  var mr = document.getElementById('missionRow');
+  if (!mr) return;
+  var ev = WEEKEND_EVENT;
+  var st = loadWeekendState();
+  var doneCount = 0;
+
+  var rows = '';
+  ev.missions.forEach(function (m) {
+    var cur = Math.min(weStatValue(m.stat, st), m.target);
+    var pct = Math.min(100, Math.round(cur / m.target * 100));
+    var done = cur >= m.target;
+    var claimed = st.claimed.indexOf(m.id) > -1;
+    if (done) doneCount++;
+
+    var btn;
+    if (claimed) btn = '<span class="dm-claimed">✓ odebrane</span>';
+    else if (done) btn = '<button class="dm-claim" onclick="claimWeekend(\'' + m.id + '\')">ODBIERZ +' + m.xp + ' XP</button>';
+    else btn = '<span class="dm-xp">+' + m.xp + ' XP</span>';
+
+    rows +=
+      '<div class="dm-row' + (done ? ' done' : '') + (claimed ? ' claimed' : '') + '">' +
+        '<div class="dm-ic">' + m.icon + '</div>' +
+        '<div class="dm-mid">' +
+          '<div class="dm-label">' + m.label + '</div>' +
+          '<div class="dm-bar"><div class="dm-fill" style="width:' + pct + '%"></div></div>' +
+          '<div class="dm-prog">' + cur + '/' + m.target + '</div>' +
+        '</div>' +
+        '<div class="dm-act">' + btn + '</div>' +
+      '</div>';
+  });
+
+  var allDone = doneCount === ev.missions.length;
+  var headLine = allDone ? 'RAID CLEARED — absolute legend 🏆🔥'
+    : (doneCount + '/' + ev.missions.length + ' celów raidu 💪');
+
+  mr.innerHTML =
+    '<div class="daily-event weekend-event" style="--ev:' + ev.vibe + '">' +
+      '<div class="we-banner">🏔️ MEGA WEEKEND EVENT 🏔️</div>' +
+      '<div class="de-head">' +
+        '<div class="de-title">' + ev.emoji + ' <b>' + ev.name + '</b></div>' +
+        '<div class="de-tag">' + ev.tag + '</div>' +
+      '</div>' +
+      '<div class="de-status">' + headLine + '</div>' +
+      '<div class="de-list">' + rows + '</div>' +
+    '</div>';
+}
+
+// odbierz nagrodę weekendową
+function claimWeekend(mid) {
+  var ev = WEEKEND_EVENT, m = null;
+  ev.missions.forEach(function (x) { if (x.id === mid) m = x; });
+  if (!m) return;
+  var st = loadWeekendState();
+  if (weStatValue(m.stat, st) < m.target) {
+    if (typeof showToast === 'function') showToast('⏳ Cel raidu jeszcze nie zaliczony!');
+    return;
+  }
+  if (st.claimed.indexOf(mid) > -1) return;
+  st.claimed.push(mid);
+  saveWeekendState(st);
+
+  if (typeof awardWildXp === 'function') awardWildXp(window._user, m.xp);
+  if (typeof floatXP === 'function') floatXP('🏔️ +' + m.xp + ' XP');
+  if (typeof confettiBlast === 'function') confettiBlast();
+  if (typeof showToast === 'function') showToast('⚔️ Cel raidu zaliczony! +' + m.xp + ' XP');
+
+  var allClaimed = ev.missions.every(function (x) { return st.claimed.indexOf(x.id) > -1; });
+  if (allClaimed) {
+    if (typeof awardWildXp === 'function') awardWildXp(window._user, ev.comboBonus);
+    if (typeof showToast === 'function') setTimeout(function () { showToast('🏆 RAID CLEARED! Mega-bonus +' + ev.comboBonus + ' XP'); }, 1400);
+    if (typeof floatXP === 'function') setTimeout(function () { floatXP('🏆 +' + ev.comboBonus + ' XP RAID!'); }, 1500);
+  }
+  renderWeekendEvent();
 }

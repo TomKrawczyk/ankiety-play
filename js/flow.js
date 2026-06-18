@@ -416,6 +416,10 @@ function pushRanking(name, xp, total, hot, streak, todayCount) {
 }
 
 function afterSave(data, xp, isHot, fid) {
+  // Postęp weekendowego mega-eventu (kumuluje sob+nd)
+  try { if (typeof trackWeekendProgress === 'function') trackWeekendProgress(isHot); } catch(e){}
+  // Po pierwszej ankiecie zaproponuj powiadomienia o evencie dnia
+  try { if (typeof maybeAskPush === 'function') maybeAskPush(); } catch(e){}
   // Oblicz XP z mnożnikiem combo
   var mult = getMultiplier();
   var finalXp = Math.round(xp * mult);
