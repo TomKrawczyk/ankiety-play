@@ -48,13 +48,25 @@ var LEAD_SIGNALS = {
   },
   decyzja: {
     'Jak najszybciej': 5, 'W ciągu pół roku': 3, 'Za rok lub dłużej': 1, 'Jeszcze nie wie': 0
+  },
+  // ── Świadomość rosnących cen energii (QPV/FULL) ──
+  podwyzki: {
+    'Aktywnie szuka oszczędności': 3, 'Obserwuje, zastanawia się': 1, 'Na razie się nie martwi': 0
+  },
+  // ── Decyzyjność: rozmowa z właścicielem/parą = mocniejszy lead ──
+  kto_decyduje: {
+    'Rozmawiam z właścicielem': 2, 'Małżeństwo decyduje wspólnie': 2, 'Decyduje ktoś inny': 0
+  },
+  // ── Gotowość na bezpłatną konsultację — najsilniejszy sygnał intencji ──
+  audyt: {
+    'Tak, chętnie się umówi': 5, 'Może w późniejszym terminie': 2, 'Nie jest zainteresowany': -2
   }
 };
 
 // Zainteresowania (multi) — każdy konkretny produkt = sygnał zakupowy
 var INTEREST_POINTS = {
   'Panele słoneczne': 1, 'Pompa ciepła': 1, 'Magazyn energii': 1,
-  'Ocieplenie domu': 1, 'Klimatyzacja': 1
+  'Mała turbina wiatrowa': 1, 'Ocieplenie domu': 1, 'Klimatyzacja': 1
 };
 
 // Liczy łączny wynik intencji z odpowiedzi ankiety

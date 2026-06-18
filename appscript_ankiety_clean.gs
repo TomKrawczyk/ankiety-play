@@ -27,6 +27,7 @@ var HEADERS_ANKIETY = [
   "Imię klienta","Telefon","Kod pocztowy","Typ obiektu","Rachunek prąd",
   "Koszt ogrzewania","Ma PV","Źródło ciepła","Wiek kotła/budynku",
   "Zainteresowania","Motywacja","Decyzja","Ból","Rachunki ogółem",
+  "Świadomość podwyżek","Kto decyduje","Gotowość na konsultację",
   "Temperatura leada","Uwagi"
 ];
 
@@ -124,6 +125,9 @@ function handleSaveAnkieta(d) {
     d.decyzja        || "",
     d.bol            || "",
     d.rachunki_ogol  || "",
+    d.podwyzki       || "",
+    d.kto_decyduje   || "",
+    d.audyt          || "",
     d.temp_leada     || "",
     d.uwagi          || ""
   ];

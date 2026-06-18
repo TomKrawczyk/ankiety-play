@@ -26,6 +26,16 @@ var FLOW_QPV = [
     {icon:"😴",text:"Nie śledzi — płaci i tyle"},
     {icon:"👍",text:"Jest zadowolony"}
   ]},
+  {id:"podwyzki", type:"choice", title:"Jak patrzy na rosnące ceny prądu?", choices:[
+    {icon:"🔎",text:"Aktywnie szuka oszczędności"},
+    {icon:"👀",text:"Obserwuje, zastanawia się"},
+    {icon:"😌",text:"Na razie się nie martwi"}
+  ]},
+  {id:"kto_decyduje", type:"choice", title:"Kto decyduje o takich inwestycjach?", choices:[
+    {icon:"🙋",text:"Rozmawiam z właścicielem"},
+    {icon:"👫",text:"Małżeństwo decyduje wspólnie"},
+    {icon:"🔁",text:"Decyduje ktoś inny"}
+  ]},
   {id:"temp", type:"autotemp", title:"Ocena leada (system analizuje odpowiedzi)"},
   {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. pyta o dotacje, jest zainteresowany magazynem..."}
 ];
@@ -55,6 +65,16 @@ var FLOW_QHEAT = [
     {icon:"🏡",text:"2005–2015"},
     {icon:"🏗️",text:"Nowy — po 2015"}
   ]},
+  {id:"kto_decyduje", type:"choice", title:"Kto decyduje o takich inwestycjach?", choices:[
+    {icon:"🙋",text:"Rozmawiam z właścicielem"},
+    {icon:"👫",text:"Małżeństwo decyduje wspólnie"},
+    {icon:"🔁",text:"Decyduje ktoś inny"}
+  ]},
+  {id:"audyt", type:"choice", title:"Otwarty na bezpłatną konsultację u siebie?", choices:[
+    {icon:"✅",text:"Tak, chętnie się umówi"},
+    {icon:"🗓️",text:"Może w późniejszym terminie"},
+    {icon:"🚫",text:"Nie jest zainteresowany"}
+  ]},
   {id:"temp", type:"autotemp", title:"Ocena leada (system analizuje odpowiedzi)"},
   {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. żona decyduje, pyta o dotacje..."}
 ];
@@ -81,14 +101,25 @@ var FLOW_QNEW = [
     {icon:"☀️",text:"Panele słoneczne"},
     {icon:"🌡️",text:"Pompa ciepła"},
     {icon:"🔋",text:"Magazyn energii"},
+    {icon:"🌬️",text:"Mała turbina wiatrowa"},
     {icon:"🏠",text:"Ocieplenie domu"},
     {icon:"❄️",text:"Klimatyzacja"}
+  ]},
+  {id:"kto_decyduje", type:"choice", title:"Kto decyduje o takich inwestycjach?", choices:[
+    {icon:"🙋",text:"Rozmawiam z właścicielem"},
+    {icon:"👫",text:"Małżeństwo decyduje wspólnie"},
+    {icon:"🔁",text:"Decyduje ktoś inny"}
   ]},
   {id:"decyzja", type:"choice", title:"Kiedy klient planuje decyzję?", choices:[
     {icon:"🚀",text:"Jak najszybciej"},
     {icon:"📅",text:"W ciągu pół roku"},
     {icon:"🕐",text:"Za rok lub dłużej"},
     {icon:"🤔",text:"Jeszcze nie wie"}
+  ]},
+  {id:"audyt", type:"choice", title:"Otwarty na bezpłatną konsultację u siebie?", choices:[
+    {icon:"✅",text:"Tak, chętnie się umówi"},
+    {icon:"🗓️",text:"Może w późniejszym terminie"},
+    {icon:"🚫",text:"Nie jest zainteresowany"}
   ]},
   {id:"temp", type:"autotemp", title:"Ocena leada (system analizuje odpowiedzi)"},
   {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. oboje domownicy zainteresowani, pyta o dofinansowanie..."}
@@ -135,8 +166,14 @@ var FLOW_FULL = [
     {icon:"☀️",text:"Panele słoneczne"},
     {icon:"🌡️",text:"Pompa ciepła"},
     {icon:"🔋",text:"Magazyn energii"},
+    {icon:"🌬️",text:"Mała turbina wiatrowa"},
     {icon:"🏠",text:"Ocieplenie domu"},
     {icon:"❄️",text:"Klimatyzacja"}
+  ]},
+  {id:"podwyzki", type:"choice", title:"Jak patrzy na rosnące ceny energii?", choices:[
+    {icon:"🔎",text:"Aktywnie szuka oszczędności"},
+    {icon:"👀",text:"Obserwuje, zastanawia się"},
+    {icon:"😌",text:"Na razie się nie martwi"}
   ]},
   {id:"motyw", type:"emoji", title:"Główna motywacja klienta?", opts:[
     {emoji:"💰",label:"Oszczędności"},
@@ -144,11 +181,21 @@ var FLOW_FULL = [
     {emoji:"🌿",label:"Ekologia"},
     {emoji:"📋",label:"Dotacje"}
   ]},
+  {id:"kto_decyduje", type:"choice", title:"Kto decyduje o takich inwestycjach?", choices:[
+    {icon:"🙋",text:"Rozmawiam z właścicielem"},
+    {icon:"👫",text:"Małżeństwo decyduje wspólnie"},
+    {icon:"🔁",text:"Decyduje ktoś inny"}
+  ]},
   {id:"decyzja", type:"choice", title:"Kiedy klient planuje decyzję?", choices:[
     {icon:"🚀",text:"Jak najszybciej"},
     {icon:"📅",text:"W ciągu pół roku"},
     {icon:"🕐",text:"Za rok lub dłużej"},
     {icon:"🤔",text:"Jeszcze nie wie"}
+  ]},
+  {id:"audyt", type:"choice", title:"Otwarty na bezpłatną konsultację u siebie?", choices:[
+    {icon:"✅",text:"Tak, chętnie się umówi"},
+    {icon:"🗓️",text:"Może w późniejszym terminie"},
+    {icon:"🚫",text:"Nie jest zainteresowany"}
   ]},
   {id:"temp", type:"autotemp", title:"Ocena leada (system analizuje odpowiedzi)"},
   {id:"uwagi", type:"textarea", title:"Notatki z rozmowy", hint:"Opcjonalne", placeholder:"Obiekcje, pytania, zainteresowania..."}
@@ -364,6 +411,9 @@ function submitFlow(fid) {
     decyzja: a.decyzja||'',
     bol: a.bol||'',
     rachunki_ogol: a.rachunki_ogol||'',
+    podwyzki: a.podwyzki||'',
+    kto_decyduje: a.kto_decyduje||'',
+    audyt: a.audyt||'',
     temp_leada: a.temp||'',
     uwagi: a.uwagi||''
   };
