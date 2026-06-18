@@ -43,11 +43,12 @@ function loadLiderData() {
     var agents = (res[0] && res[0].agents) || [];
     var tracks = (res[1] && res[1].tracks) || [];
     var ranking = (res[2] && res[2].data) || [];
-    drawLiderKpis(agents, tracks, ranking);
-    drawLiderTeam(agents);
-    drawLiderTracks(tracks);
-    drawLiderLiga(tracks, ranking);
-  });
+    console.log('[Lider] presence:', agents.length, 'tracks:', tracks.length, 'ranking:', ranking.length);
+    try { drawLiderKpis(agents, tracks, ranking); } catch(e){ console.error('KPI',e); }
+    try { drawLiderTeam(agents); } catch(e){ console.error('Team',e); }
+    try { drawLiderTracks(tracks); } catch(e){ console.error('Tracks',e); }
+    try { drawLiderLiga(tracks, ranking); } catch(e){ console.error('Liga',e); }
+  }).catch(function(e){ console.error('[Lider] load fail', e); });
 }
 
 function drawLiderKpis(agents, tracks, ranking) {
@@ -57,8 +58,8 @@ function drawLiderKpis(agents, tracks, ranking) {
   var hidden = agents.filter(function(a){ return a.status === 'ukryty'; }).length;
   var totalKm = tracks.reduce(function(s,t){ return s + (t.dist||0); }, 0) / 1000;
   // ankiety dziś + gorące leady z rankingu (kolumna "Dziś" jeśli jest)
-  var ankDzis = ranking.reduce(function(s,r){ return s + (Number(r['Dziś']||r.dzis||0)); }, 0);
-  var hot = ranking.reduce(function(s,r){ return s + (Number(r['Gorące leady']||r.hot||0)); }, 0);
+  var ankDzis = ranking.reduce(function(s,r){ return s + (Number(r.today||r['Dziś']||0)); }, 0);
+  var hot = ranking.reduce(function(s,r){ return s + (Number(r.hot||r['Gorące leady']||0)); }, 0);
 
   el.innerHTML =
     kpi('🟢', active, 'pracuje teraz') +
@@ -110,14 +111,14 @@ function drawLiderLiga(tracks, ranking) {
   // mapuj ankiety dziś po imieniu z rankingu
   var ankByName = {};
   ranking.forEach(function(r){
-    var n = (r['Ankieter']||r.name||'').toString().trim();
-    if (n) ankByName[n.toLowerCase()] = Number(r['Dziś']||r.dzis||0);
+    var n = (r.name||r['Ankieter']||'').toString().trim();
+    if (n) ankByName[n.toLowerCase()] = Number(r.today||r['Dziś']||0);
   });
   // zbierz wszystkich z tras + rankingu
   var names = {};
   tracks.forEach(function(t){ if (t.name) names[t.name] = true; });
   Object.keys(ankByName).forEach(function(){});
-  ranking.forEach(function(r){ var n=(r['Ankieter']||r.name||'').toString().trim(); if(n) names[n]=true; });
+  ranking.forEach(function(r){ var n=(r.name||r['Ankieter']||'').toString().trim(); if(n) names[n]=true; });
 
   var trackByName = {};
   tracks.forEach(function(t){ trackByName[(t.name||'').toLowerCase()] = t; });

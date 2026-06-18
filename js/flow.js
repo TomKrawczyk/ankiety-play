@@ -169,7 +169,7 @@ function buildFlow(containerId, questions, sheetName, color, xpAmount) {
       if(saved) answers[q.id] = saved;
     }
   });
-  var state = { current: 0, answers: answers, questions: questions, sheetName: sheetName, color: color||'', xpAmount: xpAmount||50 };
+  var state = { current: 0, answers: answers, questions: questions, sheetName: sheetName, color: color||'', xpAmount: xpAmount||50, _params: { questions: questions, sheetName: sheetName, color: color||'', xpAmount: xpAmount||50 } };
   flows[containerId] = state;
   renderQ(containerId);
 }
@@ -456,8 +456,12 @@ function showSuccess(typ, temp, xp, fid) {
   if(data.kod_pocztowy) localStorage.setItem('4eco_loc_location_kod', data.kod_pocztowy);
   if(data.miejscowosc) localStorage.setItem('4eco_loc_location_msc', data.miejscowosc);
 
-  var app = document.getElementById('appScreen');
-  app.innerHTML = '<div class="success-screen">'+
+  var ov = document.getElementById('successOverlay');
+  if (ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'successOverlay';
+  ov.className = 'success-overlay';
+  ov.innerHTML = '<div class="success-screen">'+
     '<div class="success-icon">✅</div>'+
     '<div class="success-xp">+'+xp+' XP!</div>'+
     '<div class="success-card">'+
@@ -478,8 +482,27 @@ function showSuccess(typ, temp, xp, fid) {
       '</div>'+
       '<div style="display:flex;justify-content:space-between;font-size:0.68em;color:var(--muted);margin-top:4px"><span>Level '+lv.level+'</span><span>'+stats.xp+' / '+lv.nextXp+' XP</span></div>'+
     '</div>'+
-    '<button onclick="location.reload()" class="btn-primary" style="max-width:400px;font-size:1.05em">➕ Następna ankieta</button>'+
+    '<button onclick="nextAnkieta(\''+fid+'\')" class="btn-primary" style="max-width:400px;font-size:1.05em">➕ Następna ankieta</button>'+
   '</div>';
+  document.body.appendChild(ov);
+  window.scrollTo(0, 0);
+}
+
+// Szybki restart ankiety bez przeladowania strony (zachowuje combo)
+function nextAnkieta(fid) {
+  var ov = document.getElementById('successOverlay');
+  if (ov) ov.remove();
+  var st = flows[fid];
+  if (st && st._params) {
+    var p = st._params;
+    buildFlow(fid, p.questions, p.sheetName, p.color, p.xpAmount);
+  }
+  // przewin do gory i sfokusuj pierwszy input jesli jest
+  window.scrollTo(0, 0);
+  setTimeout(function(){
+    var first = document.querySelector('#'+fid+' .q-input');
+    if (first) try { first.focus(); } catch(e){}
+  }, 200);
 }
 
 

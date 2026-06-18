@@ -1231,3 +1231,14 @@ body.kb-open .qflow { padding-bottom:45vh; }
 .liga-mid b{font-weight:700;color:var(--text);font-size:0.9em}
 .liga-meta{font-size:0.7em;color:var(--text);opacity:0.6;margin-top:1px}
 .liga-pts{font-weight:800;color:var(--green);font-size:0.95em}
+
+/* ── EKRAN SUKCESU JAKO OVERLAY (bez reloadu strony) ── */
+.success-overlay{
+  position:fixed; inset:0; z-index:9000;
+  background:var(--bg, #0a0e1a);
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+  padding:18px 16px calc(env(safe-area-inset-bottom,0) + 24px);
+  animation:successIn .25s ease;
+}
+@keyframes successIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
+body.light .success-overlay{ background:var(--bg, #f4f6fb); }
