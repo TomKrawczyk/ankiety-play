@@ -1350,3 +1350,38 @@ body.light .success-overlay{ background:var(--bg, #f4f6fb); }
 .at-xp{ margin-top:14px; font-size:20px; font-weight:900; color:var(--ac);
   text-shadow:0 0 12px var(--ac); }
 .at-hint{ margin-top:10px; font-size:11px; color:#64748b; }
+
+/* ===== 🎟️ DZIENNE EVENTY MISJI (Gen Z) ===== */
+.daily-event{
+  border:1.5px solid color-mix(in srgb, var(--ev) 55%, transparent);
+  border-radius:16px; padding:13px 13px 10px;
+  background:linear-gradient(165deg, color-mix(in srgb, var(--ev) 12%, #0a0c10), #0a0c10);
+  box-shadow:0 0 18px color-mix(in srgb, var(--ev) 22%, transparent);
+}
+.de-head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.de-title{ font-size:16px; font-weight:900; color:#fff; }
+.de-title b{ color:var(--ev); }
+.de-tag{ font-size:11px; color:#94a3b8; font-style:italic; }
+.de-status{ font-size:12px; font-weight:700; color:var(--ev); margin:6px 0 9px; }
+.de-list{ display:flex; flex-direction:column; gap:7px; }
+.dm-row{ display:flex; align-items:center; gap:10px; padding:7px 8px;
+  background:#0c0e14; border:1px solid #1b2230; border-radius:11px; transition:.2s; }
+.dm-row.done{ border-color:color-mix(in srgb, var(--ev) 60%, transparent); }
+.dm-row.claimed{ opacity:.6; }
+.dm-ic{ font-size:20px; flex:0 0 auto; width:26px; text-align:center; }
+.dm-mid{ flex:1 1 auto; min-width:0; }
+.dm-label{ font-size:12.5px; font-weight:700; color:#e2e8f0; line-height:1.25; }
+.dm-bar{ height:5px; background:#161a22; border-radius:5px; overflow:hidden; margin:4px 0 2px; }
+.dm-fill{ height:100%; background:var(--ev); border-radius:5px; transition:width .5s ease; }
+.dm-prog{ font-size:10.5px; color:#7c8696; font-weight:700; }
+.dm-act{ flex:0 0 auto; }
+.dm-xp{ font-size:11px; font-weight:800; color:#64748b; }
+.dm-claimed{ font-size:11px; font-weight:800; color:#10d873; }
+.dm-claim{
+  border:none; cursor:pointer; font-weight:900; font-size:11px; color:#0a0c10;
+  background:var(--ev); border-radius:9px; padding:7px 11px;
+  box-shadow:0 0 12px color-mix(in srgb, var(--ev) 60%, transparent);
+  animation:dmPulse 1.3s ease-in-out infinite;
+}
+@keyframes dmPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.06); } }
+.dm-claim:active{ transform:scale(.94); }

@@ -190,6 +190,9 @@ function updateUI(name) {
 }
 
 function renderMissions(s) {
+  // ── Nowy system: dzienne eventy misji (Gen Z) ──
+  if (typeof renderDailyEvent === 'function') { renderDailyEvent(s); return; }
+  // (fallback poniżej — stare stałe misje)
   var ms = [
     {icon:'⚡', title:'5 ankiet dziś',    target:5,  cur:s.today,            xp:'+100XP'},
     {icon:'🔥', title:'3 gorące leady',   target:3,  cur:Math.min(s.hot,3),  xp:'+150XP'},
