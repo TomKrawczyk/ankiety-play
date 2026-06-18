@@ -1286,3 +1286,49 @@ body.light .success-overlay{ background:var(--bg, #f4f6fb); }
 .xp-track{ height:7px; background:#0c0e12; border-radius:6px; overflow:hidden; margin-top:5px; }
 .xp-fill{ height:100%; background:linear-gradient(90deg,#a78bfa,#60a5fa); border-radius:6px; transition:width .6s ease; }
 .xp-val{ font-weight:800; color:#a78bfa; min-width:46px; text-align:right; }
+
+/* ===== 🎲 DZIKIE LEADY (pokestopy) ===== */
+.wild-div{ background:none; border:none; }
+.wild-pin{ position:relative; width:40px; height:40px; display:flex; align-items:center; justify-content:center; }
+.wild-pulse{
+  position:absolute; inset:0; border-radius:50%;
+  background:var(--wc); opacity:.25;
+  animation:wildPulse 1.8s ease-out infinite;
+}
+@keyframes wildPulse{
+  0%   { transform:scale(.5); opacity:.45; }
+  70%  { transform:scale(1.6); opacity:0; }
+  100% { transform:scale(1.6); opacity:0; }
+}
+.wild-core{
+  position:relative; width:30px; height:30px; border-radius:50%;
+  background:radial-gradient(circle at 30% 25%, #1b2027, #0a0c10);
+  border:2px solid var(--wc); box-shadow:0 0 12px var(--wg), 0 2px 6px rgba(0,0,0,.5);
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+  animation:wildFloat 2.6s ease-in-out infinite;
+}
+@keyframes wildFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
+
+/* overlay zebrania */
+.wild-anim-ov{
+  position:fixed; inset:0; z-index:9999; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; pointer-events:none;
+  opacity:0; transition:opacity .2s ease;
+}
+.wild-anim-ov.go{ opacity:1; }
+.wild-anim-ov.out{ opacity:0; transition:opacity .35s ease; }
+.wild-burst{
+  position:absolute; width:140px; height:140px; border-radius:50%;
+  background:radial-gradient(circle, var(--wc) 0%, transparent 65%);
+  opacity:.0; transform:scale(.3);
+}
+.wild-anim-ov.go .wild-burst{ animation:wildBurst .7s ease-out forwards; }
+@keyframes wildBurst{ 0%{opacity:.7; transform:scale(.3);} 100%{opacity:0; transform:scale(2.2);} }
+.wild-emoji{ font-size:54px; transform:scale(.4); }
+.wild-anim-ov.go .wild-emoji{ animation:wildPop .5s cubic-bezier(.2,1.6,.5,1) forwards; }
+@keyframes wildPop{ 0%{transform:scale(.4) rotate(-15deg);} 60%{transform:scale(1.25) rotate(8deg);} 100%{transform:scale(1) rotate(0);} }
+.wild-xp{ margin-top:6px; font-size:26px; font-weight:900; color:var(--wc); text-shadow:0 0 14px var(--wc); transform:translateY(8px); opacity:0; }
+.wild-anim-ov.go .wild-xp{ animation:wildRise .6s ease-out .15s forwards; }
+@keyframes wildRise{ to{ transform:translateY(-6px); opacity:1; } }
+.wild-lbl{ margin-top:2px; font-size:13px; font-weight:700; color:#cbd5e1; opacity:0; }
+.wild-anim-ov.go .wild-lbl{ animation:wildRise .6s ease-out .25s forwards; }

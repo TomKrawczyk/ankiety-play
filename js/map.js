@@ -150,6 +150,8 @@ function onGeoOk(pos) {
   if (first) MAP.obj.setView([lat, lng], MAP_ME_ZOOM);
   setGeoStatus('🟢 Na żywo · dokładność ~' + Math.round(acc) + ' m');
   updateNearbyHint();
+  ensureWildSpawns();
+  checkWildCatch();
 }
 
 function onGeoErr(err) {
@@ -298,6 +300,7 @@ function renderMapa() {
     initTrack();
     startTrackSync();
     updateTeamModeBtn();
+    startWild();
   }, 60);
 }
 
@@ -757,4 +760,192 @@ function heatColor(r) {
   if (r < 0.5)  return '#10d873';
   if (r < 0.75) return '#facc15';
   return '#dc2626';
+}
+
+// ============================================================
+// 🎲 DZIKIE LEADY (pokestopy) — losowe punkty XP w terenie
+// ============================================================
+// Wokół gracza pojawiają się "dzikie leady". Wejdź w zasięg (~30 m),
+// żeby je zebrać i zgarnąć bonus XP. Odnawiają się co jakiś czas.
+// Wszystko lokalnie (per użytkownik) — bez zmian w backendzie.
+
+var WILD = {
+  markers: {},        // id -> Leaflet marker
+  spawnTimer: null,
+  count: 4,           // ile dzikich leadów utrzymywać wokół gracza
+  radiusMin: 80,      // m — najbliższy spawn
+  radiusMax: 320,     // m — najdalszy spawn
+  catchDist: 35,      // m — w tym zasięgu zbierasz lead
+  respawnEvery: 90000 // ms — co ile dosypywać brakujące
+};
+
+// typy dzikich leadów: waga losowania + XP + wygląd
+var WILD_TYPES = [
+  { key: 'mini',  emoji: '✨', xp: 15,  color: '#60a5fa', glow: 'rgba(96,165,250,.7)',  label: 'Iskra'    , weight: 50 },
+  { key: 'std',   emoji: '⚡', xp: 30,  color: '#10d873', glow: 'rgba(16,216,115,.7)',  label: 'Lead'     , weight: 32 },
+  { key: 'rare',  emoji: '💎', xp: 60,  color: '#a855f7', glow: 'rgba(168,85,247,.75)', label: 'Rzadki'   , weight: 14 },
+  { key: 'gold',  emoji: '👑', xp: 120, color: '#facc15', glow: 'rgba(250,204,21,.8)',  label: 'Złoty'    , weight: 4  }
+];
+
+function wildKey() { return mapKey('wild'); }
+function loadWild() {
+  try { return JSON.parse(localStorage.getItem(wildKey()) || '[]'); }
+  catch (e) { return []; }
+}
+function saveWild(arr) {
+  try { localStorage.setItem(wildKey(), JSON.stringify(arr)); } catch (e) {}
+}
+
+// losuj typ wg wag
+function pickWildType() {
+  var total = 0; WILD_TYPES.forEach(function (t) { total += t.weight; });
+  var r = Math.random() * total;
+  for (var i = 0; i < WILD_TYPES.length; i++) {
+    r -= WILD_TYPES[i].weight;
+    if (r <= 0) return WILD_TYPES[i];
+  }
+  return WILD_TYPES[0];
+}
+function wildTypeByKey(k) {
+  for (var i = 0; i < WILD_TYPES.length; i++) if (WILD_TYPES[i].key === k) return WILD_TYPES[i];
+  return WILD_TYPES[0];
+}
+
+// przesuń punkt o (dist metrów) pod losowym kątem
+function offsetLatLng(lat, lng, distM) {
+  var ang = Math.random() * 2 * Math.PI;
+  var dLat = (distM * Math.cos(ang)) / 111320;
+  var dLng = (distM * Math.sin(ang)) / (111320 * Math.cos(lat * Math.PI / 180));
+  return { lat: lat + dLat, lng: lng + dLng };
+}
+
+// utrzymuj WILD.count dzikich leadów wokół gracza
+function ensureWildSpawns() {
+  if (!MAP.lastPos) return;
+  var arr = loadWild();
+  // odrzuć zbyt stare (>30 min) lub bardzo oddalone (>1 km) — żeby nie wisiały w nieskończoność
+  var now = Date.now();
+  arr = arr.filter(function (w) {
+    if (now - (w.born || 0) > 30 * 60000) return false;
+    if (distM({ lat: w.lat, lng: w.lng }, MAP.lastPos) > 1000) return false;
+    return true;
+  });
+  while (arr.length < WILD.count) {
+    var d = WILD.radiusMin + Math.random() * (WILD.radiusMax - WILD.radiusMin);
+    var p = offsetLatLng(MAP.lastPos.lat, MAP.lastPos.lng, d);
+    var t = pickWildType();
+    arr.push({
+      id: 'w' + now + '_' + Math.floor(Math.random() * 1e6),
+      lat: p.lat, lng: p.lng, type: t.key, xp: t.xp, born: now
+    });
+  }
+  saveWild(arr);
+  renderWildOnMap();
+}
+
+function makeWildIcon(t) {
+  var html =
+    '<div class="wild-pin" style="--wc:' + t.color + ';--wg:' + t.glow + '">' +
+      '<div class="wild-pulse"></div>' +
+      '<div class="wild-core">' + t.emoji + '</div>' +
+    '</div>';
+  return L.divIcon({ className: 'wild-div', html: html, iconSize: [40, 40], iconAnchor: [20, 20] });
+}
+
+function renderWildOnMap() {
+  if (!MAP.obj) return;
+  // usuń znaczniki, których nie ma już w danych
+  var arr = loadWild();
+  var live = {};
+  arr.forEach(function (w) { live[w.id] = true; });
+  Object.keys(WILD.markers).forEach(function (id) {
+    if (!live[id]) { MAP.obj.removeLayer(WILD.markers[id]); delete WILD.markers[id]; }
+  });
+  // dodaj brakujące
+  arr.forEach(function (w) {
+    if (WILD.markers[w.id]) return;
+    var t = wildTypeByKey(w.type);
+    var m = L.marker([w.lat, w.lng], { icon: makeWildIcon(t), zIndexOffset: 500 })
+      .addTo(MAP.obj)
+      .bindPopup('<b>' + t.emoji + ' ' + t.label + '</b><br>+' + t.xp + ' XP<br><small>Podejdź bliżej, żeby zebrać</small>');
+    WILD.markers[w.id] = m;
+  });
+}
+
+// sprawdź, czy gracz wszedł w zasięg jakiegoś dzikiego leada
+function checkWildCatch() {
+  if (!MAP.lastPos) return;
+  var arr = loadWild();
+  var remaining = [];
+  var collected = null;
+  arr.forEach(function (w) {
+    if (!collected && distM({ lat: w.lat, lng: w.lng }, MAP.lastPos) <= WILD.catchDist) {
+      collected = w; // zbierz tylko jeden na raz (kolejne przy następnym kroku)
+    } else {
+      remaining.push(w);
+    }
+  });
+  if (collected) {
+    saveWild(remaining);
+    if (WILD.markers[collected.id]) {
+      MAP.obj.removeLayer(WILD.markers[collected.id]);
+      delete WILD.markers[collected.id];
+    }
+    collectWild(collected);
+  }
+}
+
+function collectWild(w) {
+  var t = wildTypeByKey(w.type);
+  // dolicz XP graczowi — BEZ zwiększania liczby ankiet (to nie ankieta)
+  awardWildXp(window._user, t.xp);
+  playWildAnim(t);
+  // dosyp nowy, żeby zawsze było co zbierać
+  setTimeout(ensureWildSpawns, 800);
+}
+
+// dodanie XP za dzikiego leada (osobne od addXP — nie rusza total/hot/streak)
+function awardWildXp(name, amount) {
+  if (!name) return;
+  try {
+    var us = getUsers(), k = name.toLowerCase();
+    if (!us[k]) return;
+    var oldLv = (typeof getLv === 'function') ? getLv(us[k].xp || 0).level : 0;
+    us[k].xp = (us[k].xp || 0) + amount;
+    saveUsers(us);
+    // odśwież UI XP jeśli dostępne
+    if (typeof updateUI === 'function') updateUI(name);
+    var newLv = (typeof getLv === 'function') ? getLv(us[k].xp || 0).level : 0;
+    if (newLv > oldLv && typeof lvFlash === 'function') {
+      lvFlash();
+      if (typeof showToast === 'function') showToast('🎉 LEVEL UP! Jesteś Level ' + newLv + '!');
+    }
+    // zaktualizuj ranking serwerowy (XP się zmieniło)
+    if (typeof pushRanking === 'function') {
+      pushRanking(us[k].name, us[k].xp || 0, us[k].total || 0, us[k].hot || 0, us[k].streak || 0, 0);
+    }
+  } catch (e) {}
+}
+
+// animacja zebrania dzikiego leada
+function playWildAnim(t) {
+  var ov = document.createElement('div');
+  ov.className = 'wild-anim-ov';
+  ov.innerHTML =
+    '<div class="wild-burst" style="--wc:' + t.color + '"></div>' +
+    '<div class="wild-emoji">' + t.emoji + '</div>' +
+    '<div class="wild-xp" style="--wc:' + t.color + '">+' + t.xp + ' XP</div>' +
+    '<div class="wild-lbl">' + t.label + ' zebrany!</div>';
+  document.body.appendChild(ov);
+  if (typeof playSound === 'function') { try { playSound('catch'); } catch (e) {} }
+  setTimeout(function () { ov.classList.add('go'); }, 20);
+  setTimeout(function () { ov.classList.add('out'); }, 1300);
+  setTimeout(function () { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 1700);
+}
+
+// start systemu dzikich leadów (wywoływane z renderMapa)
+function startWild() {
+  ensureWildSpawns();
+  if (WILD.spawnTimer) clearInterval(WILD.spawnTimer);
+  WILD.spawnTimer = setInterval(ensureWildSpawns, WILD.respawnEvery);
 }
