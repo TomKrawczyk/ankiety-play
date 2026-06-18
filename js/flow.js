@@ -26,7 +26,7 @@ var FLOW_QPV = [
     {icon:"😴",text:"Nie śledzi — płaci i tyle"},
     {icon:"👍",text:"Jest zadowolony"}
   ]},
-  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"temp", type:"autotemp", title:"Ocena leada (system analizuje odpowiedzi)"},
   {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. pyta o dotacje, jest zainteresowany magazynem..."}
 ];
 
@@ -55,7 +55,7 @@ var FLOW_QHEAT = [
     {icon:"🏡",text:"2005–2015"},
     {icon:"🏗️",text:"Nowy — po 2015"}
   ]},
-  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"temp", type:"autotemp", title:"Ocena leada (system analizuje odpowiedzi)"},
   {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. żona decyduje, pyta o dotacje..."}
 ];
 
@@ -90,7 +90,7 @@ var FLOW_QNEW = [
     {icon:"🕐",text:"Za rok lub dłużej"},
     {icon:"🤔",text:"Jeszcze nie wie"}
   ]},
-  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"temp", type:"autotemp", title:"Ocena leada (system analizuje odpowiedzi)"},
   {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. oboje domownicy zainteresowani, pyta o dofinansowanie..."}
 ];
 
@@ -150,7 +150,7 @@ var FLOW_FULL = [
     {icon:"🕐",text:"Za rok lub dłużej"},
     {icon:"🤔",text:"Jeszcze nie wie"}
   ]},
-  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"temp", type:"autotemp", title:"Ocena leada (system analizuje odpowiedzi)"},
   {id:"uwagi", type:"textarea", title:"Notatki z rozmowy", hint:"Opcjonalne", placeholder:"Obiekcje, pytania, zainteresowania..."}
 ];
 
@@ -220,6 +220,23 @@ function renderQ(fid) {
       html += '<button class="es-btn'+sel+'" onclick="selectEmoji(\''+fid+'\',\''+o.label+'\')"><span class="es-emoji">'+o.emoji+'</span><span class="es-label">'+o.label+'</span></button>';
     });
     html += '</div>';
+  } else if(q.type==='autotemp') {
+    var _r = analyzeLeadTemp(s.answers);
+    s.answers[q.id] = _r.temp;               // zapisz auto-wynik jako temp leada
+    s._autoXp = _r.xp;                        // XP zalezne od temperatury
+    var _meta = {
+      'Zimny':  {icon:'🔵', col:'#60a5fa', desc:'Słaby sygnał zakupowy'},
+      'Letni':  {icon:'🟡', col:'#fbbf24', desc:'Umiarkowane zainteresowanie'},
+      'Ciepły': {icon:'🟠', col:'#fb923c', desc:'Wyraźny potencjał'},
+      'Gorący': {icon:'🔥', col:'#10d873', desc:'Silna intencja — działaj!'}
+    }[_r.temp];
+    html += '<div class="autotemp-card" style="--ac:'+_meta.col+'">';
+    html += '<div class="at-badge">🤖 Ocena automatyczna</div>';
+    html += '<div class="at-big">'+_meta.icon+' <b>'+_r.temp+'</b></div>';
+    html += '<div class="at-desc">'+_meta.desc+'</div>';
+    html += '<div class="at-xp">+'+_r.xp+' XP za ten lead</div>';
+    html += '<div class="at-hint">System ocenił to na podstawie odpowiedzi z ankiety</div>';
+    html += '</div>';
   } else if(q.type==='temp') {
     html += '<div class="temp-sel">';
     [{v:'Zimny',icon:'🔵',desc:'Mało zainteresowany'},{v:'Letni',icon:'🟡',desc:'Słucha, zastanawia się'},{v:'Ciepły',icon:'🟠',desc:'Wyraźnie zainteresowany'},{v:'Gorący',icon:'🔥',desc:'Chce spotkania!'}].forEach(function(t){
@@ -234,7 +251,8 @@ function renderQ(fid) {
   html += '<div class="qnav">';
   if(s.current > 0) html += '<button class="btn-back" onclick="prevQ(\''+fid+'\')">← Wróć</button>';
   if(isLast) {
-    html += '<button class="btn-submit '+(s.color||'')+'" onclick="submitFlow(\''+fid+'\')">✅ Zapisz +'+s.xpAmount+' XP</button>';
+    var _shownXp = s._autoXp || s.xpAmount;
+    html += '<button class="btn-submit '+(s.color||'')+'" onclick="submitFlow(\''+fid+'\')">✅ Zapisz +'+_shownXp+' XP</button>';
   } else {
     html += '<button class="btn-next '+(s.color||'')+'" onclick="nextQ(\''+fid+'\')">Dalej →</button>';
   }
@@ -350,7 +368,8 @@ function submitFlow(fid) {
     uwagi: a.uwagi||''
   };
   if(!data.telefon){showToast('⚠️ Brak telefonu klienta!'); s.current=0; renderQ(fid); return;}
-  sendData(data, s.xpAmount, data.temp_leada==='Gorący', fid);
+  var leadXp = s._autoXp || (LEAD_XP[data.temp_leada] || s.xpAmount);
+  sendData(data, leadXp, data.temp_leada==='Gorący', fid);
 }
 
 function sendData(data, xp, isHot, fid) {

@@ -1332,3 +1332,21 @@ body.light .success-overlay{ background:var(--bg, #f4f6fb); }
 @keyframes wildRise{ to{ transform:translateY(-6px); opacity:1; } }
 .wild-lbl{ margin-top:2px; font-size:13px; font-weight:700; color:#cbd5e1; opacity:0; }
 .wild-anim-ov.go .wild-lbl{ animation:wildRise .6s ease-out .25s forwards; }
+
+/* ===== 🤖 AUTO-OCENA LEADA ===== */
+.autotemp-card{
+  border:2px solid var(--ac); border-radius:18px; padding:22px 18px; text-align:center;
+  background:linear-gradient(160deg, color-mix(in srgb, var(--ac) 14%, #0a0c10), #0a0c10);
+  box-shadow:0 0 24px color-mix(in srgb, var(--ac) 35%, transparent);
+  animation:atReveal .45s cubic-bezier(.2,1.4,.5,1);
+}
+@keyframes atReveal{ 0%{transform:scale(.9); opacity:0;} 100%{transform:scale(1); opacity:1;} }
+.at-badge{ display:inline-block; font-size:11px; font-weight:800; letter-spacing:.5px;
+  color:var(--ac); background:color-mix(in srgb, var(--ac) 18%, transparent);
+  border:1px solid var(--ac); border-radius:999px; padding:3px 12px; margin-bottom:12px; }
+.at-big{ font-size:40px; font-weight:900; color:#fff; line-height:1.1; }
+.at-big b{ color:var(--ac); }
+.at-desc{ margin-top:4px; font-size:14px; color:#cbd5e1; }
+.at-xp{ margin-top:14px; font-size:20px; font-weight:900; color:var(--ac);
+  text-shadow:0 0 12px var(--ac); }
+.at-hint{ margin-top:10px; font-size:11px; color:#64748b; }
