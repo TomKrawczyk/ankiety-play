@@ -20,13 +20,15 @@ function renderLider() {
     '<div class="lider-sec-h">🏆 Liga terenowa (dziś)</div>' +
     '<div class="liga-info">Punkty = km × 10 + strefy × 25 + ankiety × 15</div>' +
     '<div id="liderLiga" class="map-team"><div class="team-empty">Ładuję…</div></div>' +
-    '<button class="map-share off" onclick="renderLider()" style="margin-top:10px">🔄 Odśwież</button>';
+    '<button class="map-share off" onclick="renderLider()" style="margin-top:10px">🔄 Odśwież</button>'+
+    '<div class="lider-auto" id="liderAuto">⟳ auto-odświeżanie co 45 s</div>';
 
   var d = new Date();
   var dEl = document.getElementById('liderDate');
   if (dEl) dEl.textContent = d.toLocaleDateString('pl-PL', { weekday:'long', day:'numeric', month:'long' });
 
   loadLiderData();
+  startLiderAuto();
 }
 
 function liderToday() {
@@ -34,7 +36,7 @@ function liderToday() {
   return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2);
 }
 
-function loadLiderData() {
+function loadLiderData(silent) {
   var pres = fetch(WEBHOOK + '?action=getPresence').then(function(r){return r.json();}).catch(function(){return null;});
   var trk  = fetch(WEBHOOK + '?action=getTracks&date=' + liderToday()).then(function(r){return r.json();}).catch(function(){return null;});
   var rank = fetch(WEBHOOK + '?action=getRanking').then(function(r){return r.json();}).catch(function(){return null;});
@@ -144,4 +146,31 @@ function drawLiderLiga(tracks, ranking) {
             '<span class="liga-pts">'+r.pts+' pkt</span></div>';
   });
   el.innerHTML = html;
+}
+
+// ── AUTO-ODŚWIEŻANIE PANELU LIDERA ──────────────────────────
+// Timer co 45 s, ale TYLKO gdy panel Lider jest widoczny.
+// Sam się zatrzymuje gdy użytkownik wyjdzie z zakładki (oszczędza webhook).
+var _liderTimer = null;
+
+function liderPanelVisible() {
+  var p = document.getElementById('panel_lider');
+  return !!(p && p.classList.contains('active'));
+}
+
+function startLiderAuto() {
+  stopLiderAuto();
+  _liderTimer = setInterval(function(){
+    if (!liderPanelVisible()) { stopLiderAuto(); return; }   // wyszedł z Lidera → stop
+    loadLiderData(true);                                     // silent = bez "Ładuję…"
+    var a = document.getElementById('liderAuto');
+    if (a) {
+      var t = new Date().toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      a.textContent = '⟳ auto-odświeżanie co 45 s · ostatnio ' + t;
+    }
+  }, 45000);
+}
+
+function stopLiderAuto() {
+  if (_liderTimer) { clearInterval(_liderTimer); _liderTimer = null; }
 }
