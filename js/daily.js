@@ -374,10 +374,13 @@ function maybeShowWeekendTeaser() {
         '<div class="wt-rw"><b>💰 ' + maxXp + '</b><span>XP do zdobycia</span></div>' +
       '</div>' +
       '<div class="wt-hype">Naładuj baterię — w sobotę i niedzielę gramy o mega-nagrody! 🚀</div>' +
-      '<button class="wt-btn" onclick="closeWeekendTeaser()">LET\'S GO 🔥</button>' +
+      '<div class="wt-roster" id="wtRoster"><div class="wt-roster-h">🤝 Ekipa na raid</div><div class="wt-roster-list" id="wtRosterList">⏳ ładuję…</div></div>' +
+      '<button class="wt-btn" id="wtJoinBtn" onclick="joinRaid()">ZAPISUJĘ SIĘ NA RAID 🔥</button>' +
     '</div>';
   document.body.appendChild(ov);
   setTimeout(function () { ov.classList.add('show'); }, 30);
+  // pobierz aktualną ekipę zapisaną na raid
+  loadRaidRoster();
 
   // jeśli są włączone powiadomienia — dorzuć lokalny push (też zero kosztów)
   try {
@@ -392,4 +395,82 @@ function closeWeekendTeaser() {
   if (!ov) return;
   ov.classList.remove('show');
   setTimeout(function () { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 300);
+}
+
+
+// ── RAID ROSTER: kto z zespołu zapisał się na weekendowy raid ──
+function raidWeekendId() {
+  // ID weekendu = rok + miesiąc + data SOBOTY tego weekendu.
+  // piątek -> +1 (sobota), niedziela -> -1 (sobota). Spójne przez cały weekend.
+  var d = new Date();
+  var day = d.getDay();
+  if (day === 5) d.setDate(d.getDate() + 1);      // piątek -> sobota
+  else if (day === 0) d.setDate(d.getDate() - 1); // niedziela -> sobota
+  return d.getFullYear() + '_' + d.getMonth() + '_' + d.getDate();
+}
+
+function loadRaidRoster() {
+  var box = document.getElementById('wtRosterList');
+  if (!box || typeof WEBHOOK === 'undefined') return;
+  fetch(WEBHOOK + '?action=getRaid&weekend=' + raidWeekendId())
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      var list = (res && res.data) ? res.data : [];
+      renderRaidRoster(list);
+    })
+    .catch(function () {
+      if (box) box.innerHTML = '<span class="wt-roster-empty">Bądź pierwszy! 🚀</span>';
+    });
+}
+
+function renderRaidRoster(list) {
+  var box = document.getElementById('wtRosterList');
+  if (!box) return;
+  var me = (window._user || '').toLowerCase();
+  var joined = list.some(function (n) { return (n || '').toLowerCase() === me; });
+  if (!list.length) {
+    box.innerHTML = '<span class="wt-roster-empty">Nikt jeszcze — bądź pierwszy! 🚀</span>';
+  } else {
+    var chips = list.slice(0, 12).map(function (n) {
+      var mine = (n || '').toLowerCase() === me;
+      return '<span class="wt-chip' + (mine ? ' me' : '') + '">' + (mine ? '🫵 ' : '') + n + '</span>';
+    }).join('');
+    var extra = list.length > 12 ? '<span class="wt-chip more">+' + (list.length - 12) + '</span>' : '';
+    box.innerHTML = '<div class="wt-count">' + list.length + ' osób gotowych na raid 💪</div>' +
+      '<div class="wt-chips">' + chips + extra + '</div>';
+  }
+  // zaktualizuj przycisk jeśli już zapisany
+  var btn = document.getElementById('wtJoinBtn');
+  if (btn && joined) {
+    btn.textContent = '✅ JESTEŚ NA RAIDZIE — LET\'S GO 🔥';
+    btn.classList.add('joined');
+    btn.setAttribute('onclick', 'closeWeekendTeaser()');
+  }
+}
+
+function joinRaid() {
+  var btn = document.getElementById('wtJoinBtn');
+  if (btn && btn.classList.contains('joined')) { closeWeekendTeaser(); return; }
+  if (typeof WEBHOOK === 'undefined' || !window._user) { closeWeekendTeaser(); return; }
+
+  // optymistycznie: oznacz jako zapisany od razu
+  if (btn) {
+    btn.textContent = '✅ ZAPISANO! LET\'S GO 🔥';
+    btn.classList.add('joined');
+    btn.setAttribute('onclick', 'closeWeekendTeaser()');
+  }
+  if (typeof showToast === 'function') showToast('🤝 Jesteś na raidzie! Do zobaczenia w weekend 🔥');
+  if (typeof confettiBlast === 'function') confettiBlast();
+
+  var payload = { action: 'joinRaid', ankieter: window._user, weekend: raidWeekendId() };
+  try {
+    fetch(WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    }).then(function () {
+      // odśwież listę po zapisie
+      setTimeout(loadRaidRoster, 800);
+    }).catch(function () {});
+  } catch (e) {}
 }

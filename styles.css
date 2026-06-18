@@ -1446,3 +1446,15 @@ body.light .success-overlay{ background:var(--bg, #f4f6fb); }
   box-shadow:0 0 18px rgba(245,158,11,.5); animation:dmPulse 1.4s ease-in-out infinite;
 }
 .wt-btn:active{ transform:scale(.95); }
+
+/* ===== 🤝 RAID ROSTER (zapowiedź weekendu) ===== */
+.wt-roster{ background:#0c0e14; border:1px solid #3a2f12; border-radius:13px; padding:11px; margin-bottom:14px; }
+.wt-roster-h{ font-size:12px; font-weight:900; color:#fbbf24; margin-bottom:7px; }
+.wt-roster-empty{ font-size:12px; color:#94a3b8; font-style:italic; }
+.wt-count{ font-size:11px; color:#10d873; font-weight:800; margin-bottom:6px; }
+.wt-chips{ display:flex; flex-wrap:wrap; gap:5px; justify-content:center; }
+.wt-chip{ font-size:11px; font-weight:700; color:#cbd5e1; background:#161a22;
+  border:1px solid #2a3340; border-radius:20px; padding:3px 9px; }
+.wt-chip.me{ color:#0a0c10; background:#fbbf24; border-color:#fbbf24; font-weight:900; }
+.wt-chip.more{ color:#fbbf24; background:transparent; border-color:#3a2f12; }
+.wt-btn.joined{ background:linear-gradient(135deg,#10d873,#0a9d56); box-shadow:0 0 18px rgba(16,216,115,.5); animation:none; }

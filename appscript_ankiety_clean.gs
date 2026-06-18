@@ -12,6 +12,11 @@ var HEADERS_PRESENCE = [
 ];
 var PRESENCE_TTL_MS = 3 * 60 * 1000;  // aktywny = sygnal w ostatnich 3 min
 
+var SHEET_RAID = "RaidWeekend";
+var HEADERS_RAID = [
+  "Weekend ID","Ankieter","Zapisano(PL)"
+];
+
 var SHEET_TRACKS = "Trasy";
 var HEADERS_TRACKS = [
   "Data","Ankieter","Punkty JSON","Dystans(m)","Liczba pkt","Strefy","Aktualizacja(PL)"
@@ -56,6 +61,10 @@ function doPost(e) {
       return handleUpdateTrack(d);
     }
 
+    if (d.action === 'joinRaid') {
+      return handleJoinRaid(d);
+    }
+
     // Domyślnie: zapis ankiety
     return handleSaveAnkieta(d);
 
@@ -75,6 +84,9 @@ function doGet(e) {
     }
     if (action === 'getTracks') {
       return handleGetTracks(e.parameter.date || '');
+    }
+    if (action === 'getRaid') {
+      return handleGetRaid(e.parameter.weekend || '');
     }
     return jsonResp({ status: "error", message: "Nieznana akcja GET" });
   } catch(err) {
@@ -377,4 +389,55 @@ function jsonResp(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+
+// ============================================================
+// RAID WEEKEND — zapisy na weekendowy mega-event
+// ============================================================
+
+function handleJoinRaid(d) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = getOrCreateSheet(ss, SHEET_RAID, HEADERS_RAID, "#f59e0b");
+
+  var name = (d.ankieter || "").toString().trim();
+  var weekend = (d.weekend || "").toString().trim();
+  if (!name || !weekend) return jsonResp({ status: "error", message: "brak danych" });
+
+  // sprawdz czy juz zapisany na ten weekend (dedup)
+  var lastRow = sh.getLastRow();
+  if (lastRow >= 2) {
+    var rows = sh.getRange(2, 1, lastRow - 1, 2).getValues();
+    for (var i = 0; i < rows.length; i++) {
+      if ((rows[i][0] || "").toString().trim() === weekend &&
+          (rows[i][1] || "").toString().trim().toLowerCase() === name.toLowerCase()) {
+        return jsonResp({ status: "ok", already: true });
+      }
+    }
+  }
+  var nowPl = new Date().toLocaleString("pl-PL", { timeZone: "Europe/Warsaw" });
+  sh.appendRow([weekend, name, nowPl]);
+  return jsonResp({ status: "ok" });
+}
+
+function handleGetRaid(weekend) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(SHEET_RAID);
+  var out = [];
+  weekend = (weekend || "").toString().trim();
+  if (sh && sh.getLastRow() >= 2) {
+    var rows = sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues();
+    var seen = {};
+    for (var i = 0; i < rows.length; i++) {
+      var wk = (rows[i][0] || "").toString().trim();
+      var nm = (rows[i][1] || "").toString().trim();
+      if (!nm) continue;
+      if (weekend && wk !== weekend) continue;   // tylko biezacy weekend
+      var key = nm.toLowerCase();
+      if (seen[key]) continue;                    // dedup
+      seen[key] = true;
+      out.push(nm);
+    }
+  }
+  return jsonResp({ status: "ok", data: out });
 }
