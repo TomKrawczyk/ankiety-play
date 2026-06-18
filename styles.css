@@ -1248,3 +1248,41 @@ body.light .success-overlay{ background:var(--bg, #f4f6fb); }
   text-align:center; font-size:0.72em; color:var(--muted2, #6b7280);
   margin-top:8px; letter-spacing:0.3px; opacity:0.75;
 }
+
+/* ── PANEL LIDERA — rozbudowa ── */
+.lider-goal{
+  background:var(--card2, #16181d); border:1px solid var(--line, #262932);
+  border-radius:14px; padding:14px 16px; margin:10px 0 4px;
+}
+.goal-top{ display:flex; justify-content:space-between; align-items:center; font-size:0.92em; margin-bottom:8px; }
+.goal-top span{ color:var(--muted2, #9aa3b2); font-weight:600; }
+.goal-bar{ height:12px; background:#0c0e12; border-radius:8px; overflow:hidden; }
+.goal-fill{ height:100%; background:linear-gradient(90deg,#10d873,#34d399); border-radius:8px; transition:width .6s ease; }
+.goal-fill.done{ background:linear-gradient(90deg,#fbbf24,#f59e0b); }
+.goal-sub{ margin-top:8px; font-size:0.78em; color:var(--muted2, #9aa3b2); }
+
+/* słupek "lead" (lider dnia) */
+.lbr-fill.lead{ background:linear-gradient(90deg,#fbbf24,#f59e0b)!important; }
+
+/* Skuteczność */
+.skut-row{ display:flex; align-items:center; gap:10px; padding:9px 12px;
+  background:var(--card2,#16181d); border:1px solid var(--line,#262932);
+  border-radius:12px; margin-bottom:7px; }
+.skut-mid{ flex:1; display:flex; flex-direction:column; }
+.skut-meta{ font-size:0.74em; color:var(--muted2,#9aa3b2); margin-top:2px; }
+.skut-rate{ font-weight:800; font-size:1.05em; padding:3px 10px; border-radius:9px; }
+.skut-rate.hot{ color:#fb7185; background:rgba(251,113,133,.12); }
+.skut-rate.mid{ color:#fbbf24; background:rgba(251,191,36,.12); }
+.skut-rate.low{ color:#9aa3b2; background:rgba(154,163,178,.10); }
+
+/* Ranking XP */
+.xp-row{ display:flex; align-items:center; gap:10px; padding:9px 12px;
+  background:var(--card2,#16181d); border:1px solid var(--line,#262932);
+  border-radius:12px; margin-bottom:7px; }
+.xp-pos{ min-width:30px; text-align:center; font-size:1.15em; }
+.xp-mid{ flex:1; }
+.xp-name{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.xp-lv{ font-size:0.72em; color:var(--muted2,#9aa3b2); white-space:nowrap; }
+.xp-track{ height:7px; background:#0c0e12; border-radius:6px; overflow:hidden; margin-top:5px; }
+.xp-fill{ height:100%; background:linear-gradient(90deg,#a78bfa,#60a5fa); border-radius:6px; transition:width .6s ease; }
+.xp-val{ font-weight:800; color:#a78bfa; min-width:46px; text-align:right; }
