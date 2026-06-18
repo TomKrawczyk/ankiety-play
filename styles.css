@@ -1406,3 +1406,43 @@ body.light .success-overlay{ background:var(--bg, #f4f6fb); }
   text-shadow:0 1px 0 color-mix(in srgb, var(--ev) 50%, #fff);
 }
 .weekend-event .de-head,.weekend-event .de-status,.weekend-event .de-list{ position:relative; z-index:1; }
+
+/* ===== 📣 ZAPOWIEDŹ WEEKENDU (piątek) ===== */
+.wt-overlay{
+  position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+  padding:20px; background:rgba(5,7,11,.82); backdrop-filter:blur(6px);
+  opacity:0; transition:opacity .3s ease;
+}
+.wt-overlay.show{ opacity:1; }
+.wt-card{
+  max-width:340px; width:100%; text-align:center; padding:26px 22px 22px;
+  border:2px solid #f59e0b; border-radius:22px;
+  background:linear-gradient(165deg, #1a1407, #0a0c10);
+  box-shadow:0 0 40px rgba(245,158,11,.45);
+  transform:scale(.85); transition:transform .35s cubic-bezier(.2,1.4,.5,1);
+  position:relative; overflow:hidden;
+}
+.wt-overlay.show .wt-card{ transform:scale(1); }
+.wt-card::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(120deg, transparent 30%, rgba(245,158,11,.16) 50%, transparent 70%);
+  background-size:200% 100%; animation:weShine 3s linear infinite;
+}
+.wt-card > *{ position:relative; z-index:1; }
+.wt-emoji{ font-size:52px; animation:wtBounce 1.6s ease-in-out infinite; }
+@keyframes wtBounce{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+.wt-kicker{ font-size:11px; font-weight:900; letter-spacing:2px; color:#fbbf24; margin-top:6px; }
+.wt-title{ font-size:30px; font-weight:900; color:#fff; letter-spacing:1px; line-height:1.1;
+  text-shadow:0 0 16px rgba(245,158,11,.6); }
+.wt-sub{ font-size:13px; color:#fcd9a0; font-style:italic; margin-top:6px; }
+.wt-rewards{ display:flex; gap:8px; justify-content:center; margin:18px 0 14px; }
+.wt-rw{ flex:1; background:#0c0e14; border:1px solid #3a2f12; border-radius:13px; padding:10px 4px; }
+.wt-rw b{ display:block; font-size:18px; color:#fbbf24; font-weight:900; }
+.wt-rw span{ font-size:10px; color:#94a3b8; }
+.wt-hype{ font-size:13px; color:#e2e8f0; line-height:1.4; margin-bottom:18px; }
+.wt-btn{
+  width:100%; border:none; cursor:pointer; font-weight:900; font-size:15px; color:#0a0c10;
+  background:linear-gradient(135deg,#fbbf24,#f59e0b); border-radius:13px; padding:13px;
+  box-shadow:0 0 18px rgba(245,158,11,.5); animation:dmPulse 1.4s ease-in-out infinite;
+}
+.wt-btn:active{ transform:scale(.95); }

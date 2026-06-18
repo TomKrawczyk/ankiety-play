@@ -614,6 +614,7 @@ function launchApp(name) {
   buildFlow('NOWY',        FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
   buildFlow('ROZBUDOWANA', FLOW_FULL,  'Ankiety_Rozbudowane','',      100);
   try { if (typeof initPush === 'function') initPush(); } catch(e){}
+  try { if (typeof maybeShowWeekendTeaser === 'function') setTimeout(maybeShowWeekendTeaser, 600); } catch(e){}
 }
 
 window.addEventListener('DOMContentLoaded', function() {

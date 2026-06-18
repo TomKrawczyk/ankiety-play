@@ -334,3 +334,62 @@ function claimWeekend(mid) {
   }
   renderWeekendEvent();
 }
+
+// ============================================================
+// 📣 ZAPOWIEDŹ WEEKENDU — baner w piątek po otwarciu apki
+// ============================================================
+// W piątek (i tylko raz dziennie) pokazujemy hype-baner, że zbliża się
+// WEEKEND RAID. Zero kosztów — czysto lokalne. Jeśli ankieter ma włączone
+// powiadomienia, dorzucamy też lokalny push z zapowiedzią.
+
+function isFriday() { return new Date().getDay() === 5; }
+
+function weekendTeaserKey() {
+  return '4eco_weteaser_' + (window._user || 'anon').toLowerCase();
+}
+
+// pokaż zapowiedź weekendu — wywoływane po otwarciu apki
+function maybeShowWeekendTeaser() {
+  if (!isFriday()) return;
+  var today = new Date().toLocaleDateString('pl-PL');
+  // raz dziennie
+  if (localStorage.getItem(weekendTeaserKey()) === today) return;
+  localStorage.setItem(weekendTeaserKey(), today);
+
+  var ev = (typeof WEEKEND_EVENT !== 'undefined') ? WEEKEND_EVENT : null;
+  var maxXp = ev ? (ev.missions.reduce(function (a, m) { return a + m.xp; }, 0) + (ev.comboBonus || 0)) : 1100;
+
+  // overlay z hype-em
+  var ov = document.createElement('div');
+  ov.className = 'wt-overlay';
+  ov.innerHTML =
+    '<div class="wt-card">' +
+      '<div class="wt-emoji">🏔️</div>' +
+      '<div class="wt-kicker">JUTRO STARTUJE</div>' +
+      '<div class="wt-title">WEEKEND RAID</div>' +
+      '<div class="wt-sub">2 dni, full send — no days off 😤</div>' +
+      '<div class="wt-rewards">' +
+        '<div class="wt-rw"><b>⚔️ 12</b><span>ankiet</span></div>' +
+        '<div class="wt-rw"><b>🔥 5</b><span>hot leadów</span></div>' +
+        '<div class="wt-rw"><b>💰 ' + maxXp + '</b><span>XP do zdobycia</span></div>' +
+      '</div>' +
+      '<div class="wt-hype">Naładuj baterię — w sobotę i niedzielę gramy o mega-nagrody! 🚀</div>' +
+      '<button class="wt-btn" onclick="closeWeekendTeaser()">LET\'S GO 🔥</button>' +
+    '</div>';
+  document.body.appendChild(ov);
+  setTimeout(function () { ov.classList.add('show'); }, 30);
+
+  // jeśli są włączone powiadomienia — dorzuć lokalny push (też zero kosztów)
+  try {
+    if (typeof showLocalNotification === 'function' && window.Notification && Notification.permission === 'granted') {
+      showLocalNotification('🏔️ Jutro WEEKEND RAID!', 'Mega-event na sob+nd — do ' + maxXp + ' XP. Naładuj baterię! 🚀');
+    }
+  } catch (e) {}
+}
+
+function closeWeekendTeaser() {
+  var ov = document.querySelector('.wt-overlay');
+  if (!ov) return;
+  ov.classList.remove('show');
+  setTimeout(function () { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 300);
+}
