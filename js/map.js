@@ -830,9 +830,12 @@ function ensureWildSpawns() {
     if (distM({ lat: w.lat, lng: w.lng }, MAP.lastPos) > 1000) return false;
     return true;
   });
+  // upewnij sie, ze mamy swieze budynki wokol gracza (OSM) — async, nie blokuje
+  ensureBuildings();
+
   while (arr.length < WILD.count) {
-    var d = WILD.radiusMin + Math.random() * (WILD.radiusMax - WILD.radiusMin);
-    var p = offsetLatLng(MAP.lastPos.lat, MAP.lastPos.lng, d);
+    var p = pickSpawnPoint();   // preferuj realny budynek; fallback = losowy offset
+    if (!p) break;              // brak danych i brak fallbacku — odpusc do nastepnego razu
     var t = pickWildType();
     arr.push({
       id: 'w' + now + '_' + Math.floor(Math.random() * 1e6),
@@ -841,6 +844,99 @@ function ensureWildSpawns() {
   }
   saveWild(arr);
   renderWildOnMap();
+}
+
+// ── SPAWN NA TERENIE: wybierz punkt na realnym budynku w pobliżu ──
+// Priorytet: budynki mieszkalne w zasięgu (radiusMin..radiusMax) od gracza.
+// Mały offset, żeby pin „siedział” na budynku, a nie idealnie w jego środku.
+function pickSpawnPoint() {
+  var pool = OSM.buildings;
+  if (pool && pool.length && MAP.lastPos) {
+    // budynki w sensownym zasięgu spaceru
+    var inRange = pool.filter(function (b) {
+      var d = distM(b, MAP.lastPos);
+      return d >= 25 && d <= WILD.radiusMax;
+    });
+    var cand = inRange.length ? inRange : pool;
+    if (cand.length) {
+      var b = cand[Math.floor(Math.random() * cand.length)];
+      // delikatny offset ~6-12 m, by piny się nie nakładały
+      var jitter = offsetLatLng(b.lat, b.lng, 6 + Math.random() * 6);
+      return { lat: jitter.lat, lng: jitter.lng };
+    }
+  }
+  // FALLBACK (brak danych OSM / offline): stary losowy offset
+  var d = WILD.radiusMin + Math.random() * (WILD.radiusMax - WILD.radiusMin);
+  return offsetLatLng(MAP.lastPos.lat, MAP.lastPos.lng, d);
+}
+
+// ── OSM BUILDINGS: pobierz budynki mieszkalne wokół gracza (Overpass) ──
+var OSM = {
+  buildings: [],      // [{lat,lng}]
+  center: null,       // ostatnie centrum pobrania
+  fetching: false,
+  lastFetch: 0,
+  refetchDist: 250,   // m — gdy gracz odejdzie tyle, dociągamy nowe
+  ttl: 10 * 60000     // ms — odśwież dane po 10 min
+};
+
+function ensureBuildings() {
+  if (!MAP.lastPos || OSM.fetching) return;
+  var now = Date.now();
+  var stale = (now - OSM.lastFetch) > OSM.ttl;
+  var moved = OSM.center ? distM(OSM.center, MAP.lastPos) > OSM.refetchDist : true;
+  if (OSM.buildings.length && !stale && !moved) return; // mamy aktualne dane
+  fetchBuildings(MAP.lastPos.lat, MAP.lastPos.lng);
+}
+
+function fetchBuildings(lat, lng) {
+  if (OSM.fetching) return;
+  OSM.fetching = true;
+  // Promień nieco większy niż max spawn, by mieć zapas budynków
+  var R = Math.round(WILD.radiusMax + 150);
+  // Preferuj budynki mieszkalne; dorzuć nieotagowane (yes), pomiń przemysł/handel
+  var q = '[out:json][timeout:20];(' +
+    'way["building"~"house|residential|apartments|detached|terrace|semidetached_house|bungalow|yes"](around:' + R + ',' + lat + ',' + lng + ');' +
+    'node["building"~"house|residential|detached|apartments"](around:' + R + ',' + lat + ',' + lng + ');' +
+    ');out center 200;';
+  var mirrors = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter'
+  ];
+  var mi = 0;
+  function tryFetch() {
+    fetch(mirrors[mi], { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: 'data=' + encodeURIComponent(q) })
+    .then(function (r) {
+      if (!r.ok) throw new Error('bad status ' + r.status);
+      return r.json();
+    })
+    .then(function (res) {
+      var els = (res && res.elements) ? res.elements : [];
+      var blocked = { industrial: 1, commercial: 1, retail: 1, warehouse: 1, manufacture: 1, garage: 1, garages: 1, hangar: 1, kiosk: 1, service: 1, shed: 1, roof: 1 };
+      var mine = [], other = [];
+      els.forEach(function (e) {
+        var c = e.center || e;
+        if (typeof c.lat !== 'number' || typeof c.lon !== 'number') return;
+        var bt = (e.tags && e.tags.building) ? e.tags.building : 'yes';
+        if (blocked[bt]) return;                       // odetnij hale/parkingi/magazyny
+        var pt = { lat: c.lat, lng: c.lon };
+        if (bt === 'yes') other.push(pt); else mine.push(pt);  // mieszkalne na priorytet
+      });
+      // mieszkalne pierwsze; jeśli ich za mało, dolej nieotagowane
+      OSM.buildings = mine.length >= 8 ? mine : mine.concat(other);
+      OSM.center = { lat: lat, lng: lng };
+      OSM.lastFetch = Date.now();
+      OSM.fetching = false;
+      // od razu spróbuj rozstawić leady na świeżych budynkach
+      try { ensureWildSpawns(); } catch (e) {}
+    })
+    .catch(function () {
+      mi++;
+      if (mi < mirrors.length) { tryFetch(); return; }  // spróbuj kolejnego mirrora
+      OSM.fetching = false;   // wszystkie padły — zostaje fallback losowy
+    });
+  }
+  tryFetch();
 }
 
 function makeWildIcon(t) {
