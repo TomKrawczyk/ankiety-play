@@ -60,6 +60,30 @@ var LEAD_SIGNALS = {
   // ── Gotowość na bezpłatną konsultację — najsilniejszy sygnał intencji ──
   audyt: {
     'Tak, chętnie się umówi': 5, 'Może w późniejszym terminie': 2, 'Nie jest zainteresowany': -2
+  },
+  // ── Ankieta RACHUNKI (otwarcie przez rachunek za prąd) ──
+  // skok rachunku w górę = ból = potencjał
+  skok: {
+    'Mocno wzrosły': 3, 'Trochę wzrosły': 2, 'Bez zmian': 0, 'Nie śledzi': 0
+  },
+  // dopłaty na koniec roku = realny ból finansowy
+  rozliczenie: {
+    'Dopłaca spore kwoty': 3, 'Prognoza + dopłata na koniec': 2,
+    'Stała kwota co miesiąc': 0, 'Nie wie / nie pamięta': 1
+  },
+  // reakcja na mostek "obniżyć rachunek o połowę" = intencja
+  mostek: {
+    'Bardzo': 4, 'Może': 2, 'Obojętnie': 0, 'Nie': -2
+  },
+  // zgoda na bezpłatne wyliczenie — NAJSILNIEJSZY sygnał intencji
+  zgoda: {
+    'Tak — zostawia dane': 5, 'Tak, ale woli sam zadzwonić': 3,
+    'Niezdecydowany — dopytać później': 1, 'Nie wyraża zgody': -3
+  },
+  // pierwsza reakcja na zaczepkę
+  otwarcie: {
+    'Chętnie zaczął rozmawiać': 2, 'Ostrożnie, ale słucha': 1,
+    'Zbywa, mało czasu': 0, 'Nie chce rozmawiać': -1
   }
 };
 
@@ -67,6 +91,12 @@ var LEAD_SIGNALS = {
 var INTEREST_POINTS = {
   'Panele słoneczne': 1, 'Pompa ciepła': 1, 'Magazyn energii': 1,
   'Mała turbina wiatrowa': 1, 'Ocieplenie domu': 1, 'Klimatyzacja': 1
+};
+
+// Co zjada prąd (multi 'zjadacz' w ankiecie RACHUNKI) — duże zużycie = większy potencjał
+var CONSUMER_POINTS = {
+  'Ogrzewanie / bojler': 2, 'Pompa ciepła': 2, 'Auto elektryczne': 2,
+  'Klimatyzacja': 1, 'Zwykłe AGD / dom': 0
 };
 
 // Liczy łączny wynik intencji z odpowiedzi ankiety
@@ -85,6 +115,13 @@ function scoreLead(answers) {
     ints.forEach(function (it) { ip += (INTEREST_POINTS[it] || 0); });
     pts += Math.min(ip, 3);
     if (ints.length >= 3) pts += 1; // szeroki apetyt = cieplejszy lead
+  }
+  // co zjada prąd (multi 'zjadacz'): duże zużycie energii = większy potencjał, max 4 pkt
+  var cons = answers.zjadacz;
+  if (Array.isArray(cons)) {
+    var cp = 0;
+    cons.forEach(function (it) { cp += (CONSUMER_POINTS[it] || 0); });
+    pts += Math.min(cp, 4);
   }
   // notatki ankietera: słowa-klucze podbijają temperaturę
   var note = (answers.uwagi || '').toLowerCase();

@@ -811,6 +811,22 @@ function wildTypeByKey(k) {
   return WILD_TYPES[0];
 }
 
+// Pole wielokąta budynku w m² (z geometrii Overpass "geom").
+// Wzór trapezów na sferze (lokalne przybliżenie). Brak geometrii -> 0.
+function polyAreaM2(geom) {
+  if (!geom || geom.length < 3) return 0;
+  var R = 6378137;
+  var a = 0;
+  for (var i = 0; i < geom.length; i++) {
+    var p1 = geom[i], p2 = geom[(i + 1) % geom.length];
+    if (!p1 || !p2) continue;
+    var lon1 = p1.lon * Math.PI / 180, lon2 = p2.lon * Math.PI / 180;
+    var lat1 = p1.lat * Math.PI / 180, lat2 = p2.lat * Math.PI / 180;
+    a += (lon2 - lon1) * (2 + Math.sin(lat1) + Math.sin(lat2));
+  }
+  return Math.abs(a * R * R / 2);
+}
+
 // przesuń punkt o (dist metrów) pod losowym kątem
 function offsetLatLng(lat, lng, distM) {
   var ang = Math.random() * 2 * Math.PI;
@@ -836,10 +852,12 @@ function ensureWildSpawns() {
   while (arr.length < WILD.count) {
     var p = pickSpawnPoint();   // preferuj realny budynek; fallback = losowy offset
     if (!p) break;              // brak danych i brak fallbacku — odpusc do nastepnego razu
-    var t = pickWildType();
+    // typ dzikiego leada DOBRANY do zabudowy: gospodarstwo/duży -> cenny lead
+    var t = wildTypeForTier(p.tier);
     arr.push({
       id: 'w' + now + '_' + Math.floor(Math.random() * 1e6),
-      lat: p.lat, lng: p.lng, type: t.key, xp: t.xp, born: now
+      lat: p.lat, lng: p.lng, type: t.key, xp: t.xp, born: now,
+      kind: p.kind || null   // co reprezentuje (Gospodarstwo rolne / Duży dom / Dom)
     });
   }
   saveWild(arr);
@@ -859,15 +877,45 @@ function pickSpawnPoint() {
     });
     var cand = inRange.length ? inRange : pool;
     if (cand.length) {
-      var b = cand[Math.floor(Math.random() * cand.length)];
+      // Ważony wybór: gospodarstwa/duże budynki mają większą szansę być
+      // wylosowane jako miejsce spawnu (to one są najlepszymi leadami).
+      var b = pickWeightedBuilding(cand);
       // delikatny offset ~6-12 m, by piny się nie nakładały
       var jitter = offsetLatLng(b.lat, b.lng, 6 + Math.random() * 6);
-      return { lat: jitter.lat, lng: jitter.lng };
+      // niesiemy tier/kind budynku, by dobrać typ dzikiego leada do zabudowy
+      return { lat: jitter.lat, lng: jitter.lng, tier: b.tier || 'std', kind: b.kind || 'Dom' };
     }
   }
-  // FALLBACK (brak danych OSM / offline): stary losowy offset
+  // FALLBACK (brak danych OSM / offline): stary losowy offset, typ losowy
   var d = WILD.radiusMin + Math.random() * (WILD.radiusMax - WILD.radiusMin);
-  return offsetLatLng(MAP.lastPos.lat, MAP.lastPos.lng, d);
+  var fp = offsetLatLng(MAP.lastPos.lat, MAP.lastPos.lng, d);
+  fp.tier = null; fp.kind = null;
+  return fp;
+}
+
+// Losuje budynek z puli z wagą wg potencjału (gospodarstwo/duży > zwykły dom).
+function pickWeightedBuilding(cand) {
+  var W = { gold: 6, rare: 3, std: 1 };
+  var total = 0, i;
+  for (i = 0; i < cand.length; i++) total += (W[cand[i].tier] || 1);
+  var r = Math.random() * total;
+  for (i = 0; i < cand.length; i++) {
+    r -= (W[cand[i].tier] || 1);
+    if (r <= 0) return cand[i];
+  }
+  return cand[cand.length - 1];
+}
+
+// Dobór typu dzikiego leada do potencjału zabudowy.
+// Gospodarstwo/duży obiekt -> Złoty; duży dom -> Rzadki; zwykły dom -> losowo
+// mini/std (z lekkim biasem). Brak danych (fallback) -> czysto losowy typ.
+function wildTypeForTier(tier) {
+  if (tier === 'gold') return wildTypeByKey('gold');
+  if (tier === 'rare') return wildTypeByKey('rare');
+  if (tier === 'std') {
+    return Math.random() < 0.45 ? wildTypeByKey('std') : wildTypeByKey('mini');
+  }
+  return pickWildType(); // brak klasyfikacji -> stary los wg wag
 }
 
 // ── OSM BUILDINGS: pobierz budynki mieszkalne wokół gracza (Overpass) ──
@@ -895,10 +943,14 @@ function fetchBuildings(lat, lng) {
   // Promień nieco większy niż max spawn, by mieć zapas budynków
   var R = Math.round(WILD.radiusMax + 150);
   // Preferuj budynki mieszkalne; dorzuć nieotagowane (yes), pomiń przemysł/handel
-  var q = '[out:json][timeout:20];(' +
-    'way["building"~"house|residential|apartments|detached|terrace|semidetached_house|bungalow|yes"](around:' + R + ',' + lat + ',' + lng + ');' +
-    'node["building"~"house|residential|detached|apartments"](around:' + R + ',' + lat + ',' + lng + ');' +
-    ');out center 200;';
+  // Pobieramy: domy mieszkalne + GOSPODARSTWA ROLNE (farm/farmyard/barn) +
+  // budynki rolnicze. Geometrię (geom) bierzemy, by oszacować POWIERZCHNIĘ
+  // budynku — duże bryły = większe zużycie = lepszy dziki lead.
+  var q = '[out:json][timeout:25];(' +
+    'way["building"~"house|residential|apartments|detached|terrace|semidetached_house|bungalow|farm|farmyard|barn|farm_auxiliary|cowshed|stable|yes"](around:' + R + ',' + lat + ',' + lng + ');' +
+    'way["landuse"="farmyard"](around:' + R + ',' + lat + ',' + lng + ');' +
+    'node["building"~"house|residential|detached|apartments|farm"](around:' + R + ',' + lat + ',' + lng + ');' +
+    ');out center geom 250;';
   var mirrors = [
     'https://overpass-api.de/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter'
@@ -912,18 +964,39 @@ function fetchBuildings(lat, lng) {
     })
     .then(function (res) {
       var els = (res && res.elements) ? res.elements : [];
-      var blocked = { industrial: 1, commercial: 1, retail: 1, warehouse: 1, manufacture: 1, garage: 1, garages: 1, hangar: 1, kiosk: 1, service: 1, shed: 1, roof: 1 };
+      var blocked = { industrial: 1, commercial: 1, retail: 1, warehouse: 1, manufacture: 1, garage: 1, garages: 1, hangar: 1, kiosk: 1, service: 1, roof: 1 };
+      var farmTags = { farm: 1, farmyard: 1, barn: 1, farm_auxiliary: 1, cowshed: 1, stable: 1 };
       var mine = [], other = [];
       els.forEach(function (e) {
         var c = e.center || e;
         if (typeof c.lat !== 'number' || typeof c.lon !== 'number') return;
-        var bt = (e.tags && e.tags.building) ? e.tags.building : 'yes';
+        var tags = e.tags || {};
+        var bt = tags.building || (tags.landuse === 'farmyard' ? 'farmyard' : 'yes');
         if (blocked[bt]) return;                       // odetnij hale/parkingi/magazyny
-        var pt = { lat: c.lat, lng: c.lon };
-        if (bt === 'yes') other.push(pt); else mine.push(pt);  // mieszkalne na priorytet
+
+        // szacuj powierzchnię budynku z geometrii (m²) — duże bryły = duże zużycie
+        var area = polyAreaM2(e.geometry);
+
+        // KLASYFIKACJA POTENCJAŁU (tier): co stoi w terenie -> jaki dziki lead
+        //  gold = gospodarstwo rolne / bardzo duży budynek (>350 m²)
+        //  rare = duży dom / budynek (>180 m²)
+        //  std  = zwykły dom mieszkalny
+        var tier, kind;
+        if (farmTags[bt] || tags.landuse === 'farmyard') {
+          tier = 'gold'; kind = 'Gospodarstwo rolne';
+        } else if (area > 350) {
+          tier = 'gold'; kind = 'Duży obiekt';
+        } else if (area > 180) {
+          tier = 'rare'; kind = 'Duży dom';
+        } else {
+          tier = 'std';  kind = 'Dom';
+        }
+
+        var pt = { lat: c.lat, lng: c.lon, tier: tier, kind: kind, area: Math.round(area) };
+        if (bt === 'yes' && !area) other.push(pt); else mine.push(pt);
       });
-      // mieszkalne pierwsze; jeśli ich za mało, dolej nieotagowane
-      OSM.buildings = mine.length >= 8 ? mine : mine.concat(other);
+      // budynki z konkretem (mieszkalne/rolne/duże) pierwsze; dolej nieotagowane
+      OSM.buildings = mine.length >= 6 ? mine : mine.concat(other);
       OSM.center = { lat: lat, lng: lng };
       OSM.lastFetch = Date.now();
       OSM.fetching = false;
@@ -963,7 +1036,9 @@ function renderWildOnMap() {
     var t = wildTypeByKey(w.type);
     var m = L.marker([w.lat, w.lng], { icon: makeWildIcon(t), zIndexOffset: 500 })
       .addTo(MAP.obj)
-      .bindPopup('<b>' + t.emoji + ' ' + t.label + '</b><br>+' + t.xp + ' XP<br><small>Podejdź bliżej, żeby zebrać</small>');
+      .bindPopup('<b>' + t.emoji + ' ' + t.label + '</b>' +
+        (w.kind ? '<br><span style="color:' + t.color + ';font-weight:700">📍 ' + w.kind + '</span>' : '') +
+        '<br>+' + t.xp + ' XP<br><small>Podejdź bliżej, żeby zebrać</small>');
     WILD.markers[w.id] = m;
   });
 }
