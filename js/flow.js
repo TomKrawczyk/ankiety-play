@@ -126,6 +126,62 @@ var FLOW_QNEW = [
 ];
 
 // --- FULL SURVEY ---
+// --- RACHUNKI / ZUŻYCIE (bez PV — otwarcie przez rachunek za prąd) ---
+// Flow zbudowany jako rozmowa: zaczepka -> liczenie na miejscu -> zgoda na dane.
+// 5 założeń (bezpłatnie, personalizacja, jeden telefon, lokalność, kontrola)
+// wplecione w pytanie "zgoda".
+var FLOW_RACHUNKI = [
+  {id:"otwarcie", type:"choice", title:"Zaczepka: jak zareagował na pytanie o rachunki?", hint:"\"Robimy sondę w okolicy — ile teraz płacicie za prąd? Ludzie łapią się za głowę…\"", choices:[
+    {icon:"🗣️",text:"Chętnie zaczął rozmawiać"},
+    {icon:"🤔",text:"Ostrożnie, ale słucha"},
+    {icon:"🚪",text:"Zbywa, mało czasu"},
+    {icon:"❌",text:"Nie chce rozmawiać"}
+  ]},
+  {id:"rachunek", type:"choice", title:"Miesięczny rachunek za prąd?", hint:"\"Ile teraz wychodzi co miesiąc?\"", choices:[
+    {icon:"💸",text:"Ponad 500 zł"},
+    {icon:"💰",text:"300–500 zł"},
+    {icon:"💵",text:"150–300 zł"},
+    {icon:"🪙",text:"Poniżej 150 zł"}
+  ]},
+  {id:"skok", type:"choice", title:"Czy rachunki ostatnio wzrosły?", hint:"\"Zauważył Pan, że podskoczyły? U Was też?\"", choices:[
+    {icon:"📈",text:"Mocno wzrosły"},
+    {icon:"↗️",text:"Trochę wzrosły"},
+    {icon:"➡️",text:"Bez zmian"},
+    {icon:"🤷",text:"Nie śledzi"}
+  ]},
+  {id:"rozliczenie", type:"choice", title:"Jak się rozlicza za prąd?", hint:"\"Płacicie po równo, czy z prognozy i dopłata na koniec?\"", choices:[
+    {icon:"📅",text:"Stała kwota co miesiąc"},
+    {icon:"🧾",text:"Prognoza + dopłata na koniec"},
+    {icon:"😬",text:"Dopłaca spore kwoty"},
+    {icon:"❓",text:"Nie wie / nie pamięta"}
+  ]},
+  {id:"zjadacz", type:"multi", title:"Co najwięcej zjada prądu? (można kilka)", hint:"\"Co u Was bierze najwięcej — grzanie, klima, pompa, auto?\"", choices:[
+    {icon:"🔥",text:"Ogrzewanie / bojler"},
+    {icon:"❄️",text:"Klimatyzacja"},
+    {icon:"🌡️",text:"Pompa ciepła"},
+    {icon:"🚗",text:"Auto elektryczne"},
+    {icon:"🏠",text:"Zwykłe AGD / dom"}
+  ]},
+  {id:"mostek", type:"emoji", title:"Mostek: \"Gdyby dało się ściąć rachunek o połowę bez zmiany przyzwyczajeń — ciekawe?\"", opts:[
+    {emoji:"🔥",label:"Bardzo"},
+    {emoji:"🙂",label:"Może"},
+    {emoji:"😐",label:"Obojętnie"},
+    {emoji:"🙅",label:"Nie"}
+  ]},
+  {id:"zgoda", type:"choice", title:"Domknięcie — czy zgadza się na bezpłatne wyliczenie?", hint:"\"Zostawia Pan numer, my BEZPŁATNIE i BEZ ZOBOWIĄZAŃ liczymy POD PANA RACHUNEK, dzwonię RAZ umówić termin, a jak to nie to — KASUJEMY dane. Pasuje?\"", choices:[
+    {icon:"✅",text:"Tak — zostawia dane"},
+    {icon:"📞",text:"Tak, ale woli sam zadzwonić"},
+    {icon:"🕐",text:"Niezdecydowany — dopytać później"},
+    {icon:"❌",text:"Nie wyraża zgody"}
+  ]},
+  {id:"imie", type:"text", title:"Imię i nazwisko", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
+  {id:"tel", type:"text", title:"Numer telefonu", hint:"Obowiązkowe", placeholder:"600 000 000", req:true},
+  {id:"kod", type:"text", title:"Kod pocztowy", hint:"Uzupełniony automatycznie — zmień jeśli inny", placeholder:"np. 62-600", req:true, autofill:"location_kod"},
+  {id:"msc", type:"text", title:"Miejscowość", hint:"Uzupełniona automatycznie — zmień jeśli inna", placeholder:"np. Kłodawa", req:true, autofill:"location_msc"},
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. dopłacił 1500 zł na koniec roku, ma klimę..."}
+];
+
 var FLOW_FULL = [
   {id:"imie", type:"text", title:"Imię i nazwisko", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
   {id:"tel", type:"text", title:"Numer telefonu", hint:"Obowiązkowe", placeholder:"600 000 000", req:true},

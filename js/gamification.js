@@ -299,6 +299,7 @@ function saveLokalizacja() {
   buildFlow('PV',          FLOW_QPV,   'Ankiety_Podstawowe', '',       50);
   buildFlow('PC',          FLOW_QHEAT, 'Ankiety_Podstawowe', 'blue',   50);
   buildFlow('NOWY',        FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
+  buildFlow('RACHUNKI',    FLOW_RACHUNKI, 'Ankiety_Podstawowe','orange', 50);
   buildFlow('ROZBUDOWANA', FLOW_FULL,  'Ankiety_Rozbudowane','',      100);
   var ok = document.getElementById('loc_ok');
   if (ok) { ok.style.display = 'block'; setTimeout(function(){ ok.style.display = 'none'; }, 3500); }
@@ -612,6 +613,7 @@ function launchApp(name) {
   buildFlow('PV',          FLOW_QPV,   'Ankiety_Podstawowe', '',       50);
   buildFlow('PC',          FLOW_QHEAT, 'Ankiety_Podstawowe', 'blue',   50);
   buildFlow('NOWY',        FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
+  buildFlow('RACHUNKI',    FLOW_RACHUNKI, 'Ankiety_Podstawowe','orange', 50);
   buildFlow('ROZBUDOWANA', FLOW_FULL,  'Ankiety_Rozbudowane','',      100);
   try { if (typeof initPush === 'function') initPush(); } catch(e){}
   try { if (typeof maybeShowWeekendTeaser === 'function') setTimeout(maybeShowWeekendTeaser, 600); } catch(e){}
