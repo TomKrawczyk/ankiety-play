@@ -1,7 +1,7 @@
 // ============================================================
 // CONFIG — stałe, poziomy, osiągnięcia
 // ============================================================
-var WEBHOOK = "https://script.google.com/macros/s/AKfycbzHOqpsQK3NhcuxHvXWR8CVsq63LCtrje4NisgyzJctL6W6_TSe-Z2CWQXmrGDe79CV/exec";
+var WEBHOOK = "https://script.google.com/macros/s/AKfycby_eoRJL0Aiy9_rxXrXd-7Oe4ZTs2Oh-tcW0UCn8a9_de6T8trwQTJAX4sAdywqGYu7/exec";
 
 var LEVELS = [
   {min:0,    name:"Rookie",     icon:"🌱"},
