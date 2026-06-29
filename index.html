@@ -42,9 +42,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
 
-<link rel="stylesheet" href="styles.css?v=202606189">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon.png">
+<link rel="stylesheet" href="styles.css?v=202606291">
   <!-- Leaflet (mapa Pokémon GO-style) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -193,11 +191,13 @@
       <button class="sub-tile" onclick="showTab('q_heat',this)">🌡️ Ogrzewanie</button>
       <button class="sub-tile" onclick="showTab('q_new',this)">🌿 Nowy klient</button>
       <button class="sub-tile" onclick="showTab('q_rachunki',this)">⚡ Rachunki</button>
+      <button class="sub-tile" onclick="showTab('q_audyt',this)">🔎 Audyt PV</button>
     </div>
     <div id="q_pv" class="tpanel active"><div id="PV" class="qflow"></div></div>
     <div id="q_heat" class="tpanel"><div id="PC" class="qflow"></div></div>
     <div id="q_new" class="tpanel"><div id="NOWY" class="qflow"></div></div>
     <div id="q_rachunki" class="tpanel"><div id="RACHUNKI" class="qflow"></div></div>
+    <div id="q_audyt" class="tpanel"><div id="AUDYT" class="qflow"></div></div>
   </div>
 
   <!-- PANEL: ANKIETA ROZBUDOWANA -->
@@ -329,24 +329,21 @@
      SKRYPTY — kolejność ładowania ma znaczenie!
 
      Jeśli pliki są w tym samym folderze co index.html:
-       <script src="js/config.js?v=202606188"></script>  itd.
+       <script src="js/config.js?v=202606183"></script>  itd.
 
      Jeśli WordPress umieszcza index.html w katalogu głównym
      a pliki JS w podfolderze, zmień ścieżki odpowiednio.
      ============================================================ -->
-<script src="js/config.js?v=202606188"></script>
-<script src="js/auth.js?v=202606188"></script>
-<script src="js/leadscore.js?v=202606220"></script>
-<script src="js/flow.js?v=202606220"></script>
-<script src="js/history.js?v=202606188"></script>
-<script src="js/avatar.js?v=202606188"></script>
-<script src="js/ranking.js?v=202606188"></script>
-<script src="js/gamification.js?v=202606188"></script>
-<script src="js/cards.js?v=202606188"></script>
-<script src="js/map.js?v=202606220"></script>
-<script src="js/daily.js?v=202606189"></script>
-<script src="js/push.js?v=202606188"></script>
-<script src="js/lider.js?v=202606188"></script>
+<script src="js/config.js?v=202606183"></script>
+<script src="js/auth.js?v=202606183"></script>
+<script src="js/flow.js?v=202606291"></script>
+<script src="js/history.js?v=202606183"></script>
+<script src="js/avatar.js?v=202606183"></script>
+<script src="js/ranking.js?v=202606183"></script>
+<script src="js/gamification.js?v=202606291"></script>
+<script src="js/cards.js?v=202606183"></script>
+<script src="js/map.js?v=202606183"></script>
+<script src="js/lider.js?v=202606183"></script>
 
 </body>
 </html>

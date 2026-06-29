@@ -26,17 +26,7 @@ var FLOW_QPV = [
     {icon:"😴",text:"Nie śledzi — płaci i tyle"},
     {icon:"👍",text:"Jest zadowolony"}
   ]},
-  {id:"podwyzki", type:"choice", title:"Jak patrzy na rosnące ceny prądu?", choices:[
-    {icon:"🔎",text:"Aktywnie szuka oszczędności"},
-    {icon:"👀",text:"Obserwuje, zastanawia się"},
-    {icon:"😌",text:"Na razie się nie martwi"}
-  ]},
-  {id:"kto_decyduje", type:"choice", title:"Kto decyduje o takich inwestycjach?", choices:[
-    {icon:"🙋",text:"Rozmawiam z właścicielem"},
-    {icon:"👫",text:"Małżeństwo decyduje wspólnie"},
-    {icon:"🔁",text:"Decyduje ktoś inny"}
-  ]},
-  {id:"temp", type:"autotemp", title:"Ocena leada (system analizuje odpowiedzi)"},
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
   {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. pyta o dotacje, jest zainteresowany magazynem..."}
 ];
 
@@ -65,17 +55,7 @@ var FLOW_QHEAT = [
     {icon:"🏡",text:"2005–2015"},
     {icon:"🏗️",text:"Nowy — po 2015"}
   ]},
-  {id:"kto_decyduje", type:"choice", title:"Kto decyduje o takich inwestycjach?", choices:[
-    {icon:"🙋",text:"Rozmawiam z właścicielem"},
-    {icon:"👫",text:"Małżeństwo decyduje wspólnie"},
-    {icon:"🔁",text:"Decyduje ktoś inny"}
-  ]},
-  {id:"audyt", type:"choice", title:"Otwarty na bezpłatną konsultację u siebie?", choices:[
-    {icon:"✅",text:"Tak, chętnie się umówi"},
-    {icon:"🗓️",text:"Może w późniejszym terminie"},
-    {icon:"🚫",text:"Nie jest zainteresowany"}
-  ]},
-  {id:"temp", type:"autotemp", title:"Ocena leada (system analizuje odpowiedzi)"},
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
   {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. żona decyduje, pyta o dotacje..."}
 ];
 
@@ -101,14 +81,8 @@ var FLOW_QNEW = [
     {icon:"☀️",text:"Panele słoneczne"},
     {icon:"🌡️",text:"Pompa ciepła"},
     {icon:"🔋",text:"Magazyn energii"},
-    {icon:"🌬️",text:"Mała turbina wiatrowa"},
     {icon:"🏠",text:"Ocieplenie domu"},
     {icon:"❄️",text:"Klimatyzacja"}
-  ]},
-  {id:"kto_decyduje", type:"choice", title:"Kto decyduje o takich inwestycjach?", choices:[
-    {icon:"🙋",text:"Rozmawiam z właścicielem"},
-    {icon:"👫",text:"Małżeństwo decyduje wspólnie"},
-    {icon:"🔁",text:"Decyduje ktoś inny"}
   ]},
   {id:"decyzja", type:"choice", title:"Kiedy klient planuje decyzję?", choices:[
     {icon:"🚀",text:"Jak najszybciej"},
@@ -116,12 +90,7 @@ var FLOW_QNEW = [
     {icon:"🕐",text:"Za rok lub dłużej"},
     {icon:"🤔",text:"Jeszcze nie wie"}
   ]},
-  {id:"audyt", type:"choice", title:"Otwarty na bezpłatną konsultację u siebie?", choices:[
-    {icon:"✅",text:"Tak, chętnie się umówi"},
-    {icon:"🗓️",text:"Może w późniejszym terminie"},
-    {icon:"🚫",text:"Nie jest zainteresowany"}
-  ]},
-  {id:"temp", type:"autotemp", title:"Ocena leada (system analizuje odpowiedzi)"},
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
   {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. oboje domownicy zainteresowani, pyta o dofinansowanie..."}
 ];
 
@@ -182,6 +151,81 @@ var FLOW_RACHUNKI = [
   {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. dopłacił 1500 zł na koniec roku, ma klimę..."}
 ];
 
+// --- AUDYT PV (dla właścicieli fotowoltaiki — Cialdini + bezpłatny audyt) ---
+// Cel: właściciele PV, którzy zainwestowali własne środki a rachunki nadal wysokie.
+// Reguły Cialdiniego: dowód społeczny, autorytet, wzajemność (darmowy audyt),
+// zaangażowanie/konsekwencja (mikro-tak -> duże tak), niedostępność (limit audytów).
+// Domknięcie: umówienie spotkania z doradcą technicznym.
+var FLOW_AUDYT_PV = [
+  {id:"ma_pv", type:"choice", title:"Ma instalację fotowoltaiczną?", hint:"\"Widzę panele na dachu — działają u Państwa na full?\"", choices:[
+    {icon:"✅",text:"Tak, ma"},
+    {icon:"🔧",text:"W trakcie montażu"},
+    {icon:"🤔",text:"Rozważa"},
+    {icon:"❌",text:"Nie ma"}
+  ]},
+  {id:"finansowanie", type:"choice", title:"Z czego finansował fotowoltaikę?", hint:"\"Brał Pan z własnej kieszeni czy na kredyt?\"", choices:[
+    {icon:"💰",text:"Własne środki"},
+    {icon:"🏦",text:"Kredyt"},
+    {icon:"🤝",text:"Dotacja + własne"}
+  ]},
+  {id:"od_kiedy", type:"choice", title:"Od jak dawna działa instalacja?", hint:"\"Ile to już u Państwa pracuje?\"", choices:[
+    {icon:"🆕",text:"do 1 roku"},
+    {icon:"📆",text:"1–3 lata"},
+    {icon:"📅",text:"3–5 lat"},
+    {icon:"⏳",text:"ponad 5 lat"}
+  ]},
+  {id:"rachunki_mimo", type:"choice", title:"Czy mimo PV rachunki nadal wysokie?", hint:"\"Najgorsze, że ludziom mimo paneli rachunki dalej rosną — u Pana jak?\"", choices:[
+    {icon:"😡",text:"Tak, zaskakująco wysokie"},
+    {icon:"😟",text:"Trochę za wysokie"},
+    {icon:"😊",text:"Są w porządku"}
+  ]},
+  {id:"netbilling", type:"choice", title:"Dowód społeczny: net-billing 2022", hint:"\"Wie Pan, że po zmianie rozliczeń od 2022 TYSIĄCE właścicieli PV w Polsce dopłaca więcej niż zakładali? Sprawdzał Pan u siebie?\"", choices:[
+    {icon:"✅",text:"Tak, sprawdzał"},
+    {icon:"🙁",text:"Nie sprawdzał"},
+    {icon:"😮",text:"Nie wiedział o tym"}
+  ]},
+  {id:"uzyski", type:"choice", title:"Czy ktoś sprawdzał realne uzyski?", hint:"\"Po montażu ktoś wracał sprawdzić, czy instalacja faktycznie tyle produkuje, ile miała?\"", choices:[
+    {icon:"✅",text:"Tak"},
+    {icon:"❌",text:"Nie"},
+    {icon:"🤷",text:"Nie wie jak"}
+  ]},
+  {id:"pewnosc", type:"choice", title:"Pewność, że panele i falownik grają w 100%?", hint:"\"Ma Pan pewność, że żaden panel ani falownik nie obniża produkcji?\"", choices:[
+    {icon:"💪",text:"Tak, pewność"},
+    {icon:"😬",text:"Nie jestem pewien"},
+    {icon:"❓",text:"Nie wie jak sprawdzić"}
+  ]},
+  {id:"potrzeba", type:"multi", title:"Co najbardziej by pomogło? (można kilka)", hint:"\"Co by Panu najbardziej zmieniło sytuację?\"", choices:[
+    {icon:"📉",text:"Niższe rachunki"},
+    {icon:"🔎",text:"Pewność, że PV działa"},
+    {icon:"🔋",text:"Magazyn energii"},
+    {icon:"🌡️",text:"Pompa ciepła"}
+  ]},
+  {id:"oddaje_darmo", type:"emoji", title:"Mostek: \"Gdyby okazało się, że Pana instalacja oddaje prąd za grosze do sieci — chciałby Pan to zmienić?\"", opts:[
+    {emoji:"🔥",label:"Zdecydowanie"},
+    {emoji:"🙂",label:"Może"},
+    {emoji:"😐",label:"Obojętnie"},
+    {emoji:"🙅",label:"Nie"}
+  ]},
+  {id:"audyt", type:"choice", title:"Domknięcie — bezpłatny audyt techniczny", hint:"\"Nasz doradca BEZPŁATNIE i BEZ ZOBOWIĄZAŃ sprawdzi realne uzyski Pana instalacji i pokaże gdzie tracicie pieniądze. W tym miesiącu mamy ograniczoną liczbę audytów w okolicy. Umówmy termin?\"", choices:[
+    {icon:"✅",text:"Tak, chętnie umawiam"},
+    {icon:"📞",text:"Tak, ale najpierw więcej info"},
+    {icon:"🕐",text:"Niezdecydowany — dopytać"},
+    {icon:"❌",text:"Nie teraz"}
+  ]},
+  {id:"imie", type:"text", title:"Imię i nazwisko", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
+  {id:"tel", type:"text", title:"Numer telefonu", hint:"Obowiązkowe", placeholder:"600 000 000", req:true},
+  {id:"kod", type:"text", title:"Kod pocztowy", hint:"Uzupełniony automatycznie — zmień jeśli inny", placeholder:"np. 62-600", req:true, autofill:"location_kod"},
+  {id:"msc", type:"text", title:"Miejscowość", hint:"Uzupełniona automatycznie — zmień jeśli inna", placeholder:"np. Kłodawa", req:true, autofill:"location_msc"},
+  {id:"pora", type:"choice", title:"Dogodna pora kontaktu doradcy?", choices:[
+    {icon:"🌅",text:"Rano"},
+    {icon:"☀️",text:"Popołudnie"},
+    {icon:"🌙",text:"Wieczór"},
+    {icon:"📅",text:"Weekend"}
+  ]},
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. ma falownik Huawei 8kW, narzeka na zimowe dopłaty, żona decyduje..."}
+];
+
 var FLOW_FULL = [
   {id:"imie", type:"text", title:"Imię i nazwisko", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
   {id:"tel", type:"text", title:"Numer telefonu", hint:"Obowiązkowe", placeholder:"600 000 000", req:true},
@@ -222,14 +266,8 @@ var FLOW_FULL = [
     {icon:"☀️",text:"Panele słoneczne"},
     {icon:"🌡️",text:"Pompa ciepła"},
     {icon:"🔋",text:"Magazyn energii"},
-    {icon:"🌬️",text:"Mała turbina wiatrowa"},
     {icon:"🏠",text:"Ocieplenie domu"},
     {icon:"❄️",text:"Klimatyzacja"}
-  ]},
-  {id:"podwyzki", type:"choice", title:"Jak patrzy na rosnące ceny energii?", choices:[
-    {icon:"🔎",text:"Aktywnie szuka oszczędności"},
-    {icon:"👀",text:"Obserwuje, zastanawia się"},
-    {icon:"😌",text:"Na razie się nie martwi"}
   ]},
   {id:"motyw", type:"emoji", title:"Główna motywacja klienta?", opts:[
     {emoji:"💰",label:"Oszczędności"},
@@ -237,23 +275,13 @@ var FLOW_FULL = [
     {emoji:"🌿",label:"Ekologia"},
     {emoji:"📋",label:"Dotacje"}
   ]},
-  {id:"kto_decyduje", type:"choice", title:"Kto decyduje o takich inwestycjach?", choices:[
-    {icon:"🙋",text:"Rozmawiam z właścicielem"},
-    {icon:"👫",text:"Małżeństwo decyduje wspólnie"},
-    {icon:"🔁",text:"Decyduje ktoś inny"}
-  ]},
   {id:"decyzja", type:"choice", title:"Kiedy klient planuje decyzję?", choices:[
     {icon:"🚀",text:"Jak najszybciej"},
     {icon:"📅",text:"W ciągu pół roku"},
     {icon:"🕐",text:"Za rok lub dłużej"},
     {icon:"🤔",text:"Jeszcze nie wie"}
   ]},
-  {id:"audyt", type:"choice", title:"Otwarty na bezpłatną konsultację u siebie?", choices:[
-    {icon:"✅",text:"Tak, chętnie się umówi"},
-    {icon:"🗓️",text:"Może w późniejszym terminie"},
-    {icon:"🚫",text:"Nie jest zainteresowany"}
-  ]},
-  {id:"temp", type:"autotemp", title:"Ocena leada (system analizuje odpowiedzi)"},
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
   {id:"uwagi", type:"textarea", title:"Notatki z rozmowy", hint:"Opcjonalne", placeholder:"Obiekcje, pytania, zainteresowania..."}
 ];
 
@@ -323,23 +351,6 @@ function renderQ(fid) {
       html += '<button class="es-btn'+sel+'" onclick="selectEmoji(\''+fid+'\',\''+o.label+'\')"><span class="es-emoji">'+o.emoji+'</span><span class="es-label">'+o.label+'</span></button>';
     });
     html += '</div>';
-  } else if(q.type==='autotemp') {
-    var _r = analyzeLeadTemp(s.answers);
-    s.answers[q.id] = _r.temp;               // zapisz auto-wynik jako temp leada
-    s._autoXp = _r.xp;                        // XP zalezne od temperatury
-    var _meta = {
-      'Zimny':  {icon:'🔵', col:'#60a5fa', desc:'Słaby sygnał zakupowy'},
-      'Letni':  {icon:'🟡', col:'#fbbf24', desc:'Umiarkowane zainteresowanie'},
-      'Ciepły': {icon:'🟠', col:'#fb923c', desc:'Wyraźny potencjał'},
-      'Gorący': {icon:'🔥', col:'#10d873', desc:'Silna intencja — działaj!'}
-    }[_r.temp];
-    html += '<div class="autotemp-card" style="--ac:'+_meta.col+'">';
-    html += '<div class="at-badge">🤖 Ocena automatyczna</div>';
-    html += '<div class="at-big">'+_meta.icon+' <b>'+_r.temp+'</b></div>';
-    html += '<div class="at-desc">'+_meta.desc+'</div>';
-    html += '<div class="at-xp">+'+_r.xp+' XP za ten lead</div>';
-    html += '<div class="at-hint">System ocenił to na podstawie odpowiedzi z ankiety</div>';
-    html += '</div>';
   } else if(q.type==='temp') {
     html += '<div class="temp-sel">';
     [{v:'Zimny',icon:'🔵',desc:'Mało zainteresowany'},{v:'Letni',icon:'🟡',desc:'Słucha, zastanawia się'},{v:'Ciepły',icon:'🟠',desc:'Wyraźnie zainteresowany'},{v:'Gorący',icon:'🔥',desc:'Chce spotkania!'}].forEach(function(t){
@@ -354,8 +365,7 @@ function renderQ(fid) {
   html += '<div class="qnav">';
   if(s.current > 0) html += '<button class="btn-back" onclick="prevQ(\''+fid+'\')">← Wróć</button>';
   if(isLast) {
-    var _shownXp = s._autoXp || s.xpAmount;
-    html += '<button class="btn-submit '+(s.color||'')+'" onclick="submitFlow(\''+fid+'\')">✅ Zapisz +'+_shownXp+' XP</button>';
+    html += '<button class="btn-submit '+(s.color||'')+'" onclick="submitFlow(\''+fid+'\')">✅ Zapisz +'+s.xpAmount+' XP</button>';
   } else {
     html += '<button class="btn-next '+(s.color||'')+'" onclick="nextQ(\''+fid+'\')">Dalej →</button>';
   }
@@ -467,15 +477,24 @@ function submitFlow(fid) {
     decyzja: a.decyzja||'',
     bol: a.bol||'',
     rachunki_ogol: a.rachunki_ogol||'',
-    podwyzki: a.podwyzki||'',
-    kto_decyduje: a.kto_decyduje||'',
-    audyt: a.audyt||'',
+    // --- pola Audytu PV ---
+    finansowanie: a.finansowanie||'',
+    pv_od_kiedy: a.od_kiedy||'',
+    rachunki_mimo_pv: a.rachunki_mimo||'',
+    netbilling_swiadomosc: a.netbilling||'',
+    uzyski_sprawdzane: a.uzyski||'',
+    pewnosc_instalacji: a.pewnosc||'',
+    potrzeba_klienta: Array.isArray(a.potrzeba) ? a.potrzeba.join(', ') : (a.potrzeba||''),
+    chce_zmiany: a.oddaje_darmo||'',
+    zgoda_audyt: a.audyt||'',
+    pora_kontaktu: a.pora||'',
     temp_leada: a.temp||'',
-    uwagi: a.uwagi||''
+    uwagi: a.uwagi||'',
+    // pelny zrzut wszystkich odpowiedzi (zabezpieczenie — nic nie ginie)
+    wszystkie_odpowiedzi: JSON.stringify(a)
   };
   if(!data.telefon){showToast('⚠️ Brak telefonu klienta!'); s.current=0; renderQ(fid); return;}
-  var leadXp = s._autoXp || (LEAD_XP[data.temp_leada] || s.xpAmount);
-  sendData(data, leadXp, data.temp_leada==='Gorący', fid);
+  sendData(data, s.xpAmount, data.temp_leada==='Gorący', fid);
 }
 
 function sendData(data, xp, isHot, fid) {
@@ -522,10 +541,6 @@ function pushRanking(name, xp, total, hot, streak, todayCount) {
 }
 
 function afterSave(data, xp, isHot, fid) {
-  // Postęp weekendowego mega-eventu (kumuluje sob+nd)
-  try { if (typeof trackWeekendProgress === 'function') trackWeekendProgress(isHot); } catch(e){}
-  // Po pierwszej ankiecie zaproponuj powiadomienia o evencie dnia
-  try { if (typeof maybeAskPush === 'function') maybeAskPush(); } catch(e){}
   // Oblicz XP z mnożnikiem combo
   var mult = getMultiplier();
   var finalXp = Math.round(xp * mult);

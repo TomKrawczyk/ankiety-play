@@ -190,9 +190,6 @@ function updateUI(name) {
 }
 
 function renderMissions(s) {
-  // ── Nowy system: dzienne eventy misji (Gen Z) ──
-  if (typeof renderDailyEvent === 'function') { renderDailyEvent(s); return; }
-  // (fallback poniżej — stare stałe misje)
   var ms = [
     {icon:'⚡', title:'5 ankiet dziś',    target:5,  cur:s.today,            xp:'+100XP'},
     {icon:'🔥', title:'3 gorące leady',   target:3,  cur:Math.min(s.hot,3),  xp:'+150XP'},
@@ -300,6 +297,7 @@ function saveLokalizacja() {
   buildFlow('PC',          FLOW_QHEAT, 'Ankiety_Podstawowe', 'blue',   50);
   buildFlow('NOWY',        FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
   buildFlow('RACHUNKI',    FLOW_RACHUNKI, 'Ankiety_Podstawowe','orange', 50);
+  buildFlow('AUDYT',       FLOW_AUDYT_PV, 'Ankiety_Audyt_PV',  'green',  70);
   buildFlow('ROZBUDOWANA', FLOW_FULL,  'Ankiety_Rozbudowane','',      100);
   var ok = document.getElementById('loc_ok');
   if (ok) { ok.style.display = 'block'; setTimeout(function(){ ok.style.display = 'none'; }, 3500); }
@@ -614,9 +612,8 @@ function launchApp(name) {
   buildFlow('PC',          FLOW_QHEAT, 'Ankiety_Podstawowe', 'blue',   50);
   buildFlow('NOWY',        FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
   buildFlow('RACHUNKI',    FLOW_RACHUNKI, 'Ankiety_Podstawowe','orange', 50);
+  buildFlow('AUDYT',       FLOW_AUDYT_PV, 'Ankiety_Audyt_PV',  'green',  70);
   buildFlow('ROZBUDOWANA', FLOW_FULL,  'Ankiety_Rozbudowane','',      100);
-  try { if (typeof initPush === 'function') initPush(); } catch(e){}
-  try { if (typeof maybeShowWeekendTeaser === 'function') setTimeout(maybeShowWeekendTeaser, 600); } catch(e){}
 }
 
 window.addEventListener('DOMContentLoaded', function() {
