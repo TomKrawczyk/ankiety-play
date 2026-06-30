@@ -288,6 +288,7 @@ function switchMode(mode) {
   if (mode === 'history')     renderHistory();
   if (mode === 'mapa')        renderMapa();
   if (mode === 'lider')       renderLider();
+  if (mode === 'druk')        renderDruk();
 }
 
 function renderLokalizacja() {
