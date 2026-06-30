@@ -319,6 +319,8 @@ function saveLokalizacja() {
   buildFlow('NOWY',        FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
   buildFlow('RACHUNKI',    FLOW_RACHUNKI, 'Ankiety_Podstawowe','orange', 50);
   buildFlow('AUDYT',       FLOW_AUDYT_PV, 'Ankiety_Audyt_PV',  'green',  70);
+  buildFlow('PVSKR',       FLOW_PV_SKROCONA, 'Ankiety_Podstawowe', '',      55);
+  buildFlow('KLIMA',       FLOW_KLIMA,    'Ankiety_Podstawowe', 'blue',   55);
   buildFlow('ROZBUDOWANA', FLOW_FULL,  'Ankiety_Rozbudowane','',      100);
   var ok = document.getElementById('loc_ok');
   if (ok) { ok.style.display = 'block'; setTimeout(function(){ ok.style.display = 'none'; }, 3500); }
@@ -635,6 +637,8 @@ function launchApp(name) {
   buildFlow('NOWY',        FLOW_QNEW,  'Ankiety_Podstawowe', 'purple', 50);
   buildFlow('RACHUNKI',    FLOW_RACHUNKI, 'Ankiety_Podstawowe','orange', 50);
   buildFlow('AUDYT',       FLOW_AUDYT_PV, 'Ankiety_Audyt_PV',  'green',  70);
+  buildFlow('PVSKR',       FLOW_PV_SKROCONA, 'Ankiety_Podstawowe', '',      55);
+  buildFlow('KLIMA',       FLOW_KLIMA,    'Ankiety_Podstawowe', 'blue',   55);
   buildFlow('ROZBUDOWANA', FLOW_FULL,  'Ankiety_Rozbudowane','',      100);
 }
 

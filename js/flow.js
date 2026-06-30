@@ -226,6 +226,111 @@ var FLOW_AUDYT_PV = [
   {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. ma falownik Huawei 8kW, narzeka na zimowe dopłaty, żona decyduje..."}
 ];
 
+var FLOW_PV_SKROCONA = [
+  {id:"finansowanie", type:"choice", title:"Fotowoltaikę finansowałeś/aś z własnych środków?", hint:"\"Brał Pan z własnej kieszeni czy na kredyt?\"", choices:[
+    {icon:"💰",text:"Własne"},
+    {icon:"🏦",text:"Kredyt"},
+    {icon:"🤝",text:"Dotacja + własne"}
+  ]},
+  {id:"od_kiedy", type:"choice", title:"Od jak dawna działa Twoja instalacja?", hint:"\"Ile to już u Państwa pracuje?\"", choices:[
+    {icon:"🆕",text:"do 1 roku"},
+    {icon:"📆",text:"1–3 lata"},
+    {icon:"📅",text:"3–5 lat"},
+    {icon:"⏳",text:"ponad 5 lat"}
+  ]},
+  {id:"rachunki_mimo", type:"choice", title:"Mimo fotowoltaiki rachunki za prąd nadal są wysokie?", hint:"\"Najgorsze, że ludziom mimo paneli rachunki dalej rosną — u Pana jak?\"", choices:[
+    {icon:"😡",text:"Tak, zaskakująco"},
+    {icon:"😟",text:"Trochę za wysokie"},
+    {icon:"😊",text:"Są w porządku"}
+  ]},
+  {id:"uzyski", type:"choice", title:"Czy ktoś po montażu sprawdzał realne uzyski Twojej instalacji?", hint:"\"Po montażu ktoś wracał sprawdzić, czy instalacja faktycznie tyle produkuje, ile miała?\"", choices:[
+    {icon:"✅",text:"Tak"},
+    {icon:"❌",text:"Nie"},
+    {icon:"🤷",text:"Nie wiem jak"}
+  ]},
+  {id:"pewnosc", type:"choice", title:"Masz pewność, że wszystkie panele i falownik pracują w 100%?", hint:"\"Ma Pan pewność, że żaden panel ani falownik nie obniża produkcji?\"", choices:[
+    {icon:"💪",text:"Tak"},
+    {icon:"😬",text:"Nie jestem pewien"},
+    {icon:"❓",text:"Nie wiem jak sprawdzić"}
+  ]},
+  {id:"potrzeba", type:"multi", title:"Co najbardziej by Ci pomogło? (można kilka)", hint:"\"Co by Panu najbardziej zmieniło sytuację?\"", choices:[
+    {icon:"📉",text:"Niższe rachunki"},
+    {icon:"🔎",text:"Pewność, że PV działa"},
+    {icon:"🔋",text:"Magazyn energii"},
+    {icon:"🌡️",text:"Pompa ciepła"}
+  ]},
+  {id:"audyt", type:"choice", title:"Chciałbyś, aby doradca bezpłatnie sprawdził Twoją instalację?", hint:"\"Nasz doradca BEZPŁATNIE i bez zobowiązań sprawdzi realne uzyski Pana instalacji. Umówmy termin?\"", choices:[
+    {icon:"✅",text:"Tak, chętnie"},
+    {icon:"📞",text:"Najpierw więcej info"},
+    {icon:"🕐",text:"Nie teraz"}
+  ]},
+  {id:"imie", type:"text", title:"Imię i nazwisko", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
+  {id:"tel", type:"text", title:"Numer telefonu", hint:"Obowiązkowe", placeholder:"600 000 000", req:true},
+  {id:"kod", type:"text", title:"Kod pocztowy", hint:"Uzupełniony automatycznie — zmień jeśli inny", placeholder:"np. 62-600", req:true, autofill:"location_kod"},
+  {id:"msc", type:"text", title:"Miejscowość", hint:"Uzupełniona automatycznie — zmień jeśli inna", placeholder:"np. Kłodawa", req:true, autofill:"location_msc"},
+  {id:"pora", type:"choice", title:"Dogodna pora kontaktu doradcy?", choices:[
+    {icon:"🌅",text:"Rano"},
+    {icon:"☀️",text:"Popołudnie"},
+    {icon:"🌙",text:"Wieczór"},
+    {icon:"📅",text:"Weekend"}
+  ]},
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. szczegóły, kto decyduje, kiedy oddzwonić..."}
+];
+
+var FLOW_KLIMA = [
+  {id:"ile_pomieszczen", type:"choice", title:"Ile pomieszczeń chcesz klimatyzować?", hint:"\"Ile pokoi chcielibyście schłodzić?\"", choices:[
+    {icon:"1️⃣",text:"1"},
+    {icon:"2️⃣",text:"2"},
+    {icon:"3️⃣",text:"3"},
+    {icon:"🏠",text:"4 i więcej"}
+  ]},
+  {id:"powierzchnia", type:"choice", title:"Orientacyjna powierzchnia do schłodzenia?", hint:"\"Z grubsza ile to metrów?\"", choices:[
+    {icon:"📏",text:"do 25 m²"},
+    {icon:"📐",text:"25–50 m²"},
+    {icon:"🏡",text:"50–100 m²"},
+    {icon:"🏰",text:"ponad 100 m²"}
+  ]},
+  {id:"goraco", type:"choice", title:"Czy latem w Twoim domu robi się nieznośnie gorąco?", hint:"\"Latem da się u Państwa wytrzymać, czy to udręka?\"", choices:[
+    {icon:"🥵",text:"Tak, nie da się funkcjonować"},
+    {icon:"😓",text:"Bywa uciążliwie"},
+    {icon:"🙂",text:"Da się wytrzymać"}
+  ]},
+  {id:"grzanie_zima", type:"choice", title:"Interesuje Cię, że klimatyzacja zimą działa też jako ogrzewanie (niższe rachunki za grzanie)?", hint:"\"Wie Pan, że to samo urządzenie zimą tanio grzeje? To realnie obniża rachunki.\"", choices:[
+    {icon:"🔥",text:"Tak, bardzo"},
+    {icon:"🤔",text:"Może"},
+    {icon:"🚫",text:"Nie potrzebuję"}
+  ]},
+  {id:"najwazniejsze", type:"choice", title:"Co jest dla Ciebie najważniejsze?", hint:"\"Na czym Panu najbardziej zależy?\"", choices:[
+    {icon:"🤫",text:"Komfort i cisza"},
+    {icon:"💡",text:"Niski koszt prądu"},
+    {icon:"🔥",text:"Grzanie zimą"},
+    {icon:"✨",text:"Estetyka montażu"}
+  ]},
+  {id:"termin", type:"choice", title:"W jakim czasie chciałbyś mieć zamontowaną klimatyzację?", hint:"\"Kiedy najchętniej byście to mieli zrobione?\"", choices:[
+    {icon:"⚡",text:"Jak najszybciej"},
+    {icon:"📆",text:"W ciągu kilku miesięcy"},
+    {icon:"👀",text:"Dopiero się rozglądam"}
+  ]},
+  {id:"wycena", type:"choice", title:"Chciałbyś, aby doradca bezpłatnie dobrał i wycenił klimatyzację?", hint:"\"Nasz doradca BEZPŁATNIE dobierze moc i przygotuje wycenę pod Pana dom. Umówmy się?\"", choices:[
+    {icon:"✅",text:"Tak, chętnie"},
+    {icon:"📞",text:"Najpierw więcej info"},
+    {icon:"🕐",text:"Nie teraz"}
+  ]},
+  {id:"imie", type:"text", title:"Imię i nazwisko", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
+  {id:"tel", type:"text", title:"Numer telefonu", hint:"Obowiązkowe", placeholder:"600 000 000", req:true},
+  {id:"kod", type:"text", title:"Kod pocztowy", hint:"Uzupełniony automatycznie — zmień jeśli inny", placeholder:"np. 62-600", req:true, autofill:"location_kod"},
+  {id:"msc", type:"text", title:"Miejscowość", hint:"Uzupełniona automatycznie — zmień jeśli inna", placeholder:"np. Kłodawa", req:true, autofill:"location_msc"},
+  {id:"pora", type:"choice", title:"Dogodna pora kontaktu doradcy?", choices:[
+    {icon:"🌅",text:"Rano"},
+    {icon:"☀️",text:"Popołudnie"},
+    {icon:"🌙",text:"Wieczór"},
+    {icon:"📅",text:"Weekend"}
+  ]},
+  {id:"temp", type:"temp", title:"Jak oceniasz zainteresowanie klienta?"},
+  {id:"uwagi", type:"textarea", title:"Notatki", hint:"Opcjonalne", placeholder:"np. szczegóły, kto decyduje, kiedy oddzwonić..."}
+];
+
 var FLOW_FULL = [
   {id:"imie", type:"text", title:"Imię i nazwisko", hint:"Wymagane", placeholder:"np. Jan Kowalski", req:true},
   {id:"tel", type:"text", title:"Numer telefonu", hint:"Obowiązkowe", placeholder:"600 000 000", req:true},
@@ -487,6 +592,14 @@ function submitFlow(fid) {
     potrzeba_klienta: Array.isArray(a.potrzeba) ? a.potrzeba.join(', ') : (a.potrzeba||''),
     chce_zmiany: a.oddaje_darmo||'',
     zgoda_audyt: a.audyt||'',
+    // --- pola Klimatyzacji (skrócona) ---
+    klima_pomieszczenia: a.ile_pomieszczen||'',
+    klima_powierzchnia: a.powierzchnia||'',
+    klima_goraco: a.goraco||'',
+    klima_grzanie_zima: a.grzanie_zima||'',
+    klima_najwazniejsze: a.najwazniejsze||'',
+    klima_termin: a.termin||'',
+    klima_wycena: a.wycena||'',
     pora_kontaktu: a.pora||'',
     temp_leada: a.temp||'',
     uwagi: a.uwagi||'',
