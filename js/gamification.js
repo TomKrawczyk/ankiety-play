@@ -55,6 +55,26 @@ function checkWeekly(name) {
   }
 }
 
+
+// ── Czysty dopływ XP (bonusy: cel dnia, raid, itp.) — NIE liczy jako ankieta ──
+function addBonusXP(name, amount){
+  var us = getUsers(), k = (name||'').toLowerCase();
+  if (!us[k]) return;
+  var oldLv = getLv(us[k].xp || 0).level;
+  us[k].xp = (us[k].xp||0) + (amount||0);
+  saveUsers(us);
+  updateUI(name);
+  var newLv = getLv(us[k].xp||0).level;
+  if (newLv > oldLv) { try{ lvFlash(); showToast('🎉 LEVEL UP! Jesteś Level ' + newLv + '!'); }catch(e){} }
+  // odśwież ranking z aktualnym XP (reszta pól bez zmian)
+  try {
+    var today = new Date().toLocaleDateString('pl-PL');
+    var _td = JSON.parse(localStorage.getItem('4eco_td_'+k))||{};
+    var todayC = _td.d===today?(_td.c||0):0;
+    pushRanking(us[k].name, us[k].xp||0, us[k].total||0, us[k].hot||0, us[k].streak||0, todayC);
+  } catch(e){}
+}
+
 function addXP(name, amount, isHot) {
   var us = getUsers(), k = (name||'').toLowerCase();
   if (!us[k]) return;
@@ -606,6 +626,7 @@ function launchApp(name) {
   window._user = name;
   applyStoredTheme();
   updateUI(name);
+  try { if (typeof dgRender === 'function') dgRender(name); } catch(e){}
   initCombo();
   applyAvatarToHeader();
   buildFlow('PV',          FLOW_QPV,   'Ankiety_Podstawowe', '',       50);

@@ -546,6 +546,17 @@ function afterSave(data, xp, isHot, fid) {
   var finalXp = Math.round(xp * mult);
   saveToHistory(data);
   if(window._user) addXP(window._user, finalXp, isHot);
+
+  // ── CEL DNIA: zaktualizuj licznik dnia i sprawdź domknięcie celu ──
+  try {
+    if (window._user && typeof dgOnSurvey === 'function') {
+      var _dg = dgOnSurvey(window._user);
+      if (typeof dgRender === 'function') dgRender(window._user);
+      if (_dg && _dg.hit && typeof dgCelebrate === 'function') {
+        setTimeout(function(){ dgCelebrate(_dg); }, 1100); // po confetti za ankietę
+      }
+    }
+  } catch(e) { /* cel dnia opcjonalny — nigdy nie blokuje zapisu */ }
   // Zwiększ combo na następną ankietę
   comboHit();
   confettiBlast();
