@@ -1,0 +1,160 @@
+/* ═══════════════════════════════════════════════════════════════
+   GAME-FX — warstwa soczystości (juiciness) dla 4ECO Field Agent
+   Dopinana PO styles.css. Wzbogaca istniejący UX bez zmiany struktury.
+   Respektuje prefers-reduced-motion.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --fx-spring: cubic-bezier(.34,1.56,.64,1);
+  --fx-spring-strong: cubic-bezier(.22,1.8,.5,1);
+  --fx-ease: cubic-bezier(.4,0,.2,1);
+}
+
+/* 1. PRZEJŚCIA MIĘDZY PANELAMI */
+.mpanel.active{ animation: fxPanelIn .42s var(--fx-spring) both; }
+@keyframes fxPanelIn{
+  0%{ opacity:0; transform:translateY(14px) scale(.985); }
+  100%{ opacity:1; transform:translateY(0) scale(1); }
+}
+.tpanel.active{ animation: fxFadeUp .3s var(--fx-ease) both; }
+@keyframes fxFadeUp{ 0%{ opacity:0; transform:translateY(8px); } 100%{ opacity:1; transform:translateY(0); } }
+
+/* 2. NAV TILES */
+.nav-tile{
+  transition: transform .18s var(--fx-spring), background .2s, box-shadow .25s, border-color .2s !important;
+  position:relative; overflow:hidden;
+}
+.nav-tile:active{ transform:scale(.9) !important; }
+.nav-tile .nt-icon{ transition: transform .3s var(--fx-spring); display:inline-block; }
+.nav-tile:active .nt-icon{ transform:scale(1.25) rotate(-6deg); }
+.nav-tile.active{
+  box-shadow:0 0 0 1px rgba(16,216,115,.5), 0 6px 20px rgba(16,216,115,.28);
+  animation: fxTilePop .35s var(--fx-spring-strong);
+}
+.nav-tile.active .nt-icon{ animation: fxIconBob 2.4s ease-in-out infinite; }
+@keyframes fxTilePop{ 0%{ transform:scale(1); } 45%{ transform:scale(1.12); } 100%{ transform:scale(1); } }
+@keyframes fxIconBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-3px); } }
+.fx-ripple{
+  position:absolute; border-radius:50%; transform:translate(-50%,-50%) scale(0);
+  background:radial-gradient(circle, rgba(16,216,115,.55), rgba(16,216,115,0));
+  pointer-events:none; animation: fxRipple .55s var(--fx-ease) forwards; z-index:0;
+}
+@keyframes fxRipple{ to{ transform:translate(-50%,-50%) scale(1); opacity:0; } }
+
+/* 3. WYBORY W ANKIECIE + PRZYCISKI */
+.choice{
+  transition: transform .16s var(--fx-spring), border-color .18s, background .18s, color .18s, box-shadow .2s !important;
+  position:relative; overflow:hidden;
+}
+.choice:active{ transform:scale(.96); }
+.choice.selected{
+  animation: fxChoicePop .4s var(--fx-spring-strong);
+  box-shadow:0 0 0 1px rgba(16,216,115,.4), 0 4px 16px rgba(16,216,115,.22);
+}
+@keyframes fxChoicePop{ 0%{ transform:scale(1); } 40%{ transform:scale(1.06); } 100%{ transform:scale(1); } }
+.btn-next, .btn-submit, .btn-auth, .btn-primary{
+  transition: transform .16s var(--fx-spring), box-shadow .25s, filter .2s !important;
+  position:relative; overflow:hidden;
+}
+.btn-next:active, .btn-submit:active, .btn-auth:active, .btn-primary:active{ transform:scale(.95) !important; filter:brightness(1.1); }
+.btn-next::after, .btn-submit::after, .btn-auth::after{
+  content:''; position:absolute; top:0; left:-120%; width:60%; height:100%;
+  background:linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
+  transform:skewX(-18deg); pointer-events:none;
+}
+.btn-next:hover::after, .btn-submit:hover::after, .btn-auth:hover::after{ animation: fxShine .8s var(--fx-ease); }
+@keyframes fxShine{ 0%{ left:-120%; } 100%{ left:160%; } }
+.fx-shake{ animation: fxShake .4s ease; }
+@keyframes fxShake{
+  0%,100%{ transform:translateX(0); }
+  20%{ transform:translateX(-8px); } 40%{ transform:translateX(7px); }
+  60%{ transform:translateX(-5px); } 80%{ transform:translateX(3px); }
+}
+
+/* 4. QCARD */
+.qcard{ transition: box-shadow .3s, transform .2s; }
+.qcard:hover{ box-shadow:0 10px 40px rgba(0,0,0,.5); }
+
+/* 5. COMBO BAR */
+#comboBar.fx-hot{ animation: fxComboHot 1.1s ease-in-out infinite; }
+@keyframes fxComboHot{ 0%,100%{ box-shadow:0 0 14px rgba(16,216,115,.35); } 50%{ box-shadow:0 0 26px rgba(251,146,60,.6); } }
+.combo-value{ transition: transform .3s var(--fx-spring-strong), color .3s; display:inline-block; }
+.combo-value.fx-bump{ animation: fxComboBump .5s var(--fx-spring-strong); }
+@keyframes fxComboBump{ 0%{ transform:scale(1); } 35%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+
+/* 6. XP PILL + latajacy +XP */
+.xp-pill{ transition: transform .3s var(--fx-spring-strong); display:inline-flex; }
+.xp-pill.fx-bump{ animation: fxXpBump .55s var(--fx-spring-strong); }
+@keyframes fxXpBump{ 0%{ transform:scale(1); } 30%{ transform:scale(1.28); } 100%{ transform:scale(1); } }
+.fx-xpfly{
+  position:fixed; z-index:9000; font-weight:900; font-size:1.1em;
+  color:var(--green); text-shadow:0 2px 10px rgba(16,216,115,.6);
+  pointer-events:none; animation: fxXpFly 1s var(--fx-ease) forwards;
+}
+@keyframes fxXpFly{
+  0%{ opacity:0; transform:translateY(0) scale(.7); }
+  15%{ opacity:1; transform:translateY(-10px) scale(1.15); }
+  100%{ opacity:0; transform:translateY(-70px) scale(.9); }
+}
+
+/* 7. LEVEL UP */
+.fx-levelup{
+  position:fixed; inset:0; z-index:9500; display:flex; align-items:center; justify-content:center;
+  pointer-events:none; background:radial-gradient(circle at center, rgba(16,216,115,.25), transparent 60%);
+  animation: fxLuFlash 1.6s var(--fx-ease) forwards;
+}
+.fx-levelup .lu-inner{ text-align:center; animation: fxLuPop 1.6s var(--fx-spring-strong) forwards; }
+.fx-levelup .lu-badge{
+  font-size:3.2em; font-weight:900; letter-spacing:1px;
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  text-shadow:0 0 40px rgba(16,216,115,.5);
+}
+.fx-levelup .lu-sub{ font-size:1.3em; font-weight:800; color:var(--text); margin-top:6px; }
+@keyframes fxLuFlash{ 0%{opacity:0;} 12%{opacity:1;} 78%{opacity:1;} 100%{opacity:0;} }
+@keyframes fxLuPop{
+  0%{ transform:scale(.3) rotate(-8deg); opacity:0; }
+  20%{ transform:scale(1.15) rotate(2deg); opacity:1; }
+  30%{ transform:scale(1); }
+  78%{ transform:scale(1); opacity:1; }
+  100%{ transform:scale(.9); opacity:0; }
+}
+
+/* 8. STAT CARDS */
+.sc{ transition: transform .2s var(--fx-spring), box-shadow .25s !important; }
+.sc:hover{ transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.4); }
+.sc .sv{ transition: transform .3s var(--fx-spring-strong); display:inline-block; }
+.sc.fx-bump .sv{ animation: fxXpBump .5s var(--fx-spring-strong); }
+
+/* 9. XP BARY — polysk */
+.xpbar-fill, .bp-xp-fill, .bp-season-fill{ position:relative; overflow:hidden; }
+.xpbar-fill::after, .bp-xp-fill::after, .bp-season-fill::after{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(100deg, transparent, rgba(255,255,255,.4), transparent);
+  transform:translateX(-100%); animation: fxBarShine 2.6s var(--fx-ease) infinite;
+}
+@keyframes fxBarShine{ 0%{transform:translateX(-100%);} 55%,100%{transform:translateX(200%);} }
+
+/* 10. TLO — zywy glow */
+#appScreen::before{
+  content:''; position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:
+    radial-gradient(600px circle at 20% -5%, rgba(16,216,115,.08), transparent 55%),
+    radial-gradient(700px circle at 90% 0%, rgba(96,165,250,.06), transparent 55%);
+  animation: fxBgDrift 14s ease-in-out infinite alternate;
+}
+@keyframes fxBgDrift{ 0%{ transform:translateY(0) scale(1); opacity:.8; } 100%{ transform:translateY(20px) scale(1.05); opacity:1; } }
+
+/* 11. ACH POP */
+.ach.show{ animation: fxAchIn .6s var(--fx-spring-strong); }
+@keyframes fxAchIn{
+  0%{ transform:translateX(-50%) translateY(-120%) scale(.8); opacity:0; }
+  60%{ transform:translateX(-50%) translateY(8px) scale(1.05); opacity:1; }
+  100%{ transform:translateX(-50%) translateY(0) scale(1); opacity:1; }
+}
+
+/* 12. reduced-motion */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;
+  }
+}
