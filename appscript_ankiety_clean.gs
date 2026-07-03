@@ -17,7 +17,7 @@ var PRESENCE_TTL_MS = 3 * 60 * 1000;  // aktywny = sygnal w ostatnich 3 min
 // Zwykly ankieter widzi tylko kolegow w promieniu PRESENCE_NEARBY_KM.
 // Nazwy porownywane po znormalizowanej formie (lower, trim, bez wielokrotnych spacji).
 var PRESENCE_ADMINS = ["dws"];          // <-- tu dopisz kolejnych adminow (male litery)
-var PRESENCE_NEARBY_KM = 5;             // promien "najblizszej okolicy" dla ankieterow
+var PRESENCE_NEARBY_KM = 20;             // promien "najblizszej okolicy" dla ankieterow
 
 function _normName(x){ return (x||"").toString().trim().toLowerCase().replace(/\s+/g," "); }
 function _isAdmin(name){ return PRESENCE_ADMINS.indexOf(_normName(name)) !== -1; }
