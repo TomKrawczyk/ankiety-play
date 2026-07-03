@@ -312,7 +312,7 @@ function renderMapa() {
 
 var PRESENCE_SEND_EVERY  = 120000;  // 2 min — wysyłka własnej pozycji
 var PRESENCE_FETCH_EVERY = 180000;  // 3 min — pobieranie kolegów
-var MATE = { markers: {}, sendTimer: null, fetchTimer: null };
+var MATE = { markers: {}, sendTimer: null, fetchTimer: null, isAdmin: false, nearbyKm: null };
 
 // ── Udostępnianie lokalizacji: domyślnie WŁĄCZONE ──
 function isSharing() {
@@ -364,10 +364,14 @@ function sendPresence() {
 // ── POBIERZ kolegów i narysuj ich na mapie ──
 function fetchMates() {
   if (!MAP.ready) return;
-  fetch(WEBHOOK + '?action=getPresence')
+  var q = '?action=getPresence&viewer=' + encodeURIComponent(window._user || '');
+  if (MAP.lastPos) { q += '&vlat=' + MAP.lastPos.lat + '&vlng=' + MAP.lastPos.lng; }
+  fetch(WEBHOOK + q)
     .then(function(r){ return r.json(); })
     .then(function(res){
       if (!res || res.status !== 'ok' || !Array.isArray(res.agents)) return;
+      MATE.isAdmin = !!res.viewerAdmin;
+      MATE.nearbyKm = res.nearbyKm || null;
       drawMates(res.agents);
     })
     .catch(function(){});
@@ -425,7 +429,13 @@ function renderTeamPanel(agents) {
   }
   var active = others.filter(function(a){ return a.status !== 'ukryty'; });
   var hidden = others.filter(function(a){ return a.status === 'ukryty'; });
-  var html = '<div class="team-h">👥 Zespół w terenie (' + active.length + ' aktywnych)</div>';
+  var head;
+  if (MATE.isAdmin) {
+    head = '🛡️ Widok admina — wszyscy ankieterzy (' + active.length + ' aktywnych)';
+  } else {
+    head = '👥 W okolicy' + (MATE.nearbyKm ? ' (do ' + MATE.nearbyKm + ' km)' : '') + ' — ' + active.length + ' aktywnych';
+  }
+  var html = '<div class="team-h">' + head + '</div>';
   active.forEach(function(a){
     html += '<div class="team-row"><span class="team-dot ok"></span>' +
             '<b>' + a.name + '</b><span class="team-ago">' + agoTxt(a.ageSec) + '</span></div>';
