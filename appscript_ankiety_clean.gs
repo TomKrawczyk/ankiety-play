@@ -12,6 +12,25 @@ var HEADERS_PRESENCE = [
 ];
 var PRESENCE_TTL_MS = 3 * 60 * 1000;  // aktywny = sygnal w ostatnich 3 min
 
+// ── ROLE / WIDOCZNOSC MAPY ──
+// Admin (np. DWS) widzi WSZYSTKICH ankieterow zawsze, na calej mapie.
+// Zwykly ankieter widzi tylko kolegow w promieniu PRESENCE_NEARBY_KM.
+// Nazwy porownywane po znormalizowanej formie (lower, trim, bez wielokrotnych spacji).
+var PRESENCE_ADMINS = ["dws"];          // <-- tu dopisz kolejnych adminow (male litery)
+var PRESENCE_NEARBY_KM = 5;             // promien "najblizszej okolicy" dla ankieterow
+
+function _normName(x){ return (x||"").toString().trim().toLowerCase().replace(/\s+/g," "); }
+function _isAdmin(name){ return PRESENCE_ADMINS.indexOf(_normName(name)) !== -1; }
+
+// odleglosc Haversine w km miedzy dwoma punktami
+function _distKm(lat1,lng1,lat2,lng2){
+  if(lat1==null||lng1==null||lat2==null||lng2==null) return Infinity;
+  var R=6371, toRad=function(d){return d*Math.PI/180;};
+  var dLat=toRad(lat2-lat1), dLng=toRad(lng2-lng1);
+  var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
 var SHEET_RAID = "RaidWeekend";
 var HEADERS_RAID = [
   "Weekend ID","Ankieter","Zapisano(PL)"
@@ -28,7 +47,12 @@ var HEADERS_ANKIETY = [
   "Koszt ogrzewania","Ma PV","Źródło ciepła","Wiek kotła/budynku",
   "Zainteresowania","Motywacja","Decyzja","Ból","Rachunki ogółem",
   "Świadomość podwyżek","Kto decyduje","Gotowość na konsultację",
-  "Temperatura leada","Uwagi"
+  "Temperatura leada","Uwagi",
+  "Finansowanie PV","PV od kiedy","Rachunki mimo PV","Świadomość net-billing",
+  "Uzyski sprawdzane","Pewność instalacji","Potrzeba klienta","Chęć zmiany",
+  "Zgoda na audyt","Pora kontaktu",
+  "Klima: pomieszczenia","Klima: powierzchnia","Klima: upał latem","Klima: grzanie zimą","Klima: priorytet","Klima: termin","Klima: zgoda na wycenę",
+  "Wszystkie odpowiedzi (JSON)"
 ];
 
 var HEADERS_RANKING = [
@@ -81,7 +105,7 @@ function doGet(e) {
       return handleGetRanking();
     }
     if (action === 'getPresence') {
-      return handleGetPresence();
+      return handleGetPresence(e.parameter.viewer || '', e.parameter.vlat, e.parameter.vlng);
     }
     if (action === 'getTracks') {
       return handleGetTracks(e.parameter.date || '');
@@ -127,9 +151,27 @@ function handleSaveAnkieta(d) {
     d.rachunki_ogol  || "",
     d.podwyzki       || "",
     d.kto_decyduje   || "",
-    d.audyt          || "",
+    d.zgoda_audyt    || d.audyt || "",
     d.temp_leada     || "",
-    d.uwagi          || ""
+    d.uwagi          || "",
+    d.finansowanie          || "",
+    d.pv_od_kiedy           || "",
+    d.rachunki_mimo_pv      || "",
+    d.netbilling_swiadomosc || "",
+    d.uzyski_sprawdzane     || "",
+    d.pewnosc_instalacji    || "",
+    d.potrzeba_klienta      || "",
+    d.chce_zmiany           || "",
+    d.zgoda_audyt           || "",
+    d.pora_kontaktu         || "",
+    d.klima_pomieszczenia   || "",
+    d.klima_powierzchnia    || "",
+    d.klima_goraco          || "",
+    d.klima_grzanie_zima    || "",
+    d.klima_najwazniejsze   || "",
+    d.klima_termin          || "",
+    d.klima_wycena          || "",
+    d.wszystkie_odpowiedzi  || ""
   ];
 
   sh.appendRow(row);
@@ -256,10 +298,14 @@ function handleUpdatePresence(d) {
   return jsonResp({ status: "ok" });
 }
 
-function handleGetPresence() {
+function handleGetPresence(viewer, vlatRaw, vlngRaw) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sh = ss.getSheetByName(SHEET_PRESENCE);
-  var out = [];
+  var admin = _isAdmin(viewer);
+  var vName = _normName(viewer);
+  var vlat = (vlatRaw === undefined || vlatRaw === null || vlatRaw === "") ? null : Number(vlatRaw);
+  var vlng = (vlngRaw === undefined || vlngRaw === null || vlngRaw === "") ? null : Number(vlngRaw);
+  var all = [];
   if (sh && sh.getLastRow() >= 2) {
     var rows = sh.getRange(2, 1, sh.getLastRow() - 1, HEADERS_PRESENCE.length).getValues();
     var now = Date.now();
@@ -273,7 +319,7 @@ function handleGetPresence() {
       var fresh = ageMs >= 0 && ageMs <= PRESENCE_TTL_MS;
       if (!fresh) continue;                 // tylko aktywni w ostatnich 3 min
       var status = (r[4] || "aktywny").toString();
-      out.push({
+      all.push({
         name:   name,
         lat:    r[1] === "" ? null : Number(r[1]),
         lng:    r[2] === "" ? null : Number(r[2]),
@@ -283,7 +329,24 @@ function handleGetPresence() {
       });
     }
   }
-  return jsonResp({ status: "ok", agents: out, ttlSec: PRESENCE_TTL_MS / 1000 });
+
+  // ── FILTR WIDOCZNOSCI wg roli pytajacego ──
+  var out;
+  if (admin) {
+    // Admin (DWS) widzi WSZYSTKICH, na calej mapie, zawsze.
+    out = all;
+  } else {
+    // Zwykly ankieter: widzi siebie + kolegow w promieniu PRESENCE_NEARBY_KM.
+    // Kolega bez pozycji (ukryty/brak GPS) NIE jest pokazywany ankieterowi.
+    out = all.filter(function(a){
+      if (_normName(a.name) === vName) return true;   // zawsze siebie
+      if (a.lat == null || a.lng == null) return false; // brak pozycji -> niewidoczny dla kolegi
+      if (vlat == null || vlng == null) return false;   // pytajacy bez pozycji -> nie liczymy okolicy
+      return _distKm(vlat, vlng, a.lat, a.lng) <= PRESENCE_NEARBY_KM;
+    });
+  }
+
+  return jsonResp({ status: "ok", agents: out, ttlSec: PRESENCE_TTL_MS / 1000, viewerAdmin: admin, nearbyKm: PRESENCE_NEARBY_KM });
 }
 
 // ============================================================
@@ -363,6 +426,18 @@ function getOrCreateSheet(ss, name, headers, headerBg) {
           .setFontColor("white")
           .setFontWeight("bold");
     sh.setFrozenRows(1);
+  } else {
+    // Samonaprawa: jeśli arkusz istnieje, ale brakuje nowych kolumn nagłówka
+    // (np. doszły pola Audytu PV), dopisz brakujące nagłówki bez ruszania danych.
+    var curCols = sh.getLastColumn();
+    if (curCols < headers.length) {
+      var missing = headers.slice(curCols);
+      var mRange = sh.getRange(1, curCols + 1, 1, missing.length);
+      mRange.setValues([missing]);
+      mRange.setBackground(headerBg)
+            .setFontColor("white")
+            .setFontWeight("bold");
+    }
   }
   return sh;
 }
