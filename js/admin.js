@@ -186,10 +186,11 @@ function admMergeRanking() {
   if (!confirm('Scalić „' + drop + '" → „' + keep + '"?\nXP i statystyki zostaną zsumowane, konto „' + drop + '" zniknie z rankingu.')) return;
   var box = document.getElementById('adm_zespol');
   if (box) box.insertAdjacentHTML('afterbegin', '<div class="adm-muted" id="adm_mrg_msg">⏳ Scalam…</div>');
-  fetch(WEBHOOK, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'mergeRanking', viewer: window._user || '', keep: keep, drop: drop })
-  }).then(function (r) { return r.json(); }).then(function (res) {
+  var url = WEBHOOK + '?action=mergeRanking' +
+    '&viewer=' + encodeURIComponent(window._user || '') +
+    '&keep=' + encodeURIComponent(keep) +
+    '&drop=' + encodeURIComponent(drop);
+  fetch(url).then(function (r) { return r.json(); }).then(function (res) {
     if (res.status === 'ok') {
       alert('Scalono! „' + res.keep + '" ma teraz ' + res.mergedXp + ' XP.');
       loadTeamStats();
