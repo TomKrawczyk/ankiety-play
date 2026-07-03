@@ -157,11 +157,52 @@ function loadTeamStats() {
         '<span class="v" title="Gorące" style="color:#e0483d">' + (t.hot || 0) + '</span></div>';
     });
     html += '<div class="adm-muted" style="margin-top:6px">Kolumny: razem · dziś · <span style="color:#e0483d">gorące</span></div></div>';
+    // --- Scalanie duplikatow ---
+    var opts = team.map(function(t){ return '<option value="'+jsSafe(t.name)+'">'+esc(t.name)+' ('+(t.xp||0)+' XP)</option>'; }).join('');
+    html += '<div class="adm-card">' +
+      '<div style="font-weight:800;margin-bottom:4px">🔗 Scal duplikaty</div>' +
+      '<div class="adm-muted" style="margin-bottom:8px">Łączy dwa konta w rankingu w jedno — sumuje XP, ankiety i gorące. Zostaje pierwsze, drugie znika.</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+        '<label class="adm-muted" style="min-width:64px">Zostaw:</label>' +
+        '<select id="adm_mrg_keep" style="flex:1;min-width:150px;padding:7px;border-radius:8px;background:var(--card,#111a2e);color:var(--text,#eee);border:1px solid var(--border,#2a3550)">'+opts+'</select>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px">' +
+        '<label class="adm-muted" style="min-width:64px">Usuń:</label>' +
+        '<select id="adm_mrg_drop" style="flex:1;min-width:150px;padding:7px;border-radius:8px;background:var(--card,#111a2e);color:var(--text,#eee);border:1px solid var(--border,#2a3550)">'+opts+'</select>' +
+        '<button class="adm-btn" onclick="admMergeRanking()">Scal</button>' +
+      '</div>' +
+    '</div>';
     box.innerHTML = html;
   }).catch(function () {
     box.innerHTML = '<div class="adm-card">⚠️ Nie udało się połączyć z serwerem.</div>';
   });
 }
+
+function admMergeRanking() {
+  var keep = document.getElementById('adm_mrg_keep').value;
+  var drop = document.getElementById('adm_mrg_drop').value;
+  if (!keep || !drop) { alert('Wybierz oba konta.'); return; }
+  if (keep.toLowerCase() === drop.toLowerCase()) { alert('To samo konto — wybierz dwa różne.'); return; }
+  if (!confirm('Scalić „' + drop + '" → „' + keep + '"?\nXP i statystyki zostaną zsumowane, konto „' + drop + '" zniknie z rankingu.')) return;
+  var box = document.getElementById('adm_zespol');
+  if (box) box.insertAdjacentHTML('afterbegin', '<div class="adm-muted" id="adm_mrg_msg">⏳ Scalam…</div>');
+  fetch(WEBHOOK, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'mergeRanking', viewer: window._user || '', keep: keep, drop: drop })
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res.status === 'ok') {
+      alert('Scalono! „' + res.keep + '" ma teraz ' + res.mergedXp + ' XP.');
+      loadTeamStats();
+    } else {
+      alert('Nie udało się: ' + (res.message || 'błąd'));
+      var m = document.getElementById('adm_mrg_msg'); if (m) m.remove();
+    }
+  }).catch(function () {
+    alert('Błąd połączenia z serwerem.');
+    var m = document.getElementById('adm_mrg_msg'); if (m) m.remove();
+  });
+}
+window.admMergeRanking = admMergeRanking;
 
 // ======================================================
 // ZAKLADKA: KONTA (lokalne konta z tego urzadzenia)
