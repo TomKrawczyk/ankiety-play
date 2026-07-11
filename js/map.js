@@ -373,6 +373,7 @@ function fetchMates() {
       MATE.isAdmin = !!res.viewerAdmin;
       MATE.nearbyKm = res.nearbyKm || null;
       drawMates(res.agents);
+      if (FOLLOW.active) onFollowPresenceUpdate(res.agents);
     })
     .catch(function(){});
 }
@@ -437,8 +438,11 @@ function renderTeamPanel(agents) {
   }
   var html = '<div class="team-h">' + head + '</div>';
   active.forEach(function(a){
+    var followBtn = (MATE.isAdmin && typeof a.lat === 'number' && typeof a.lng === 'number')
+      ? '<button class="team-follow-btn" onclick="startFollow(\'' + a.name.replace(/'/g, "\\'") + '\')">🎯 Śledź</button>'
+      : '';
     html += '<div class="team-row"><span class="team-dot ok"></span>' +
-            '<b>' + a.name + '</b><span class="team-ago">' + agoTxt(a.ageSec) + '</span></div>';
+            '<b>' + a.name + '</b><span class="team-ago">' + agoTxt(a.ageSec) + '</span>' + followBtn + '</div>';
   });
   hidden.forEach(function(a){
     html += '<div class="team-row hidden"><span class="team-dot off"></span>' +
@@ -1129,4 +1133,144 @@ function startWild() {
   ensureWildSpawns();
   if (WILD.spawnTimer) clearInterval(WILD.spawnTimer);
   WILD.spawnTimer = setInterval(ensureWildSpawns, WILD.respawnEvery);
+}
+
+// ============================================================
+// ŚLEDZENIE NA ŻYWO — tryb "Endomondo" dla wybranego ankietera
+// ============================================================
+// Tylko admin (dws/PRESENCE_ADMINS). Po kliknięciu "🎯 Śledź" na kimś:
+//  - odświeżanie pozycji przyspiesza z 3 min do FOLLOW_PRESENCE_EVERY
+//  - dociągana jest cała dzisiejsza trasa tej osoby (getTracks) i rysowana
+//    grubą, złotą linią, odświeżaną co FOLLOW_TRACK_EVERY
+//  - mapa automatycznie centruje się na tej osobie po każdej aktualizacji
+//  - panel na mapie pokazuje: status, ostatnia aktualizacja, dystans dziś
+
+var FOLLOW = {
+  active: false,
+  name: null,
+  trailLine: null,
+  marker: null,
+  trackTimer: null,
+  autoCenter: true,
+  lastPt: null
+};
+var FOLLOW_PRESENCE_EVERY = 10000;  // 10 s — pozycja podczas śledzenia (zamiast 3 min)
+var FOLLOW_TRACK_EVERY    = 20000;  // 20 s — pełna trasa podczas śledzenia
+
+function startFollow(name) {
+  if (!MATE.isAdmin) return; // tylko admin moze sledzic konkretna osobe
+  FOLLOW.active = true;
+  FOLLOW.name = name;
+  FOLLOW.lastPt = null;
+
+  // przyspiesz odswiezanie prezencji na czas sledzenia
+  if (MATE.fetchTimer) { clearInterval(MATE.fetchTimer); }
+  MATE.fetchTimer = setInterval(fetchMates, FOLLOW_PRESENCE_EVERY);
+  fetchMates();
+
+  // odpal petle sciagania pelnej trasy
+  if (FOLLOW.trackTimer) clearInterval(FOLLOW.trackTimer);
+  FOLLOW.trackTimer = setInterval(fetchFollowTrack, FOLLOW_TRACK_EVERY);
+  fetchFollowTrack();
+
+  showFollowPanel();
+}
+
+function stopFollow() {
+  FOLLOW.active = false;
+  FOLLOW.name = null;
+
+  // wroc do normalnego tempa odswiezania
+  if (MATE.fetchTimer) { clearInterval(MATE.fetchTimer); }
+  MATE.fetchTimer = setInterval(fetchMates, PRESENCE_FETCH_EVERY);
+
+  if (FOLLOW.trackTimer) { clearInterval(FOLLOW.trackTimer); FOLLOW.trackTimer = null; }
+  if (FOLLOW.trailLine) { MAP.obj.removeLayer(FOLLOW.trailLine); FOLLOW.trailLine = null; }
+
+  hideFollowPanel();
+}
+
+function toggleFollowAutoCenter() {
+  FOLLOW.autoCenter = !FOLLOW.autoCenter;
+  var b = document.getElementById('followCenterBtn');
+  if (b) b.textContent = FOLLOW.autoCenter ? '🎯 Auto-centruj: wł.' : '⚪ Auto-centruj: wył.';
+}
+
+// woane po kazdym fetchMates() gdy FOLLOW.active — centruje mape + odswieza panel
+function onFollowPresenceUpdate(agents) {
+  if (!FOLLOW.active) return;
+  var a = agents.find(function (x) { return x.name === FOLLOW.name; });
+  updateFollowPanel(a);
+  if (a && typeof a.lat === 'number' && typeof a.lng === 'number' && FOLLOW.autoCenter && MAP.obj) {
+    MAP.obj.setView([a.lat, a.lng], Math.max(MAP.obj.getZoom(), MAP_ME_ZOOM), { animate: true });
+  }
+}
+
+// dociagnij cala dzisiejsza trase sledzonej osoby i narysuj wyrozniona linia
+function fetchFollowTrack() {
+  if (!FOLLOW.active) return;
+  fetch(WEBHOOK + '?action=getTracks&date=' + todayStr())
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      if (!FOLLOW.active || !res || res.status !== 'ok' || !Array.isArray(res.tracks)) return;
+      var t = res.tracks.find(function (x) { return x.name === FOLLOW.name; });
+      if (!t) return;
+      drawFollowTrail(t.points || []);
+      updateFollowStats(t);
+    })
+    .catch(function () {});
+}
+
+function drawFollowTrail(points) {
+  if (!MAP.ready || !MAP.obj) return;
+  if (FOLLOW.trailLine) { MAP.obj.removeLayer(FOLLOW.trailLine); FOLLOW.trailLine = null; }
+  if (!points || points.length < 2) return;
+  var latlngs = points.map(function (p) { return [p.lat, p.lng]; });
+  FOLLOW.trailLine = L.polyline(latlngs, {
+    color: '#c9a875', weight: 5, opacity: 0.95,
+    lineJoin: 'round', lineCap: 'round'
+  }).addTo(MAP.obj).bringToFront();
+  FOLLOW.lastPt = points[points.length - 1];
+}
+
+// ── PANEL "śledzenie na żywo" (pokazuje sie nad mapa) ──
+function showFollowPanel() {
+  var el = document.getElementById('followPanel');
+  if (!el) return;
+  el.style.display = 'block';
+  el.innerHTML =
+    '<div class="follow-head">🎯 Śledzenie na żywo: <b>' + FOLLOW.name + '</b>' +
+    '<button class="follow-close" onclick="stopFollow()">✕</button></div>' +
+    '<div id="followStatus" class="follow-body">📡 Łączę się…</div>' +
+    '<div id="followStats" class="follow-body follow-stats"></div>' +
+    '<button id="followCenterBtn" class="follow-center-btn" onclick="toggleFollowAutoCenter()">🎯 Auto-centruj: wł.</button>';
+}
+
+function hideFollowPanel() {
+  var el = document.getElementById('followPanel');
+  if (el) { el.style.display = 'none'; el.innerHTML = ''; }
+}
+
+// zaktualizuj status (pozycja/wiek sygnalu) sledzonej osoby — niezalezny blok od statystyk trasy
+function updateFollowPanel(agent) {
+  var el = document.getElementById('followStatus');
+  if (!el || !FOLLOW.active) return;
+  if (!agent || typeof agent.lat !== 'number') {
+    el.innerHTML = '⚠️ Brak świeżej pozycji tej osoby (starsza niż ' + Math.round(PRESENCE_TTL_MS / 60000) + ' min lub pozycja ukryta).';
+    return;
+  }
+  var statusTxt = agent.status === 'ukryty' ? '🚫 Ukryty' : '🟢 Na żywo';
+  el.innerHTML =
+    '<div>' + statusTxt + ' · aktualizacja ' + (agent.ageSec < 5 ? 'teraz' : agent.ageSec + ' s temu') + '</div>' +
+    '<div class="follow-coords">📍 ' + agent.lat.toFixed(5) + ', ' + agent.lng.toFixed(5) +
+    (agent.acc ? ' · dokładność ~' + Math.round(agent.acc) + ' m' : '') + '</div>';
+}
+
+// dolacz statystyki trasy (dystans/liczba punktow/stref) — osobny blok, niezalezny od statusu
+function updateFollowStats(t) {
+  var el = document.getElementById('followStats');
+  if (!el || !FOLLOW.active) return;
+  var m = Number(t.dist) || 0;
+  var distTxt = m >= 1000 ? (m / 1000).toFixed(2) + ' km' : Math.round(m) + ' m';
+  el.innerHTML = '🚶 Dziś: <b>' + distTxt + '</b> · ' + (t.count || 0) + ' pkt · ' + (t.zones || 0) + ' stref';
 }
