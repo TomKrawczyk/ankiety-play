@@ -895,30 +895,35 @@ function handleGetAnkietyZdjecia(viewer, limitRaw) {
     var iZdj   = idx("Zdjęcie ankiety (URL)");
     if (iZdj === -1) return jsonResp({ status: "ok", items: [] });
 
+    function cell(rowArr, ci) {
+      // Nie uzywac "|| \"\"" - zgubi legalna wartosc liczbowa 0. Tylko null/undefined -> "".
+      var v = ci >= 0 ? rowArr[ci] : "";
+      return (v === null || v === undefined) ? "" : v.toString();
+    }
+
     for (var r = rng.length - 1; r >= 1 && items.length < limit; r--) {
       var row = rng[r];
-      var url = (row[iZdj] || "").toString();
+      var url = cell(row, iZdj);
       if (!url) continue;
-      var typ = iTyp >= 0 ? (row[iTyp] || "").toString() : "";
+      var typ = cell(row, iTyp);
       var quizCols = QUIZ_COLS_BY_TYPE[typ] || null;
       var missing = 0, total = 0;
       if (quizCols) {
         total = quizCols.length;
         for (var qc = 0; qc < quizCols.length; qc++) {
-          var ci = idx(quizCols[qc]);
-          var val = ci >= 0 ? (row[ci] || "").toString().trim() : "";
+          var val = cell(row, idx(quizCols[qc])).trim();
           if (!val) missing++;
         }
       }
       var sheetRow = r + 1; // r indeksuje rng (0=naglowek), sheet jest 1-based -> ta sama liczba
       items.push({
-        data: iData >= 0 ? (row[iData] || "").toString() : "",
+        data: cell(row, iData),
         typ: typ,
-        ankieter: iAnk >= 0 ? (row[iAnk] || "").toString() : "",
-        imie: iImie >= 0 ? (row[iImie] || "").toString() : "",
-        telefon: iTel >= 0 ? (row[iTel] || "").toString() : "",
-        msc: iMsc >= 0 ? (row[iMsc] || "").toString() : "",
-        temp: iTemp >= 0 ? (row[iTemp] || "").toString() : "",
+        ankieter: cell(row, iAnk),
+        imie: cell(row, iImie),
+        telefon: cell(row, iTel),
+        msc: cell(row, iMsc),
+        temp: cell(row, iTemp),
         zdjecie: url,
         row: sheetRow,
         missing: missing,
