@@ -197,9 +197,95 @@ function setRankTab(tab) {
   else renderRanking();
 }
 
-// Duel section (placeholder — rozszerz jeśli trzeba)
+// ============================================================
+// DUEL — pojedynek "Ty vs kolega" na bazie danych z rankingu
+// ============================================================
+var DUEL = { opp: null };
+
 function renderDuel() {
   var el = document.getElementById('duel_section');
   if (!el) return;
-  el.innerHTML = '';
+  if (!_rankCache || _rankCache.length < 2) { el.innerHTML = ''; return; }
+
+  var me = (window._user || '').toLowerCase();
+  var meData = _rankCache.find(function(u){ return (u.name||'').toLowerCase() === me; });
+  if (!meData) { el.innerHTML = ''; return; }
+
+  var others = _rankCache.filter(function(u){ return (u.name||'').toLowerCase() !== me; });
+  if (others.length === 0) { el.innerHTML = ''; return; }
+
+  var oppKey = '4eco_duel_opp_' + me;
+  var savedOpp = localStorage.getItem(oppKey);
+  var oppData = others.find(function(u){ return (u.name||'').toLowerCase() === (savedOpp||'').toLowerCase(); });
+  if (!oppData) {
+    oppData = _pickDefaultRival(meData, others);
+    try { localStorage.setItem(oppKey, oppData.name); } catch(e) {}
+  }
+  DUEL.opp = oppData.name;
+
+  el.innerHTML = _duelHTML(meData, oppData, others);
+}
+
+// domyslny rywal = osoba najblizsza w XP (najbardziej naturalny pojedynek)
+function _pickDefaultRival(me, others) {
+  var sorted = others.slice().sort(function(a, b){
+    return Math.abs((a.xp||0) - (me.xp||0)) - Math.abs((b.xp||0) - (me.xp||0));
+  });
+  return sorted[0];
+}
+
+function _duelHTML(me, opp, others) {
+  var metrics = [
+    {key:'xp',    icon:'⭐', label:'XP'},
+    {key:'total', icon:'📋', label:'Ankiety'},
+    {key:'today', icon:'📅', label:'Dziś'},
+    {key:'hot',   icon:'🔥', label:'Gorące'}
+  ];
+  var rows = metrics.map(function(m){ return _duelRow(m, me, opp); }).join('');
+
+  var diff = (me.xp||0) - (opp.xp||0);
+  var verdict;
+  if (diff > 0)       verdict = '🏆 Prowadzisz o <b>' + diff + ' XP</b>!';
+  else if (diff < 0)  verdict = '🔥 Gonisz o <b>' + Math.abs(diff) + ' XP</b> — do dzieła!';
+  else                verdict = '🤝 Idealny remis!';
+
+  var options = others.map(function(u){
+    return '<option value="' + u.name + '"' + (u.name === opp.name ? ' selected' : '') + '>' + u.name + '</option>';
+  }).join('');
+
+  return '<div class="duel-card">' +
+    '<div class="duel-head">⚔️ Pojedynek</div>' +
+    '<div class="duel-vs">' +
+      '<div class="duel-side">' + _avHTML(me.name, 46, '1.35em') + '<div class="duel-name">Ty</div></div>' +
+      '<div class="duel-mid-vs">VS</div>' +
+      '<div class="duel-side">' + _avHTML(opp.name, 46, '1.35em') + '<div class="duel-name">' + opp.name + '</div></div>' +
+    '</div>' +
+    rows +
+    '<div class="duel-verdict">' + verdict + '</div>' +
+    '<select class="duel-select" onchange="changeDuelOpponent(this.value)">' + options + '</select>' +
+  '</div>';
+}
+
+function _duelRow(m, me, opp) {
+  var mv = me[m.key] || 0, ov = opp[m.key] || 0;
+  var max = Math.max(mv, ov, 1);
+  var mePct = Math.round(mv / max * 100), oppPct = Math.round(ov / max * 100);
+  var meLead = mv > ov, oppLead = ov > mv;
+  return '<div class="duel-row">' +
+    '<div class="duel-vals">' +
+      '<span class="duel-val' + (meLead?' lead':'') + '">' + mv + '</span>' +
+      '<span class="duel-row-label">' + m.icon + ' ' + m.label + '</span>' +
+      '<span class="duel-val' + (oppLead?' lead':'') + '">' + ov + '</span>' +
+    '</div>' +
+    '<div class="duel-bars">' +
+      '<div class="duel-bar-wrap left"><div class="duel-bar-fill' + (meLead?' lead':'') + '" style="width:' + mePct + '%"></div></div>' +
+      '<div class="duel-bar-wrap right"><div class="duel-bar-fill' + (oppLead?' lead':'') + '" style="width:' + oppPct + '%"></div></div>' +
+    '</div>' +
+  '</div>';
+}
+
+function changeDuelOpponent(name) {
+  var me = (window._user || '').toLowerCase();
+  try { localStorage.setItem('4eco_duel_opp_' + me, name); } catch(e) {}
+  renderDuel();
 }
