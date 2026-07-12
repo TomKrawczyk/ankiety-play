@@ -604,7 +604,9 @@ function submitFlow(fid) {
     temp_leada: a.temp||'',
     uwagi: a.uwagi||'',
     // pelny zrzut wszystkich odpowiedzi (zabezpieczenie — nic nie ginie)
-    wszystkie_odpowiedzi: JSON.stringify(a)
+    wszystkie_odpowiedzi: JSON.stringify(a),
+    // zdjecie papierowej kartki (jesli ankieter uzyl "Wpisz z kartki") — dowod/kopia zapasowa
+    zdjecie: s.photo || ''
   };
   if(!data.telefon){showToast('⚠️ Brak telefonu klienta!'); s.current=0; renderQ(fid); return;}
   sendData(data, s.xpAmount, data.temp_leada==='Gorący', fid);

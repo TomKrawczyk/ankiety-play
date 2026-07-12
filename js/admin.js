@@ -59,11 +59,13 @@ function ensureAdminDom() {
         '<button class="adm-tab" data-t="konta" onclick="adminTab(\'konta\')">👤 Konta</button>' +
         '<button class="adm-tab" data-t="leady" onclick="adminTab(\'leady\')">📋 Leady</button>' +
         '<button class="adm-tab" data-t="nagrody" onclick="adminTab(\'nagrody\')">🎖️ Nagrody</button>' +
+        '<button class="adm-tab" data-t="zdjecia" onclick="adminTab(\'zdjecia\')">📷 Zdjęcia</button>' +
       '</div>' +
       '<div id="adm_zespol" class="adm-view"></div>' +
       '<div id="adm_konta" class="adm-view" style="display:none"></div>' +
       '<div id="adm_leady" class="adm-view" style="display:none"></div>' +
-      '<div id="adm_nagrody" class="adm-view" style="display:none"></div>';
+      '<div id="adm_nagrody" class="adm-view" style="display:none"></div>' +
+      '<div id="adm_zdjecia" class="adm-view" style="display:none"></div>';
     // wstaw przed panelem quick albo na koniec appScreen
     var host = document.getElementById('appScreen') || document.body;
     host.appendChild(panel);
@@ -106,7 +108,7 @@ function adminTab(t) {
   document.querySelectorAll('#adminTabs .adm-tab').forEach(function (b) {
     b.classList.toggle('active', b.getAttribute('data-t') === t);
   });
-  ['zespol', 'konta', 'leady', 'nagrody'].forEach(function (v) {
+  ['zespol', 'konta', 'leady', 'nagrody', 'zdjecia'].forEach(function (v) {
     var el = document.getElementById('adm_' + v);
     if (el) el.style.display = (v === t) ? '' : 'none';
   });
@@ -114,6 +116,7 @@ function adminTab(t) {
   if (t === 'konta') renderKonta();
   if (t === 'leady') loadLeads();
   if (t === 'nagrody') renderNagrody();
+  if (t === 'zdjecia') loadAnkietyZdjecia();
 }
 window.adminTab = adminTab;
 
@@ -362,3 +365,39 @@ else window.addEventListener('DOMContentLoaded', admInit);
     };
   }
 })();
+
+
+// ======================================================
+// ZAKLADKA: ZDJĘCIA (ankiety z dołączonym zdjęciem papierowej kartki)
+// ======================================================
+function loadAnkietyZdjecia() {
+  var box = document.getElementById('adm_zdjecia');
+  if (!box) return;
+  box.innerHTML = '<div class="adm-muted">⏳ Ładuję zdjęcia…</div>';
+  var url = WEBHOOK + '?action=getAnkietyZdjecia&viewer=' + encodeURIComponent(window._user || '') + '&limit=100';
+  fetch(url).then(function (r) { return r.json(); }).then(function (res) {
+    if (res.status !== 'ok') { box.innerHTML = '<div class="adm-card">⛔ ' + (res.message || 'Błąd') + '</div>'; return; }
+    var items = res.items || [];
+    if (!items.length) {
+      box.innerHTML = '<div class="adm-card adm-muted">📭 Brak ankiet ze zdjęciem kartki — pojawią się tu po użyciu przycisku "📸 Wpisz z wypełnionej kartki".</div>';
+      return;
+    }
+    var html = '<div class="adm-muted" style="margin-bottom:8px">' + items.length + ' ankiet ze zdjęciem</div>';
+    items.forEach(function (it) {
+      html += '<div class="adm-lead">' +
+        '<div class="top"><span>' + esc(it.data || '') + '</span><span>' + esc(it.typ || '') + '</span></div>' +
+        '<div class="cn">' + esc(it.imie || 'Brak nazwy') + ' — ' + esc(it.telefon || '—') + '</div>' +
+        '<div class="adm-muted" style="margin-bottom:6px">' + esc(it.msc || '') + ' · ankieter: ' + esc(it.ankieter || '—') +
+          (it.temp ? ' · <span class="adm-badge' + (it.temp === 'Gorący' ? ' hot' : '') + '">' + esc(it.temp) + '</span>' : '') +
+        '</div>' +
+        '<a href="' + esc(it.zdjecie) + '" target="_blank" rel="noopener">' +
+          '<img src="' + esc(it.zdjecie) + '" loading="lazy" style="max-width:100%;border-radius:8px;border:1px solid var(--border,#2a3550);display:block" onerror="this.style.display=\'none\'">' +
+        '</a>' +
+      '</div>';
+    });
+    box.innerHTML = html;
+  }).catch(function () {
+    box.innerHTML = '<div class="adm-card">⚠️ Nie udało się połączyć z serwerem.</div>';
+  });
+}
+window.loadAnkietyZdjecia = loadAnkietyZdjecia;

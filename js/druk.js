@@ -43,13 +43,20 @@ function renderDruk() {
         '📸 Wpisz z wypełnionej kartki</button>' +
     '</div>';
   }).join('');
-  if (!document.getElementById('ocrFileInput')) {
-    var inp = document.createElement('input');
-    inp.type = 'file'; inp.accept = 'image/*'; inp.capture = 'environment';
-    inp.id = 'ocrFileInput'; inp.style.display = 'none';
-    inp.onchange = handleOcrFileChosen;
-    document.body.appendChild(inp);
-  }
+  _ensureOcrFileInput();
+}
+
+// Input pliku musi istniec ZANIM ktokolwiek kliknie "Wpisz z kartki" —
+// przyciski OCR sa teraz rowniez nad flow PV/Klima (widoczne od razu,
+// zanim uzytkownik w ogole odwiedzi zakladke "Do druku"), wiec tworzymy
+// input lazy, niezaleznie od renderDruk().
+function _ensureOcrFileInput() {
+  if (document.getElementById('ocrFileInput')) return;
+  var inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*'; inp.capture = 'environment';
+  inp.id = 'ocrFileInput'; inp.style.display = 'none';
+  inp.onchange = handleOcrFileChosen;
+  document.body.appendChild(inp);
 }
 
 // ============================================================
@@ -63,6 +70,7 @@ var OCR_TYPE_MAP = {
 function triggerOcrPhoto(druk_id) {
   var cfg = OCR_TYPE_MAP[druk_id];
   if (!cfg) return;
+  _ensureOcrFileInput();
   window._ocrTarget = cfg;
   document.getElementById('ocrFileInput').click();
 }
@@ -75,6 +83,11 @@ function handleOcrFileChosen(ev) {
 
   showToast('📸 Przetwarzam zdjęcie…');
   _compressImageToBase64(file, 1280, 0.72, function(base64) {
+    // Zdjecie zapisujemy do flow NIEZALEZNIE od wyniku OCR — trafi do arkusza
+    // przy zapisie ankiety jako dowod/kopia zapasowa, nawet jesli odczyt sie nie uda.
+    var s = flows[cfg.flowId];
+    if (s) s.photo = base64;
+
     fetch(WEBHOOK, {
       method: 'POST',
       body: JSON.stringify({ action: 'ocrSurvey', type: cfg.ocrType, image: base64 })
@@ -82,13 +95,17 @@ function handleOcrFileChosen(ev) {
       .then(function(r){ return r.json(); })
       .then(function(res){
         if (res.status !== 'ok' || !res.data) {
-          showToast('⚠️ Nie udało się odczytać kartki: ' + (res.message || 'błąd'));
+          showToast('⚠️ Nie odczytano danych automatycznie — zdjęcie dołączone, wypełnij ręcznie');
+          switchMode('quick');
+          showTab(cfg.tabId, document.querySelector('[onclick="showTab(\'' + cfg.tabId + '\',this)"]'));
           return;
         }
         _applyOcrPrefill(cfg, res.data);
       })
       .catch(function(err){
-        showToast('⚠️ Błąd połączenia z serwerem OCR');
+        showToast('⚠️ Błąd połączenia z OCR — zdjęcie dołączone, wypełnij ręcznie');
+        switchMode('quick');
+        showTab(cfg.tabId, document.querySelector('[onclick="showTab(\'' + cfg.tabId + '\',this)"]'));
       });
   });
 }

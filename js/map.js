@@ -128,6 +128,13 @@ function startGeo() {
   );
 }
 
+// Progi jakosci sygnalu — telefon czasem daje BARDZO zgrubna pierwsza pozycje
+// (siec/wifi, nie GPS), np. accuracy=50000m. Nie pokazujemy tego jako "Na żywo",
+// tylko info ze szukamy lepszego sygnalu — user nie panikuje ze mapa sie myli.
+var GEO_ACC_OK    = 100;   // <=100m: dobry GPS, zielony status
+var GEO_ACC_SLABY = 1000;  // 100-1000m: srednio, zolty status
+// >1000m: to prawie na 100% pozycja z sieci/wifi (nie GPS) — czerwony/info status
+
 function onGeoOk(pos) {
   var lat = pos.coords.latitude, lng = pos.coords.longitude;
   var acc = pos.coords.accuracy || 50;
@@ -137,18 +144,36 @@ function onGeoOk(pos) {
   // zapis śladu trasy (filtr: tylko sensowne kroki, dobry GPS)
   recordTrackPoint(lat, lng, acc);
 
+  // Krąg dokładności ograniczamy wizualnie (bez tego 50km "bąbel" zakrywa całą mapę)
+  var circleRadius = Math.min(acc, 500);
+
   if (!MAP.meMarker) {
     MAP.meMarker = L.marker([lat, lng], { icon: makeMeIcon(), zIndexOffset: 1000 }).addTo(MAP.obj);
     MAP.meAccuracy = L.circle([lat, lng], {
-      radius: acc, color: '#16a34a', weight: 1, fillColor: '#16a34a', fillOpacity: 0.08
+      radius: circleRadius, color: '#16a34a', weight: 1, fillColor: '#16a34a', fillOpacity: 0.08
     }).addTo(MAP.obj);
   } else {
     MAP.meMarker.setLatLng([lat, lng]);
-    MAP.meAccuracy.setLatLng([lat, lng]).setRadius(acc);
+    MAP.meAccuracy.setLatLng([lat, lng]).setRadius(circleRadius);
   }
 
   if (first) MAP.obj.setView([lat, lng], MAP_ME_ZOOM);
-  setGeoStatus('🟢 Na żywo · dokładność ~' + Math.round(acc) + ' m');
+
+  if (acc <= GEO_ACC_OK) {
+    setGeoStatus('🟢 Na żywo · dokładność ~' + Math.round(acc) + ' m');
+  } else if (acc <= GEO_ACC_SLABY) {
+    setGeoStatus('🟡 Doprecyzowuję pozycję · ~' + Math.round(acc) + ' m');
+  } else {
+    // To jest lokalizacja z sieci/WiFi, nie z GPS — czekamy na lepszy fix,
+    // ale nie blokujemy gry (marker i tak sie aktualizuje).
+    var km = (acc / 1000).toFixed(acc >= 10000 ? 0 : 1);
+    setGeoStatus('📡 Szukam GPS (obecnie z sieci, błąd ~' + km + ' km)');
+    if (first) {
+      setTimeout(function () {
+        showToast('💡 Słaby sygnał GPS — sprawdź w ustawieniach telefonu tryb lokalizacji "Wysoka dokładność" i włącz GPS + dane mobilne/WiFi');
+      }, 1200);
+    }
+  }
   updateNearbyHint();
   ensureWildSpawns();
   checkWildCatch();

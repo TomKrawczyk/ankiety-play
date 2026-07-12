@@ -1369,3 +1369,12 @@ body.light .success-overlay{ background:var(--bg, #f4f6fb); }
 .duel-verdict b{color:var(--green)}
 .duel-select{width:100%;border:1px solid var(--border2);background:var(--card2);color:var(--text);
   font-size:0.78em;font-weight:700;border-radius:10px;padding:8px 10px;font-family:Inter,sans-serif}
+
+/* ── OCR: przycisk "Wpisz z kartki" nad flow PV skrocona / Klima ── */
+.ocr-quickbtn {
+  display:block; width:100%; text-align:center;
+  background:var(--card2,var(--card)); border:1.5px dashed var(--border2,var(--border));
+  color:var(--text); font-weight:700; font-size:0.8em; padding:11px 14px;
+  border-radius:10px; font-family:'Inter',sans-serif; cursor:pointer; margin-bottom:12px;
+}
+.ocr-quickbtn:active { transform:scale(0.98); }
