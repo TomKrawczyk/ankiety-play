@@ -4,6 +4,7 @@
 // ============================================================
 
 var SHEET_ANKIETY   = "Ankiety";
+var SHEET_CV        = "Leady_CV";
 var SHEET_RANKING   = "Ranking";
 var SHEET_PRESENCE  = "Presence";
 
@@ -52,7 +53,7 @@ var HEADERS_ANKIETY = [
   "Uzyski sprawdzane","Pewność instalacji","Potrzeba klienta","Chęć zmiany",
   "Zgoda na audyt","Pora kontaktu",
   "Klima: pomieszczenia","Klima: powierzchnia","Klima: upał latem","Klima: grzanie zimą","Klima: priorytet","Klima: termin","Klima: zgoda na wycenę",
-  "Wszystkie odpowiedzi (JSON)"
+  "Wszystkie odpowiedzi (JSON)","Zdjęcie ankiety (URL)"
 ];
 
 var HEADERS_RANKING = [
@@ -69,6 +70,10 @@ var COLORS_LEAD = {
 // ============================================================
 // ROUTER
 // ============================================================
+
+var HEADERS_CV = [
+  "Data dodania", "Imie i nazwisko", "Adres", "Telefon", "Zrodlo (plik)", "Status"
+];
 
 function doPost(e) {
   try {
@@ -88,6 +93,14 @@ function doPost(e) {
 
     if (d.action === 'joinRaid') {
       return handleJoinRaid(d);
+    }
+
+    if (d.action === 'mergeRanking') {
+      return handleMergeRanking(d);
+    }
+
+    if (d.action === 'saveCV') {
+      return handleSaveCV(d);
     }
 
     if (d.action === 'ocrSurvey') {
@@ -116,6 +129,18 @@ function doGet(e) {
     }
     if (action === 'getRaid') {
       return handleGetRaid(e.parameter.weekend || '');
+    }
+    if (action === 'getTeamStats') {
+      return handleGetTeamStats(e.parameter.viewer || '');
+    }
+    if (action === 'mergeRanking') {
+      return handleMergeRanking({ viewer: e.parameter.viewer || '', keep: e.parameter.keep || '', drop: e.parameter.drop || '' });
+    }
+    if (action === 'getLeads') {
+      return handleGetLeads(e.parameter.viewer || '', e.parameter.limit || '200');
+    }
+    if (action === 'getAnkietyZdjecia') {
+      return handleGetAnkietyZdjecia(e.parameter.viewer || '', e.parameter.limit || '100');
     }
     return jsonResp({ status: "error", message: "Nieznana akcja GET" });
   } catch(err) {
@@ -175,7 +200,8 @@ function handleSaveAnkieta(d) {
     d.klima_najwazniejsze   || "",
     d.klima_termin          || "",
     d.klima_wycena          || "",
-    d.wszystkie_odpowiedzi  || ""
+    d.wszystkie_odpowiedzi  || "",
+    d.zdjecie ? _saveZdjecieDoDrive(d.zdjecie, (d.ankieter||"ankieter") + "_" + (d.telefon||"tel")) : ""
   ];
 
   sh.appendRow(row);
@@ -476,6 +502,69 @@ function jsonResp(obj) {
 
 
 // ============================================================
+// LEADY Z CV — zapis danych kontaktowych z PDF-ow (pod obdzwonke bota)
+// ============================================================
+
+function handleSaveCV(d) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = getOrCreateSheet(ss, SHEET_CV, HEADERS_CV, "#0d6b4f");
+
+  // Obsluga paczki (batch) lub pojedynczego rekordu
+  var items = [];
+  if (d.leads && d.leads.length) {
+    items = d.leads;
+  } else {
+    items = [d];
+  }
+
+  // Deduplikacja po ostatnich 9 cyfrach telefonu (jak w Leo/kontaktach)
+  var existing = {};
+  var lastRow = sh.getLastRow();
+  if (lastRow > 1) {
+    var telCol = sh.getRange(2, 4, lastRow - 1, 1).getValues();
+    for (var i = 0; i < telCol.length; i++) {
+      var t9 = _last9(telCol[i][0]);
+      if (t9) existing[t9] = true;
+    }
+  }
+
+  var added = 0, dup = 0, skipped = 0;
+  var rows = [];
+  var now = new Date();
+  var ts = Utilities.formatDate(now, "Europe/Warsaw", "yyyy-MM-dd HH:mm");
+
+  for (var j = 0; j < items.length; j++) {
+    var it = items[j] || {};
+    var name = (it.name || it.imie || "").toString().trim();
+    var addr = (it.address || it.adres || "").toString().trim();
+    var tel  = (it.phone || it.telefon || "").toString().trim();
+    var src  = (it.source || it.plik || "").toString().trim();
+
+    // Wymagany telefon — bez numeru lead bezuzyteczny do obdzwonki
+    var t9 = _last9(tel);
+    if (!t9) { skipped++; continue; }
+    if (existing[t9]) { dup++; continue; }
+    existing[t9] = true;
+
+    rows.push([ts, name, addr, tel, src, "nowy"]);
+    added++;
+  }
+
+  if (rows.length) {
+    sh.getRange(sh.getLastRow() + 1, 1, rows.length, HEADERS_CV.length).setValues(rows);
+  }
+
+  return jsonResp({ status: "ok", added: added, duplicates: dup, skipped_no_phone: skipped });
+}
+
+function _last9(v) {
+  var digits = (v == null ? "" : v.toString()).replace(/[^0-9]/g, "");
+  if (digits.length < 9) return "";
+  return digits.slice(-9);
+}
+
+
+// ============================================================
 // RAID WEEKEND — zapisy na weekendowy mega-event
 // ============================================================
 
@@ -523,6 +612,129 @@ function handleGetRaid(weekend) {
     }
   }
   return jsonResp({ status: "ok", data: out });
+}
+
+
+// ============================================================
+// MEGA-ADMIN (DWS) — statystyki zespolu i leady
+// Chronione: tylko dla nazw z PRESENCE_ADMINS (mega-admin).
+// ============================================================
+
+function handleGetTeamStats(viewer) {
+  if (!_isAdmin(viewer)) return jsonResp({ status: "denied", message: "Brak uprawnien" });
+  // Ranking = zrodlo prawdy o zespole (name, today, hot, total/xp).
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName("Ranking");
+  var team = [];
+  if (sh && sh.getLastRow() > 1) {
+    var rng = sh.getDataRange().getValues();
+    var head = rng[0].map(function(h){ return (h||"").toString().trim().toLowerCase(); });
+    function idx(names){ for (var i=0;i<head.length;i++){ if (names.indexOf(head[i])!==-1) return i; } return -1; }
+    var iName = idx(["ankieter","name","imie","imię i nazwisko"]);
+    var iTot  = idx(["total","suma","razem","ankiety"]);
+    var iToday= idx(["dziś","dzis","today"]);
+    var iHot  = idx(["gorące leady","gorace leady","hot","gorące"]);
+    var iXp   = idx(["xp","punkty"]);
+    for (var r=1;r<rng.length;r++){
+      var row=rng[r];
+      var nm=(iName>=0?row[iName]:"")||"";
+      if (!nm) continue;
+      team.push({
+        name:  nm.toString(),
+        total: iTot>=0 ? Number(row[iTot])||0 : 0,
+        today: iToday>=0 ? Number(row[iToday])||0 : 0,
+        hot:   iHot>=0 ? Number(row[iHot])||0 : 0,
+        xp:    iXp>=0 ? Number(row[iXp])||0 : 0
+      });
+    }
+  }
+  team.sort(function(a,b){ return b.total - a.total; });
+  var totAnk=0, totHot=0, totToday=0;
+  team.forEach(function(t){ totAnk+=t.total; totHot+=t.hot; totToday+=t.today; });
+  return jsonResp({
+    status:"ok",
+    team: team,
+    summary: { ankieterzy: team.length, ankiety: totAnk, gorace: totHot, dzis: totToday }
+  });
+}
+
+function handleGetLeads(viewer, limitRaw) {
+  if (!_isAdmin(viewer)) return jsonResp({ status: "denied", message: "Brak uprawnien" });
+  var limit = Math.min(Math.max(parseInt(limitRaw,10)||200, 1), 1000);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var tabs = ["Ankiety_Podstawowe","Ankiety_Audyt_PV","Ankiety_Rozbudowane"];
+  var leads = [];
+  tabs.forEach(function(tab){
+    var sh = ss.getSheetByName(tab);
+    if (!sh || sh.getLastRow() < 2) return;
+    var rng = sh.getDataRange().getValues();
+    var head = rng[0].map(function(h){ return (h||"").toString().trim().toLowerCase(); });
+    function idx(names){ for (var i=0;i<head.length;i++){ for (var j=0;j<names.length;j++){ if (head[i].indexOf(names[j])!==-1) return i; } } return -1; }
+    var iData = idx(["data","czas","timestamp"]);
+    var iAnk  = idx(["ankieter"]);
+    var iImie = idx(["imię","imie","nazwisko","klient"]);
+    var iTel  = idx(["telefon","tel","numer"]);
+    var iMsc  = idx(["miejscowość","miejscowosc","msc"]);
+    var iTemp = idx(["temperatura","temp"]);
+    var iTyp  = idx(["typ","ankieta","rodzaj"]);
+    for (var r=rng.length-1; r>=1 && leads.length<limit; r--){
+      var row=rng[r];
+      leads.push({
+        tab: tab,
+        data: iData>=0 ? (row[iData]||"").toString() : "",
+        ankieter: iAnk>=0 ? (row[iAnk]||"").toString() : "",
+        klient: iImie>=0 ? (row[iImie]||"").toString() : "",
+        telefon: iTel>=0 ? (row[iTel]||"").toString() : "",
+        msc: iMsc>=0 ? (row[iMsc]||"").toString() : "",
+        temp: iTemp>=0 ? (row[iTemp]||"").toString() : "",
+        typ: iTyp>=0 ? (row[iTyp]||"").toString() : tab
+      });
+    }
+  });
+  return jsonResp({ status:"ok", leads: leads, count: leads.length });
+}
+
+
+// ============================================================
+// MEGA-ADMIN — scalanie duplikatow w rankingu
+// POST {action:'mergeRanking', viewer:'dws', keep:'Przemek Ościak', drop:'Przemek Osciak'}
+// Sumuje XP/ankiety/gorące/dziś do 'keep', bierze wyzszy streak, usuwa wiersz 'drop'.
+// ============================================================
+function handleMergeRanking(d) {
+  if (!_isAdmin(d.viewer)) return jsonResp({ status: "denied", message: "Brak uprawnien" });
+  var keep = (d.keep || "").toString().trim();
+  var drop = (d.drop || "").toString().trim();
+  if (!keep || !drop) return jsonResp({ status:"error", message:"Brak keep/drop" });
+  if (keep.toLowerCase() === drop.toLowerCase()) return jsonResp({ status:"error", message:"To samo konto" });
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(SHEET_RANKING);
+  if (!sh || sh.getLastRow() < 2) return jsonResp({ status:"error", message:"Brak rankingu" });
+
+  var data = sh.getDataRange().getValues();  // [Ankieter,XP,Ankiety,Gorące,Streak,Dziś,Data]
+  var iKeep = -1, iDrop = -1;
+  for (var i=1;i<data.length;i++){
+    var nm=(data[i][0]||"").toString().trim().toLowerCase();
+    if (nm===keep.toLowerCase()) iKeep=i;
+    if (nm===drop.toLowerCase()) iDrop=i;
+  }
+  if (iKeep<0) return jsonResp({ status:"error", message:"Nie ma konta docelowego: "+keep });
+  if (iDrop<0) return jsonResp({ status:"error", message:"Nie ma konta do usuniecia: "+drop });
+
+  var k=data[iKeep], p=data[iDrop];
+  var merged = [
+    k[0],                                             // nazwa (keep)
+    (Number(k[1])||0)+(Number(p[1])||0),              // XP
+    (Number(k[2])||0)+(Number(p[2])||0),              // Ankiety
+    (Number(k[3])||0)+(Number(p[3])||0),              // Gorące
+    Math.max(Number(k[4])||0, Number(p[4])||0),       // Streak (wyzszy)
+    (Number(k[5])||0)+(Number(p[5])||0),              // Dziś
+    new Date().toLocaleString("pl-PL", { timeZone: "Europe/Warsaw" })
+  ];
+  sh.getRange(iKeep+1, 1, 1, HEADERS_RANKING.length).setValues([merged]);
+  sh.deleteRow(iDrop+1);
+  colorTopRanking(sh);
+  return jsonResp({ status:"ok", keep:k[0], mergedXp:merged[1] });
 }
 
 
@@ -617,4 +829,75 @@ function handleOcrSurvey(d) {
   } catch (err) {
     return jsonResp({ status: "error", message: err.toString() });
   }
+}
+
+
+// ============================================================
+// ZDJECIA ANKIET (dowod papierowej kartki, dolaczone przy zapisie)
+// ============================================================
+
+// Zapisuje base64 (JPEG) do folderu Drive "AnkietyZdjecia_4ECO" (tworzy jesli trzeba),
+// ustawia udostepnianie "kto ma link - moze wyswietlic" i zwraca link do podgladu.
+function _saveZdjecieDoDrive(base64Data, filenameHint) {
+  try {
+    var b64 = base64Data.indexOf(',') > -1 ? base64Data.split(',')[1] : base64Data;
+    var bytes = Utilities.base64Decode(b64);
+    var blob = Utilities.newBlob(bytes, "image/jpeg",
+      "ankieta_" + _slugify(filenameHint) + "_" + new Date().getTime() + ".jpg");
+
+    var folderName = "AnkietyZdjecia_4ECO";
+    var folders = DriveApp.getFoldersByName(folderName);
+    var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    return "https://drive.google.com/uc?export=view&id=" + file.getId();
+  } catch (e) {
+    return "";
+  }
+}
+
+function _slugify(s) {
+  return (s || "").toString().replace(/[^a-zA-Z0-9]+/g, "_").substring(0, 40);
+}
+
+// Panel admina -> zakladka "Zdjecia": lista ostatnich ankiet z dolaczonym zdjeciem kartki.
+function handleGetAnkietyZdjecia(viewer, limitRaw) {
+  if (!_isAdmin(viewer)) return jsonResp({ status: "denied", message: "Brak uprawnien" });
+  var limit = Math.min(Math.max(parseInt(limitRaw, 10) || 100, 1), 500);
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(SHEET_ANKIETY);
+  var items = [];
+  if (sh && sh.getLastRow() > 1) {
+    var rng = sh.getDataRange().getValues();
+    var head = rng[0].map(function (h) { return (h || "").toString().trim().toLowerCase(); });
+    function idx(name) { return head.indexOf(name.toLowerCase()); }
+    var iData  = idx("Data zapisu");
+    var iTyp   = idx("Typ ankiety");
+    var iAnk   = idx("Ankieter");
+    var iImie  = idx("Imię klienta");
+    var iTel   = idx("Telefon");
+    var iMsc   = idx("Miejscowość");
+    var iTemp  = idx("Temperatura leada");
+    var iZdj   = idx("Zdjęcie ankiety (URL)");
+    if (iZdj === -1) return jsonResp({ status: "ok", items: [] });
+
+    for (var r = rng.length - 1; r >= 1 && items.length < limit; r--) {
+      var row = rng[r];
+      var url = (row[iZdj] || "").toString();
+      if (!url) continue;
+      items.push({
+        data: iData >= 0 ? (row[iData] || "").toString() : "",
+        typ: iTyp >= 0 ? (row[iTyp] || "").toString() : "",
+        ankieter: iAnk >= 0 ? (row[iAnk] || "").toString() : "",
+        imie: iImie >= 0 ? (row[iImie] || "").toString() : "",
+        telefon: iTel >= 0 ? (row[iTel] || "").toString() : "",
+        msc: iMsc >= 0 ? (row[iMsc] || "").toString() : "",
+        temp: iTemp >= 0 ? (row[iTemp] || "").toString() : "",
+        zdjecie: url
+      });
+    }
+  }
+  return jsonResp({ status: "ok", items: items });
 }
