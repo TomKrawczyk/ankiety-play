@@ -370,6 +370,15 @@ else window.addEventListener('DOMContentLoaded', admInit);
 // ======================================================
 // ZAKLADKA: ZDJĘCIA (ankiety z dołączonym zdjęciem papierowej kartki)
 // ======================================================
+var _zdjeciaCache = null;
+var _zdjeciaOnlyIncomplete = false;
+
+function toggleZdjeciaFilter() {
+  _zdjeciaOnlyIncomplete = !_zdjeciaOnlyIncomplete;
+  renderAnkietyZdjecia();
+}
+window.toggleZdjeciaFilter = toggleZdjeciaFilter;
+
 function loadAnkietyZdjecia() {
   var box = document.getElementById('adm_zdjecia');
   if (!box) return;
@@ -377,27 +386,59 @@ function loadAnkietyZdjecia() {
   var url = WEBHOOK + '?action=getAnkietyZdjecia&viewer=' + encodeURIComponent(window._user || '') + '&limit=100';
   fetch(url).then(function (r) { return r.json(); }).then(function (res) {
     if (res.status !== 'ok') { box.innerHTML = '<div class="adm-card">⛔ ' + (res.message || 'Błąd') + '</div>'; return; }
-    var items = res.items || [];
-    if (!items.length) {
-      box.innerHTML = '<div class="adm-card adm-muted">📭 Brak ankiet ze zdjęciem kartki — pojawią się tu po użyciu przycisku "📸 Wpisz z wypełnionej kartki".</div>';
-      return;
-    }
-    var html = '<div class="adm-muted" style="margin-bottom:8px">' + items.length + ' ankiet ze zdjęciem</div>';
-    items.forEach(function (it) {
-      html += '<div class="adm-lead">' +
-        '<div class="top"><span>' + esc(it.data || '') + '</span><span>' + esc(it.typ || '') + '</span></div>' +
-        '<div class="cn">' + esc(it.imie || 'Brak nazwy') + ' — ' + esc(it.telefon || '—') + '</div>' +
-        '<div class="adm-muted" style="margin-bottom:6px">' + esc(it.msc || '') + ' · ankieter: ' + esc(it.ankieter || '—') +
-          (it.temp ? ' · <span class="adm-badge' + (it.temp === 'Gorący' ? ' hot' : '') + '">' + esc(it.temp) + '</span>' : '') +
-        '</div>' +
-        '<a href="' + esc(it.zdjecie) + '" target="_blank" rel="noopener">' +
-          '<img src="' + esc(it.zdjecie) + '" loading="lazy" style="max-width:100%;border-radius:8px;border:1px solid var(--border,#2a3550);display:block" onerror="this.style.display=\'none\'">' +
-        '</a>' +
-      '</div>';
-    });
-    box.innerHTML = html;
+    _zdjeciaCache = res.items || [];
+    renderAnkietyZdjecia();
   }).catch(function () {
     box.innerHTML = '<div class="adm-card">⚠️ Nie udało się połączyć z serwerem.</div>';
   });
 }
 window.loadAnkietyZdjecia = loadAnkietyZdjecia;
+
+function renderAnkietyZdjecia() {
+  var box = document.getElementById('adm_zdjecia');
+  if (!box || !_zdjeciaCache) return;
+  var items = _zdjeciaCache;
+  if (!items.length) {
+    box.innerHTML = '<div class="adm-card adm-muted">📭 Brak ankiet ze zdjęciem kartki — pojawią się tu po użyciu przycisku "📸 Wpisz z wypełnionej kartki".</div>';
+    return;
+  }
+  var incompleteCount = items.filter(function (it) { return it.total > 0 && it.missing > 0; }).length;
+  var shown = _zdjeciaOnlyIncomplete ? items.filter(function (it) { return it.total > 0 && it.missing > 0; }) : items;
+
+  var html = '<div class="adm-muted" style="margin-bottom:6px">' + items.length + ' ankiet ze zdjęciem' +
+    (incompleteCount ? ' · <b style="color:var(--orange,#e67e22)">' + incompleteCount + ' niekompletnych</b>' : '') + '</div>';
+  html += '<label style="display:flex;align-items:center;gap:6px;margin-bottom:10px;font-size:0.85em;cursor:pointer">' +
+    '<input type="checkbox" onchange="toggleZdjeciaFilter()" ' + (_zdjeciaOnlyIncomplete ? 'checked' : '') + '> Pokaż tylko niekompletne (brakuje odpowiedzi z kwestionariusza)' +
+  '</label>';
+
+  if (!shown.length) {
+    html += '<div class="adm-card adm-muted">✅ Wszystkie kompletne — nic do dopełnienia.</div>';
+    box.innerHTML = html;
+    return;
+  }
+
+  shown.forEach(function (it) {
+    var badge = '';
+    if (it.total > 0) {
+      if (it.missing > 0) {
+        badge = '<span class="adm-badge" style="background:rgba(230,126,34,0.18);color:var(--orange,#e67e22)">⚠️ brakuje ' + it.missing + '/' + it.total + '</span>';
+      } else {
+        badge = '<span class="adm-badge" style="background:rgba(16,216,115,0.15);color:var(--green,#10d873)">✅ komplet</span>';
+      }
+    }
+    html += '<div class="adm-lead">' +
+      '<div class="top"><span>' + esc(it.data || '') + '</span><span>' + esc(it.typ || '') + '</span></div>' +
+      '<div class="cn">' + esc(it.imie || 'Brak nazwy') + ' — ' + esc(it.telefon || '—') + '</div>' +
+      '<div class="adm-muted" style="margin-bottom:6px">' + esc(it.msc || '') + ' · ankieter: ' + esc(it.ankieter || '—') +
+        (it.temp ? ' · <span class="adm-badge' + (it.temp === 'Gorący' ? ' hot' : '') + '">' + esc(it.temp) + '</span>' : '') +
+        (badge ? ' · ' + badge : '') +
+      '</div>' +
+      '<a href="' + esc(it.zdjecie) + '" target="_blank" rel="noopener">' +
+        '<img src="' + esc(it.zdjecie) + '" loading="lazy" style="max-width:100%;border-radius:8px;border:1px solid var(--border,#2a3550);display:block" onerror="this.style.display=\'none\'">' +
+      '</a>' +
+      (it.sheetUrl ? '<a href="' + esc(it.sheetUrl) + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:0.82em;color:var(--blue,#3ea6ff)">📝 Otwórz ten wiersz w arkuszu →</a>' : '') +
+    '</div>';
+  });
+  box.innerHTML = html;
+}
+window.renderAnkietyZdjecia = renderAnkietyZdjecia;

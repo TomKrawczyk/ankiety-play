@@ -861,7 +861,16 @@ function _slugify(s) {
   return (s || "").toString().replace(/[^a-zA-Z0-9]+/g, "_").substring(0, 40);
 }
 
+// Kolumny "7 pytan kwestionariusza" per typ ankiety - do liczenia kompletnosci danych
+// (ankieter czasem nie wypelnia wszystkich przy szybkim wpisywaniu z kartki - admin dopelnia recznie).
+var QUIZ_COLS_BY_TYPE = {
+  PVSKR: ["Finansowanie PV","PV od kiedy","Rachunki mimo PV","Uzyski sprawdzane","Pewność instalacji","Potrzeba klienta","Zgoda na audyt"],
+  KLIMA: ["Klima: pomieszczenia","Klima: powierzchnia","Klima: upał latem","Klima: grzanie zimą","Klima: priorytet","Klima: termin","Klima: zgoda na wycenę"]
+};
+
 // Panel admina -> zakladka "Zdjecia": lista ostatnich ankiet z dolaczonym zdjeciem kartki.
+// Dolacza numer wiersza + link do konkretnego wiersza w arkuszu oraz licznik brakujacych
+// odpowiedzi z kwestionariusza (PVSKR/KLIMA), zeby admin szybko dopelnial dane ze zdjecia.
 function handleGetAnkietyZdjecia(viewer, limitRaw) {
   if (!_isAdmin(viewer)) return jsonResp({ status: "denied", message: "Brak uprawnien" });
   var limit = Math.min(Math.max(parseInt(limitRaw, 10) || 100, 1), 500);
@@ -870,9 +879,12 @@ function handleGetAnkietyZdjecia(viewer, limitRaw) {
   var sh = ss.getSheetByName(SHEET_ANKIETY);
   var items = [];
   if (sh && sh.getLastRow() > 1) {
+    var sheetId = sh.getSheetId();
+    var spreadsheetId = ss.getId();
     var rng = sh.getDataRange().getValues();
-    var head = rng[0].map(function (h) { return (h || "").toString().trim().toLowerCase(); });
-    function idx(name) { return head.indexOf(name.toLowerCase()); }
+    var head = rng[0].map(function (h) { return (h || "").toString().trim(); });
+    var headLower = head.map(function (h) { return h.toLowerCase(); });
+    function idx(name) { return headLower.indexOf(name.toLowerCase()); }
     var iData  = idx("Data zapisu");
     var iTyp   = idx("Typ ankiety");
     var iAnk   = idx("Ankieter");
@@ -887,15 +899,31 @@ function handleGetAnkietyZdjecia(viewer, limitRaw) {
       var row = rng[r];
       var url = (row[iZdj] || "").toString();
       if (!url) continue;
+      var typ = iTyp >= 0 ? (row[iTyp] || "").toString() : "";
+      var quizCols = QUIZ_COLS_BY_TYPE[typ] || null;
+      var missing = 0, total = 0;
+      if (quizCols) {
+        total = quizCols.length;
+        for (var qc = 0; qc < quizCols.length; qc++) {
+          var ci = idx(quizCols[qc]);
+          var val = ci >= 0 ? (row[ci] || "").toString().trim() : "";
+          if (!val) missing++;
+        }
+      }
+      var sheetRow = r + 1; // r indeksuje rng (0=naglowek), sheet jest 1-based -> ta sama liczba
       items.push({
         data: iData >= 0 ? (row[iData] || "").toString() : "",
-        typ: iTyp >= 0 ? (row[iTyp] || "").toString() : "",
+        typ: typ,
         ankieter: iAnk >= 0 ? (row[iAnk] || "").toString() : "",
         imie: iImie >= 0 ? (row[iImie] || "").toString() : "",
         telefon: iTel >= 0 ? (row[iTel] || "").toString() : "",
         msc: iMsc >= 0 ? (row[iMsc] || "").toString() : "",
         temp: iTemp >= 0 ? (row[iTemp] || "").toString() : "",
-        zdjecie: url
+        zdjecie: url,
+        row: sheetRow,
+        missing: missing,
+        total: total,
+        sheetUrl: "https://docs.google.com/spreadsheets/d/" + spreadsheetId + "/edit#gid=" + sheetId + "&range=A" + sheetRow
       });
     }
   }
