@@ -30,7 +30,7 @@ function renderDruk() {
         '<span style="font-size:0.95em;font-weight:800;color:var(--text)">' + a.nazwa + '</span>' +
       '</div>' +
       '<div style="font-size:0.78em;color:var(--muted);margin-bottom:12px;line-height:1.4">' + a.opis + '</div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">' +
         '<a href="' + a.plik + '" target="_blank" rel="noopener" ' +
           'style="flex:1;min-width:130px;text-align:center;background:linear-gradient(135deg,#10d873,#0bb45e);color:#04130a;font-weight:800;font-size:0.82em;padding:11px 14px;border-radius:10px;text-decoration:none;font-family:Inter,sans-serif">' +
           '🖨️ Otwórz / Drukuj</a>' +
@@ -38,6 +38,98 @@ function renderDruk() {
           'style="flex:1;min-width:130px;text-align:center;background:transparent;border:1px solid var(--border);color:var(--text);font-weight:700;font-size:0.82em;padding:11px 14px;border-radius:10px;text-decoration:none;font-family:Inter,sans-serif">' +
           '⬇️ Pobierz PDF</a>' +
       '</div>' +
+      '<button onclick="triggerOcrPhoto(\'' + a.id + '\')" ' +
+        'style="width:100%;text-align:center;background:var(--card2);border:1.5px dashed var(--border2);color:var(--text);font-weight:700;font-size:0.82em;padding:11px 14px;border-radius:10px;font-family:Inter,sans-serif;cursor:pointer">' +
+        '📸 Wpisz z wypełnionej kartki</button>' +
     '</div>';
   }).join('');
+  if (!document.getElementById('ocrFileInput')) {
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*'; inp.capture = 'environment';
+    inp.id = 'ocrFileInput'; inp.style.display = 'none';
+    inp.onchange = handleOcrFileChosen;
+    document.body.appendChild(inp);
+  }
+}
+
+// ============================================================
+// OCR Z KARTKI PAPIEROWEJ — zdjęcie -> Gemini Vision -> prefill flow
+// ============================================================
+var OCR_TYPE_MAP = {
+  pv:    { ocrType: 'pv_skrocona', tabId: 'q_pvskr', flowId: 'PVSKR' },
+  klima: { ocrType: 'klima',       tabId: 'q_klima', flowId: 'KLIMA' }
+};
+
+function triggerOcrPhoto(druk_id) {
+  var cfg = OCR_TYPE_MAP[druk_id];
+  if (!cfg) return;
+  window._ocrTarget = cfg;
+  document.getElementById('ocrFileInput').click();
+}
+
+function handleOcrFileChosen(ev) {
+  var file = ev.target.files && ev.target.files[0];
+  ev.target.value = '';
+  if (!file || !window._ocrTarget) return;
+  var cfg = window._ocrTarget;
+
+  showToast('📸 Przetwarzam zdjęcie…');
+  _compressImageToBase64(file, 1280, 0.72, function(base64) {
+    fetch(WEBHOOK, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'ocrSurvey', type: cfg.ocrType, image: base64 })
+    })
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (res.status !== 'ok' || !res.data) {
+          showToast('⚠️ Nie udało się odczytać kartki: ' + (res.message || 'błąd'));
+          return;
+        }
+        _applyOcrPrefill(cfg, res.data);
+      })
+      .catch(function(err){
+        showToast('⚠️ Błąd połączenia z serwerem OCR');
+      });
+  });
+}
+
+// Kompresuje zdjęcie do JPEG base64 (bez wysyłania oryginału w pełnej rozdzielczości)
+function _compressImageToBase64(file, maxDim, quality, cb) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var w = img.width, h = img.height;
+      var scale = Math.min(1, maxDim / Math.max(w, h));
+      var cw = Math.round(w * scale), ch = Math.round(h * scale);
+      var canvas = document.createElement('canvas');
+      canvas.width = cw; canvas.height = ch;
+      canvas.getContext('2d').drawImage(img, 0, 0, cw, ch);
+      cb(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Wpisuje odczytane dane do odpowiedniego flow (jako "prefill" — ankieter i tak
+// przechodzi krok po kroku i zatwierdza/koryguje każdą odpowiedź przed zapisem)
+function _applyOcrPrefill(cfg, data) {
+  var s = flows[cfg.flowId];
+  if (!s) return;
+
+  var filled = 0, total = 0;
+  Object.keys(data).forEach(function(k) {
+    total++;
+    var v = data[k];
+    if (v === null || v === undefined || v === '' || (Array.isArray(v) && v.length === 0)) return;
+    s.answers[k] = v;
+    filled++;
+  });
+
+  s.current = 0;
+  renderQ(cfg.flowId);
+  switchMode('quick');
+  showTab(cfg.tabId, document.querySelector('[onclick="showTab(\'' + cfg.tabId + '\',this)"]'));
+  showToast('✅ Odczytano ' + filled + '/' + total + ' pól — sprawdź i zapisz');
 }

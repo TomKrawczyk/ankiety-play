@@ -90,6 +90,10 @@ function doPost(e) {
       return handleJoinRaid(d);
     }
 
+    if (d.action === 'ocrSurvey') {
+      return handleOcrSurvey(d);
+    }
+
     // Domyślnie: zapis ankiety
     return handleSaveAnkieta(d);
 
@@ -519,4 +523,98 @@ function handleGetRaid(weekend) {
     }
   }
   return jsonResp({ status: "ok", data: out });
+}
+
+
+// ============================================================
+// OCR ANKIETY PAPIEROWEJ — zdjecie kartki -> Gemini Vision -> JSON
+// ============================================================
+// KROK RECZNY: wklej tu swoj klucz Gemini (https://aistudio.google.com/apikey)
+var GEMINI_API_KEY = "WKLEJ_TU_SWOJ_KLUCZ_GEMINI";
+var GEMINI_MODELS  = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash"];
+
+var OCR_PROMPTS = {
+  pv_skrocona:
+    'Masz zdjecie/skan papierowej ankiety terenowej "PV skrocona" (fotowoltaika). ' +
+    'Odpowiedzi klienta sa zakreslone/zaznaczone (ptaszek, X, okrag, podkreslenie) przy jednej z opcji w kazdym pytaniu. ' +
+    'Dane kontaktowe sa wpisane odrecznie w polach na gorze formularza.\n\n' +
+    'Zwroc WYLACZNIE czysty JSON, z dokladnie tymi polami:\n' +
+    '{\n' +
+    '  "imie": string albo null,\n' +
+    '  "tel": string albo null,\n' +
+    '  "msc": string albo null,\n' +
+    '  "pora": jedna z ["Rano","Popoludnie","Wieczor","Weekend"] albo null,\n' +
+    '  "finansowanie": jedna z ["Wlasne","Kredyt","Dotacja + wlasne"] albo null,\n' +
+    '  "od_kiedy": jedna z ["do 1 roku","1-3 lata","3-5 lat","ponad 5 lat"] albo null,\n' +
+    '  "rachunki_mimo": jedna z ["Tak, zaskakujaco","Trochę za wysokie","Sa w porzadku"] albo null,\n' +
+    '  "uzyski": jedna z ["Tak","Nie","Nie wiem jak"] albo null,\n' +
+    '  "pewnosc": jedna z ["Tak","Nie jestem pewien","Nie wiem jak sprawdzic"] albo null,\n' +
+    '  "potrzeba": lista (0 lub wiecej) zlozona z ["Nizsze rachunki","Pewnosc, ze PV dziala","Magazyn energii","Pompa ciepla"],\n' +
+    '  "audyt": jedna z ["Tak, chetnie","Najpierw wiecej info","Nie teraz"] albo null\n' +
+    '}\n' +
+    'Zwracaj TYLKO wartosci z podanych list dopuszczalnych (dokladne dopasowanie tekstu), albo null jesli pytanie nie zostalo zaznaczone lub nie da sie odczytac z pewnoscia. Nie zgaduj.',
+
+  klima:
+    'Masz zdjecie/skan papierowej ankiety terenowej "Klimatyzacja". ' +
+    'Odpowiedzi klienta sa zakreslone/zaznaczone (ptaszek, X, okrag, podkreslenie) przy jednej z opcji w kazdym pytaniu. ' +
+    'Dane kontaktowe sa wpisane odrecznie w polach na gorze formularza.\n\n' +
+    'Zwroc WYLACZNIE czysty JSON, z dokladnie tymi polami:\n' +
+    '{\n' +
+    '  "imie": string albo null,\n' +
+    '  "tel": string albo null,\n' +
+    '  "msc": string albo null,\n' +
+    '  "pora": jedna z ["Rano","Popoludnie","Wieczor","Weekend"] albo null,\n' +
+    '  "ile_pomieszczen": jedna z ["1","2","3","4 i wiecej"] albo null,\n' +
+    '  "powierzchnia": jedna z ["do 25 m2","25-50 m2","50-100 m2","ponad 100 m2"] albo null,\n' +
+    '  "goraco": jedna z ["Tak, nie da sie funkcjonowac","Bywa uciazliwie","Da sie wytrzymac"] albo null,\n' +
+    '  "grzanie_zima": jedna z ["Tak, bardzo","Moze","Nie potrzebuje"] albo null,\n' +
+    '  "najwazniejsze": jedna z ["Komfort i cisza","Niski koszt pradu","Grzanie zima","Estetyka montazu"] albo null,\n' +
+    '  "termin": jedna z ["Jak najszybciej","W ciagu kilku miesiecy","Dopiero sie rozgladam"] albo null,\n' +
+    '  "wycena": jedna z ["Tak, chetnie","Najpierw wiecej info","Nie teraz"] albo null\n' +
+    '}\n' +
+    'Zwracaj TYLKO wartosci z podanych list dopuszczalnych (dokladne dopasowanie tekstu), albo null jesli pytanie nie zostalo zaznaczone lub nie da sie odczytac z pewnoscia. Nie zgaduj.'
+};
+
+function handleOcrSurvey(d) {
+  try {
+    var prompt = OCR_PROMPTS[d.type];
+    if (!prompt) return jsonResp({ status: "error", message: "Nieznany typ ankiety: " + d.type });
+    if (!d.image) return jsonResp({ status: "error", message: "Brak zdjecia" });
+
+    var base64 = d.image.indexOf(',') > -1 ? d.image.split(',')[1] : d.image;
+
+    var payload = {
+      contents: [{ parts: [ { text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } } ] }],
+      generationConfig: { temperature: 0, responseMimeType: "application/json" }
+    };
+
+    var lastErr = "";
+    for (var i = 0; i < GEMINI_MODELS.length; i++) {
+      var model = GEMINI_MODELS[i];
+      var url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + GEMINI_API_KEY;
+      try {
+        var resp = UrlFetchApp.fetch(url, {
+          method: "post",
+          contentType: "application/json",
+          payload: JSON.stringify(payload),
+          muteHttpExceptions: true
+        });
+        var code = resp.getResponseCode();
+        if (code === 429 || code === 503) { lastErr = "HTTP " + code + " (" + model + ")"; continue; }
+        if (code !== 200) { lastErr = "HTTP " + code + ": " + resp.getContentText().substring(0,200); continue; }
+
+        var res = JSON.parse(resp.getContentText());
+        var text = res.candidates[0].content.parts[0].text;
+        var extracted = JSON.parse(text);
+        return jsonResp({ status: "ok", data: extracted, model: model });
+      } catch (innerErr) {
+        lastErr = innerErr.toString();
+        continue;
+      }
+    }
+    return jsonResp({ status: "error", message: "Wszystkie modele Gemini zawiodly: " + lastErr });
+
+  } catch (err) {
+    return jsonResp({ status: "error", message: err.toString() });
+  }
 }
