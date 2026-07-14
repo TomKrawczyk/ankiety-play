@@ -237,7 +237,7 @@ function doGet(e) {
     }
     if (action === 'getTracks') {
       if (!_verifyPin(p.viewer, p.pin)) return jsonResp({ status: "denied", message: "Nieprawidlowy PIN" });
-      return handleGetTracks(p.date || '');
+      return handleGetTracks(p.date || '', p.viewer || '');
     }
     if (action === 'getRaid') {
       return handleGetRaid(p.weekend || '');
@@ -495,6 +495,43 @@ function handleGetPresence(viewer, vlatRaw, vlngRaw) {
   return jsonResp({ status: "ok", agents: out, ttlSec: PRESENCE_TTL_MS / 1000, viewerAdmin: admin, nearbyKm: PRESENCE_NEARBY_KM });
 }
 
+// Zwraca zbior nazw (znormalizowanych) widocznych dla danego viewer-a
+// w kontekscie TRAS (historyczny slad GPS) — ta sama logika prywatnosci
+// co przy live-presence: admin widzi wszystkich, zwykly ankieter siebie
+// + kolegow aktualnie (wg ostatniego znanego sygnalu Presence) w promieniu
+// PRESENCE_NEARBY_KM. Brak wlasnej pozycji -> tylko siebie (bezpieczny domyslny wariant).
+function _visibleTrackNames(viewer){
+  if (_isAdmin(viewer)) return null; // null = brak filtra, widac wszystko
+  var vName = _normName(viewer);
+  var visible = {};
+  if (vName) visible[vName] = true; // zawsze siebie
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(SHEET_PRESENCE);
+  if (!sh || sh.getLastRow() < 2) return visible;
+
+  var rows = sh.getRange(2, 1, sh.getLastRow() - 1, HEADERS_PRESENCE.length).getValues();
+  var byName = {};
+  var vlat = null, vlng = null;
+  for (var i = 0; i < rows.length; i++) {
+    var nm = (rows[i][0] || "").toString().trim();
+    if (!nm) continue;
+    var lat = rows[i][1] === "" ? null : Number(rows[i][1]);
+    var lng = rows[i][2] === "" ? null : Number(rows[i][2]);
+    var nrm = _normName(nm);
+    byName[nrm] = { lat: lat, lng: lng };
+    if (nrm === vName) { vlat = lat; vlng = lng; }
+  }
+  if (vlat == null || vlng == null) return visible; // bez wlasnej pozycji -> tylko siebie
+
+  Object.keys(byName).forEach(function(k){
+    var p = byName[k];
+    if (p.lat == null || p.lng == null) return;
+    if (_distKm(vlat, vlng, p.lat, p.lng) <= PRESENCE_NEARBY_KM) visible[k] = true;
+  });
+  return visible;
+}
+
 // ============================================================
 // TRASY — slad gdzie ankieter dzis chodzil (cala flota)
 // ============================================================
@@ -532,7 +569,7 @@ function handleUpdateTrack(d) {
   return jsonResp({ status: "ok" });
 }
 
-function handleGetTracks(date) {
+function handleGetTracks(date, viewer) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sh = ss.getSheetByName(SHEET_TRACKS);
   var out = [];
@@ -540,14 +577,17 @@ function handleGetTracks(date) {
     var d = new Date();
     date = d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
   }
+  var visible = _visibleTrackNames(viewer || '');
   if (sh && sh.getLastRow() >= 2) {
     var rows = sh.getRange(2, 1, sh.getLastRow() - 1, HEADERS_TRACKS.length).getValues();
     for (var i = 0; i < rows.length; i++) {
       if ((rows[i][0]||"").toString().trim() !== date) continue;
+      var trkName = (rows[i][1]||"").toString().trim();
+      if (visible !== null && !visible[_normName(trkName)]) continue; // niewidoczny dla tego widza -> pomin
       var pts = [];
       try { pts = JSON.parse(rows[i][2] || "[]"); } catch(e) { pts = []; }
       out.push({
-        name: (rows[i][1]||"").toString().trim(),
+        name: trkName,
         points: pts,
         dist: Number(rows[i][3]) || 0,
         count: Number(rows[i][4]) || 0,
