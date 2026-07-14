@@ -412,7 +412,7 @@ function raidWeekendId() {
 function loadRaidRoster() {
   var box = document.getElementById('wtRosterList');
   if (!box || typeof WEBHOOK === 'undefined') return;
-  fetch(WEBHOOK + '?action=getRaid&weekend=' + raidWeekendId())
+  fetch(WEBHOOK + '?action=getRaid&weekend=' + raidWeekendId() + '&' + authQS())
     .then(function (r) { return r.json(); })
     .then(function (res) {
       var list = (res && res.data) ? res.data : [];
@@ -462,7 +462,7 @@ function joinRaid() {
   if (typeof showToast === 'function') showToast('🤝 Jesteś na raidzie! Do zobaczenia w weekend 🔥');
   if (typeof confettiBlast === 'function') confettiBlast();
 
-  var payload = { action: 'joinRaid', ankieter: window._user, weekend: raidWeekendId() };
+  var payload = authBody({ action: 'joinRaid', ankieter: window._user, weekend: raidWeekendId() });
   try {
     fetch(WEBHOOK, {
       method: 'POST',

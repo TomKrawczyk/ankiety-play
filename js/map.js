@@ -381,7 +381,7 @@ function sendPresence() {
     fetch(WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(authBody(payload))
     }).catch(function(){});
   } catch (e) {}
 }
@@ -391,6 +391,7 @@ function fetchMates() {
   if (!MAP.ready) return;
   var q = '?action=getPresence&viewer=' + encodeURIComponent(window._user || '');
   if (MAP.lastPos) { q += '&vlat=' + MAP.lastPos.lat + '&vlng=' + MAP.lastPos.lng; }
+  q += '&' + authQS();
   fetch(WEBHOOK + q)
     .then(function(r){ return r.json(); })
     .then(function(res){
@@ -637,11 +638,11 @@ function sendTrack() {
   try {
     fetch(WEBHOOK, {
       method: 'POST', headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
+      body: JSON.stringify(authBody({
         action: 'updateTrack', ankieter: window._user,
         date: todayStr(), points: slim, dist: trackDistance(),
         zones: Object.keys(loadCells()).length
-      })
+      }))
     }).catch(function(){});
   } catch (e) {}
 }
@@ -681,7 +682,7 @@ function fetchTeamTracks() {
   if (TEAM.mode !== 'team') return;
   var el = document.getElementById('teamTracksList');
   if (el) el.innerHTML = '<div class="team-empty">Ładuję trasy zespołu…</div>';
-  fetch(WEBHOOK + '?action=getTracks&date=' + todayStr())
+  fetch(WEBHOOK + '?action=getTracks&date=' + todayStr() + '&viewer=' + encodeURIComponent(window._user || '') + '&' + authQS())
     .then(function(r){ return r.json(); })
     .then(function(res){
       if (!res || res.status !== 'ok' || !Array.isArray(res.tracks)) return;
@@ -751,7 +752,7 @@ function clearHeat() {
 }
 
 function fetchHeat() {
-  fetch(WEBHOOK + '?action=getTracks&date=' + todayStr())
+  fetch(WEBHOOK + '?action=getTracks&date=' + todayStr() + '&viewer=' + encodeURIComponent(window._user || '') + '&' + authQS())
     .then(function(r){ return r.json(); })
     .then(function(res){
       if (!res || res.status !== 'ok') return;
@@ -1234,7 +1235,7 @@ function onFollowPresenceUpdate(agents) {
 // dociagnij cala dzisiejsza trase sledzonej osoby i narysuj wyrozniona linia
 function fetchFollowTrack() {
   if (!FOLLOW.active) return;
-  fetch(WEBHOOK + '?action=getTracks&date=' + todayStr())
+  fetch(WEBHOOK + '?action=getTracks&date=' + todayStr() + '&viewer=' + encodeURIComponent(window._user || '') + '&' + authQS())
     .then(function (r) { return r.json(); })
     .then(function (res) {
       if (!FOLLOW.active || !res || res.status !== 'ok' || !Array.isArray(res.tracks)) return;

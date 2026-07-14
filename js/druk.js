@@ -90,7 +90,7 @@ function handleOcrFileChosen(ev) {
 
     fetch(WEBHOOK, {
       method: 'POST',
-      body: JSON.stringify({ action: 'ocrSurvey', type: cfg.ocrType, image: base64 })
+      body: JSON.stringify(authBody({ action: 'ocrSurvey', type: cfg.ocrType, image: base64 }))
     })
       .then(function(r){ return r.json(); })
       .then(function(res){

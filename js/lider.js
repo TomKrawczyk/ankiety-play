@@ -44,9 +44,9 @@ function liderToday() {
 }
 
 function loadLiderData(silent) {
-  var pres = fetch(WEBHOOK + '?action=getPresence').then(function(r){return r.json();}).catch(function(){return null;});
-  var trk  = fetch(WEBHOOK + '?action=getTracks&date=' + liderToday()).then(function(r){return r.json();}).catch(function(){return null;});
-  var rank = fetch(WEBHOOK + '?action=getRanking').then(function(r){return r.json();}).catch(function(){return null;});
+  var pres = fetch(WEBHOOK + '?action=getPresence&viewer=' + encodeURIComponent(window._user || '') + '&' + authQS()).then(function(r){return r.json();}).catch(function(){return null;});
+  var trk  = fetch(WEBHOOK + '?action=getTracks&date=' + liderToday() + '&viewer=' + encodeURIComponent(window._user || '') + '&' + authQS()).then(function(r){return r.json();}).catch(function(){return null;});
+  var rank = fetch(WEBHOOK + '?action=getRanking&' + authQS()).then(function(r){return r.json();}).catch(function(){return null;});
 
   Promise.all([pres, trk, rank]).then(function(res){
     var agents = (res[0] && res[0].agents) || [];

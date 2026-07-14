@@ -10,7 +10,7 @@ function renderRanking() {
   if (!container) return;
   container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);font-size:0.85em">⏳ Ładowanie rankingu…</div>';
 
-  fetch(WEBHOOK + '?action=getRanking')
+  fetch(WEBHOOK + '?action=getRanking&' + authQS())
     .then(function(r){ return r.json(); })
     .then(function(res){
       if (res.status !== 'ok' || !res.data) throw new Error('no data');

@@ -620,7 +620,7 @@ function sendData(data, xp, isHot, fid) {
   fetch(WEBHOOK, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify(data)
+    body: JSON.stringify(authBody(data))
   })
   .then(function(r){ return r.text(); })
   .then(function(txt){
@@ -651,7 +651,7 @@ function pushRanking(name, xp, total, hot, streak, todayCount) {
   fetch(WEBHOOK, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(authBody(payload))
   }).catch(function(){}); // silent - nie blokujemy UI
 }
 

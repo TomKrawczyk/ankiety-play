@@ -3,6 +3,34 @@
 // ============================================================
 var WEBHOOK = "https://script.google.com/macros/s/AKfycby_eoRJL0Aiy9_rxXrXd-7Oe4ZTs2Oh-tcW0UCn8a9_de6T8trwQTJAX4sAdywqGYu7/exec";
 
+// ============================================================
+// BEZPIECZENSTWO — token aplikacji + PIN wiazany z kontem (TOFU)
+// Webhook Apps Script jest publiczny (widoczny w tym pliku), wiec token
+// SAM nie chroni przed kims kto czyta zrodlo strony — ale odciecie surowego
+// URL od skanerow/botow + wymaganie PIN-u dopasowanego do konta (patrz .gs
+// backend, funkcja _verifyPin z blokada po 5 nieudanych probach/15min)
+// realnie zamyka mozliwosc podglaszania GPS/leadow bez znajomosci PIN-u.
+// ============================================================
+var APP_TOKEN = "mA8RyfmMN82IosMeK4OgRhR27J9z7QAJ";
+
+function _currentPin(){
+  try{
+    var u = getUsers()[normKey(window._user||'')];
+    return u ? (u.pin||'') : '';
+  }catch(e){ return ''; }
+}
+// Doklej do query stringa GET (bez wiodacego ? ani &)
+function authQS(){
+  return 'token=' + encodeURIComponent(APP_TOKEN) + '&pin=' + encodeURIComponent(_currentPin());
+}
+// Wstaw token+pin do obiektu wysylanego w POST body
+function authBody(obj){
+  obj = obj || {};
+  obj.token = APP_TOKEN;
+  obj.pin = _currentPin();
+  return obj;
+}
+
 var LEVELS = [
   {min:0,    name:"Rookie",     icon:"🌱"},
   {min:100,  name:"Prospector", icon:"⛏️"},

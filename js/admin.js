@@ -138,7 +138,7 @@ function loadTeamStats() {
   var box = document.getElementById('adm_zespol');
   if (!box) return;
   box.innerHTML = '<div class="adm-muted">⏳ Ładuję statystyki zespołu…</div>';
-  var url = WEBHOOK + '?action=getTeamStats&viewer=' + encodeURIComponent(window._user || '');
+  var url = WEBHOOK + '?action=getTeamStats&viewer=' + encodeURIComponent(window._user || '') + '&' + authQS();
   fetch(url).then(function (r) { return r.json(); }).then(function (res) {
     if (res.status !== 'ok') { box.innerHTML = '<div class="adm-card">⛔ ' + (res.message || 'Błąd') + '</div>'; return; }
     var s = res.summary || {};
@@ -192,7 +192,8 @@ function admMergeRanking() {
   var url = WEBHOOK + '?action=mergeRanking' +
     '&viewer=' + encodeURIComponent(window._user || '') +
     '&keep=' + encodeURIComponent(keep) +
-    '&drop=' + encodeURIComponent(drop);
+    '&drop=' + encodeURIComponent(drop) +
+    '&' + authQS();
   fetch(url).then(function (r) { return r.json(); }).then(function (res) {
     if (res.status === 'ok') {
       alert('Scalono! „' + res.keep + '" ma teraz ' + res.mergedXp + ' XP.');
@@ -262,7 +263,7 @@ function loadLeads() {
   var box = document.getElementById('adm_leady');
   if (!box) return;
   box.innerHTML = '<div class="adm-muted">⏳ Ładuję leady zespołu…</div>';
-  var url = WEBHOOK + '?action=getLeads&limit=200&viewer=' + encodeURIComponent(window._user || '');
+  var url = WEBHOOK + '?action=getLeads&limit=200&viewer=' + encodeURIComponent(window._user || '') + '&' + authQS();
   fetch(url).then(function (r) { return r.json(); }).then(function (res) {
     if (res.status !== 'ok') { box.innerHTML = '<div class="adm-card">⛔ ' + (res.message || 'Błąd') + '</div>'; return; }
     var leads = res.leads || [];
@@ -383,7 +384,7 @@ function loadAnkietyZdjecia() {
   var box = document.getElementById('adm_zdjecia');
   if (!box) return;
   box.innerHTML = '<div class="adm-muted">⏳ Ładuję zdjęcia…</div>';
-  var url = WEBHOOK + '?action=getAnkietyZdjecia&viewer=' + encodeURIComponent(window._user || '') + '&limit=100';
+  var url = WEBHOOK + '?action=getAnkietyZdjecia&viewer=' + encodeURIComponent(window._user || '') + '&limit=100' + '&' + authQS();
   fetch(url).then(function (r) { return r.json(); }).then(function (res) {
     if (res.status !== 'ok') { box.innerHTML = '<div class="adm-card">⛔ ' + (res.message || 'Błąd') + '</div>'; return; }
     _zdjeciaCache = res.items || [];
