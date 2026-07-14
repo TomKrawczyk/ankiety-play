@@ -129,7 +129,7 @@ function dgRender(name){
     '<div class="dg-card'+(done?' dg-done':'')+'">' +
       '<div class="dg-ring">' +
         '<svg width="64" height="64" viewBox="0 0 64 64">' +
-          '<circle cx="32" cy="32" r="'+R+'" fill="none" stroke="rgba(128,128,128,0.18)" stroke-width="7"/>' +
+          '<circle cx="32" cy="32" r="'+R+'" fill="none" stroke="rgba(148,163,184,0.35)" stroke-width="7"/>' +
           '<circle cx="32" cy="32" r="'+R+'" fill="none" stroke="'+col+'" stroke-width="7" stroke-linecap="round" ' +
             'stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 32 32)" ' +
             'style="transition:stroke-dashoffset .6s ease"/>' +

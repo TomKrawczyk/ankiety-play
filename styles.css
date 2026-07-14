@@ -923,22 +923,7 @@ body.light { --muted:#475569; --muted2:#334155; }
 .nt-label { font-size:0.62em; font-weight:800; color:var(--muted2); text-transform:uppercase; letter-spacing:0.5px; }
 .nav-tile.active .nt-label { color:var(--green); }
 
-/* Kolory kafelków — każdy ma swój akcent */
-#msb_quick.active      { border-color:var(--green);  box-shadow:0 4px 14px rgba(16,216,115,0.25); }
-#msb_full.active       { border-color:var(--blue);   background:linear-gradient(135deg,rgba(96,165,250,0.15),rgba(96,165,250,0.05)); box-shadow:0 4px 14px rgba(96,165,250,0.2); }
-#msb_full.active .nt-label { color:var(--blue); }
-#msb_history.active    { border-color:var(--purple); background:linear-gradient(135deg,rgba(167,139,250,0.15),rgba(167,139,250,0.05)); box-shadow:0 4px 14px rgba(167,139,250,0.2); }
-#msb_history.active .nt-label { color:var(--purple); }
-#msb_ranking.active    { border-color:var(--gold);   background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.05)); box-shadow:0 4px 14px rgba(245,158,11,0.2); }
-#msb_ranking.active .nt-label { color:var(--gold); }
-#msb_lokalizacja.active{ border-color:var(--orange); background:linear-gradient(135deg,rgba(251,146,60,0.15),rgba(251,146,60,0.05)); box-shadow:0 4px 14px rgba(251,146,60,0.2); }
-#msb_lokalizacja.active .nt-label { color:var(--orange); }
-#msb_karty.active      { border-color:var(--yellow); background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(251,191,36,0.05)); box-shadow:0 4px 14px rgba(251,191,36,0.2); }
-#msb_karty.active .nt-label { color:var(--yellow); }
-#msb_battlepass.active { border-color:var(--red);    background:linear-gradient(135deg,rgba(248,113,113,0.15),rgba(248,113,113,0.05)); box-shadow:0 4px 14px rgba(248,113,113,0.2); }
-#msb_battlepass.active .nt-label { color:var(--red); }
-#msb_avatar.active     { border-color:#c084fc;       background:linear-gradient(135deg,rgba(192,132,252,0.15),rgba(192,132,252,0.05)); box-shadow:0 4px 14px rgba(192,132,252,0.2); }
-#msb_avatar.active .nt-label { color:#c084fc; }
+/* Kolor aktywnej zakładki — jeden konsekwentny zielony (brand), bez tęczy per-tab */
 
 /* ── SUB-TILES (zakładki ankiet) ── */
 .sub-tiles {
@@ -966,7 +951,7 @@ body.light { --muted:#475569; --muted2:#334155; }
   .nav-tile  { padding:10px 4px; border-radius:11px; }
 }
 @media (min-width:600px) {
-  .nav-tiles { grid-template-columns:repeat(8,1fr); }
+  .nav-tiles { grid-template-columns:repeat(6,1fr); max-width:640px; margin:0 auto; }
 }
 
 
@@ -1165,9 +1150,12 @@ body.kb-open .qflow { padding-bottom:45vh; }
 .catch-pin-wrap,.me-pin-wrap{background:transparent;border:none}
 
 /* ── PRESENCE: udostępnianie + zespół w terenie ── */
+.map-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.map-controls .map-share,
+.map-controls .map-track-btns{margin-bottom:0}
 .map-share{width:100%;border:none;cursor:pointer;border-radius:12px;
   padding:10px 14px;font-size:0.85em;font-weight:700;font-family:Inter,sans-serif;
-  margin-bottom:10px;transition:all .15s}
+  margin-bottom:10px;transition:all .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .map-share.on{background:rgba(16,216,115,0.15);color:var(--green);
   border:1px solid rgba(16,216,115,0.4)}
 .map-share.off{background:rgba(248,113,113,0.12);color:var(--red);
@@ -1203,8 +1191,8 @@ body.kb-open .qflow { padding-bottom:45vh; }
 .map-track-stats{font-size:0.82em;color:var(--text);background:var(--card2);
   border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:8px}
 .map-track-stats b{color:var(--green)}
-.map-track-btns{display:flex;gap:8px;margin-bottom:10px}
-.map-track-btns .map-share{flex:1;margin-bottom:0}
+.map-track-btns{display:flex;gap:6px;margin-bottom:10px}
+.map-track-btns .map-share{flex:1;margin-bottom:0;padding:10px 6px}
 .track-mini{flex-shrink:0;width:44px;border:1px solid var(--border2);cursor:pointer;
   background:var(--card2);color:var(--text);border-radius:12px;font-size:1.1em;transition:all .15s}
 .track-mini:active{transform:scale(0.94)}

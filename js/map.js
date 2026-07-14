@@ -358,10 +358,10 @@ function updateShareBtn() {
   if (!btn) return;
   if (isSharing()) {
     btn.className = 'map-share on';
-    btn.innerHTML = '📡 Udostępniam pozycję';
+    btn.innerHTML = '📡 Udostępniam';
   } else {
     btn.className = 'map-share off';
-    btn.innerHTML = '🚫 Pozycja ukryta (lider widzi „nie pracuje”)';
+    btn.innerHTML = '🚫 Ukryta';
   }
 }
 
@@ -578,7 +578,7 @@ function updateTrackBtn() {
   var b = document.getElementById('trackBtn');
   if (!b) return;
   b.className = 'map-share ' + (TRACK.shown ? 'on' : 'off');
-  b.innerHTML = TRACK.shown ? '🟢 Ślad trasy: widoczny' : '⚪ Ślad trasy: ukryty';
+  b.innerHTML = TRACK.shown ? '🟢 Ślad trasy' : '⚪ Ślad trasy';
 }
 
 // wyśrodkuj mapę na całej trasie
@@ -668,8 +668,8 @@ function toggleTeamMode() {
 function updateTeamModeBtn() {
   var b = document.getElementById('teamModeBtn');
   if (!b) return;
-  if (TEAM.mode === 'team') { b.className = 'map-share on'; b.innerHTML = '👥 Trasy zespołu (kliknij: moja)'; }
-  else { b.className = 'map-share off'; b.innerHTML = '🚶 Moja trasa (kliknij: zespół)'; }
+  if (TEAM.mode === 'team') { b.className = 'map-share on'; b.innerHTML = '👥 Zespół'; }
+  else { b.className = 'map-share off'; b.innerHTML = '🚶 Moja trasa'; }
 }
 
 function clearTeamLayers() {
@@ -745,7 +745,7 @@ function updateHeatBtn() {
   var b = document.getElementById('heatBtn');
   if (!b) return;
   b.className = 'map-share ' + (HEAT.on ? 'on' : 'off');
-  b.innerHTML = HEAT.on ? '🔥 Pokrycie: włączone' : '🗺️ Pokrycie terenu (heatmapa)';
+  b.innerHTML = HEAT.on ? '🔥 Pokrycie: ON' : '🗺️ Pokrycie';
 }
 function clearHeat() {
   if (HEAT.layer) { MAP.obj.removeLayer(HEAT.layer); HEAT.layer = null; }

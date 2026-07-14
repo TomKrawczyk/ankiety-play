@@ -42,8 +42,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
 
-<link rel="stylesheet" href="styles.css?v=202607142">
-<link rel="stylesheet" href="css/game-fx.css?v=202607142">
+<link rel="stylesheet" href="styles.css?v=202607143">
+<link rel="stylesheet" href="css/game-fx.css?v=202607143">
   <!-- Leaflet (mapa Pokémon GO-style) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -257,16 +257,18 @@
       <div id="geoStatus" class="map-geo">📡 Włącz lokalizację, żeby zacząć łowy</div>
     </div>
     <div id="mapNearby" class="map-nearby"></div>
-    <button id="shareBtn" class="map-share on" onclick="toggleSharing()">📡 Udostępniam pozycję</button>
+    <div class="map-controls">
+      <button id="shareBtn" class="map-share on" onclick="toggleSharing()" title="Widoczność Twojej pozycji dla zespołu">📡 Udostępniam</button>
+      <button id="teamModeBtn" class="map-share off" onclick="toggleTeamMode()" title="Kliknij, żeby przełączyć: moja trasa / trasy zespołu">🚶 Moja trasa</button>
+      <div class="map-track-btns">
+        <button id="trackBtn" class="map-share on" onclick="toggleTrack()">🟢 Ślad trasy</button>
+        <button class="track-mini" onclick="fitTrack()" title="Pokaż całą trasę">🔍</button>
+        <button class="track-mini" onclick="clearTrack()" title="Wyczyść dzisiejszą trasę">🗑️</button>
+      </div>
+      <button id="heatBtn" class="map-share off" onclick="toggleHeat()" title="Heatmapa pokrycia terenu">🗺️ Pokrycie</button>
+    </div>
     <div id="mapTeam" class="map-team"></div>
     <div id="trackStats" class="map-track-stats"></div>
-    <div class="map-track-btns">
-      <button id="trackBtn" class="map-share on" onclick="toggleTrack()">🟢 Ślad trasy: widoczny</button>
-      <button class="track-mini" onclick="fitTrack()" title="Pokaż całą trasę">🔍</button>
-      <button class="track-mini" onclick="clearTrack()" title="Wyczyść dzisiejszą trasę">🗑️</button>
-    </div>
-    <button id="teamModeBtn" class="map-share off" onclick="toggleTeamMode()">🚶 Moja trasa (kliknij: zespół)</button>
-    <button id="heatBtn" class="map-share off" onclick="toggleHeat()">🗺️ Pokrycie terenu (heatmapa)</button>
     <div id="teamTracksList" class="map-team"></div>
     <div class="map-wrap">
       <div id="mapCanvas"></div>
@@ -356,25 +358,25 @@
      SKRYPTY — kolejność ładowania ma znaczenie!
 
      Jeśli pliki są w tym samym folderze co index.html:
-       <script src="js/config.js?v=202607142"></script>  itd.
+       <script src="js/config.js?v=202607143"></script>  itd.
 
      Jeśli WordPress umieszcza index.html w katalogu głównym
      a pliki JS w podfolderze, zmień ścieżki odpowiednio.
      ============================================================ -->
-<script src="js/config.js?v=202607142"></script>
-<script src="js/auth.js?v=202607142"></script>
-<script src="js/flow.js?v=202607142"></script>
-<script src="js/history.js?v=202607142"></script>
-<script src="js/avatar.js?v=202607142"></script>
-<script src="js/ranking.js?v=202607142"></script>
-<script src="js/druk.js?v=202607142"></script>
-<script src="js/gamification.js?v=202607142"></script>
-<script src="js/dailygoal.js?v=202607142"></script>
-<script src="js/cards.js?v=202607142"></script>
-<script src="js/map.js?v=202607142"></script>
-<script src="js/lider.js?v=202607142"></script>
-<script src="js/game-fx.js?v=202607142"></script>
-<script src="js/admin.js?v=202607142"></script>
+<script src="js/config.js?v=202607143"></script>
+<script src="js/auth.js?v=202607143"></script>
+<script src="js/flow.js?v=202607143"></script>
+<script src="js/history.js?v=202607143"></script>
+<script src="js/avatar.js?v=202607143"></script>
+<script src="js/ranking.js?v=202607143"></script>
+<script src="js/druk.js?v=202607143"></script>
+<script src="js/gamification.js?v=202607143"></script>
+<script src="js/dailygoal.js?v=202607143"></script>
+<script src="js/cards.js?v=202607143"></script>
+<script src="js/map.js?v=202607143"></script>
+<script src="js/lider.js?v=202607143"></script>
+<script src="js/game-fx.js?v=202607143"></script>
+<script src="js/admin.js?v=202607143"></script>
 
 </body>
 </html>
