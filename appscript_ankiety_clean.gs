@@ -32,6 +32,97 @@ function _distKm(lat1,lng1,lat2,lng2){
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
+// ============================================================
+// BEZPIECZENSTWO — token aplikacji + PIN wiazany z kontem (TOFU)
+// ============================================================
+// Token musi byc IDENTYCZNY jak APP_TOKEN w js/config.js na froncie.
+// Sam w sobie nie jest "sekretem" (kod frontu jest publiczny na GitHub Pages),
+// ale odcina automatyczne skanery/boty trafiajace na goly URL webhooka.
+// Prawdziwa ochrona danych (GPS, leady, trasy) to PIN nizej.
+var APP_TOKEN = "mA8RyfmMN82IosMeK4OgRhR27J9z7QAJ";
+
+var PIN_COL = 8;                 // kolumna w arkuszu Ranking gdzie trzymany jest hash PIN-u (poza HEADERS_RANKING, zeby nie ruszac istniejacej logiki 7-kolumnowej)
+var PIN_MAX_FAILS = 5;           // po tylu nieudanych probach -> blokada czasowa
+var PIN_LOCKOUT_SEC = 15 * 60;   // 15 minut blokady (chroni przed brute-force 4-cyfrowego PIN-u)
+
+function _hasValidToken(obj){
+  return !!(obj && obj.token === APP_TOKEN);
+}
+
+function _hashPin(pin){
+  var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, (pin || "") + "|ankiety-play-salt-2026");
+  return digest.map(function(b){
+    var v = (b < 0 ? b + 256 : b).toString(16);
+    return v.length === 1 ? "0" + v : v;
+  }).join("");
+}
+
+// Sprawdza PIN dla danej nazwy wzgledem hasha zapisanego w arkuszu Ranking (kolumna PIN_COL).
+// TOFU (trust-on-first-use): pierwsze uzycie danej nazwy+PIN-u zapisuje hash i przepuszcza —
+// tak jak dzisiejszy lokalny PIN (rejestrowany raz, potem musi sie zgadzac). Po PIN_MAX_FAILS
+// nieudanych prob w PIN_LOCKOUT_SEC -> blokada, co realnie wylucza zdalny brute-force.
+function _verifyPin(name, pin){
+  name = (name || "").toString().trim();
+  if (!name) return false;
+
+  var cache = CacheService.getScriptCache();
+  var lockKey = "pinfail_" + name.toLowerCase();
+  var fails = Number(cache.get(lockKey) || 0);
+  if (fails >= PIN_MAX_FAILS) return false;
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = getOrCreateSheet(ss, SHEET_RANKING, HEADERS_RANKING, "#0d2137");
+  var lastRow = sh.getLastRow();
+  var rowIdx = -1;
+  if (lastRow >= 2) {
+    var names = sh.getRange(2, 1, lastRow - 1, 1).getValues();
+    for (var i = 0; i < names.length; i++) {
+      if ((names[i][0] || "").toString().trim().toLowerCase() === name.toLowerCase()) { rowIdx = i + 2; break; }
+    }
+  }
+
+  var hash = _hashPin(pin);
+
+  if (rowIdx === -1) {
+    // Nowa osoba — utworz wiersz z zapisanym hashem (TOFU bootstrap)
+    var blank = new Array(PIN_COL).fill("");
+    blank[0] = name;
+    blank[PIN_COL - 1] = hash;
+    sh.appendRow(blank);
+    cache.remove(lockKey);
+    return true;
+  }
+
+  var stored = sh.getRange(rowIdx, PIN_COL, 1, 1).getValue();
+  if (!stored) {
+    // Konto juz istnieje (np. z synchronizacji rankingu) ale nie mialo jeszcze PIN-u — zapisz teraz
+    sh.getRange(rowIdx, PIN_COL, 1, 1).setValue(hash);
+    cache.remove(lockKey);
+    return true;
+  }
+  if (stored === hash) { cache.remove(lockKey); return true; }
+
+  cache.put(lockKey, String(fails + 1), PIN_LOCKOUT_SEC);
+  return false;
+}
+
+// Ochrona przed formula injection przy zapisie wolnego tekstu do Sheets
+// (string zaczynajacy sie od =,+,-,@ moze zostac wykonany jako formula w Excelu/Sheets)
+function _sanitizeCell(v){
+  v = (v === null || v === undefined) ? "" : v.toString();
+  if (/^[=+\-@]/.test(v)) return "'" + v;
+  return v;
+}
+
+// Prosty rate-limit kosztownych akcji (np. OCR -> zuzywa platny/limitowany Gemini)
+function _rateLimited(key, maxPerWindow, windowSec){
+  var cache = CacheService.getScriptCache();
+  var count = Number(cache.get(key) || 0);
+  if (count >= maxPerWindow) return true;
+  cache.put(key, String(count + 1), windowSec);
+  return false;
+}
+
 var SHEET_RAID = "RaidWeekend";
 var HEADERS_RAID = [
   "Weekend ID","Ankieter","Zapisano(PL)"
@@ -79,35 +170,49 @@ function doPost(e) {
   try {
     var d = JSON.parse(e.postData.contents);
 
+    if (!_hasValidToken(d)) {
+      return jsonResp({ status: "error", message: "Brak autoryzacji" });
+    }
+
     if (d.action === 'updateRanking') {
+      if (!_verifyPin(d.name, d.pin)) return jsonResp({ status: "denied", message: "Nieprawidlowy PIN" });
       return handleUpdateRanking(d);
     }
 
     if (d.action === 'updatePresence') {
+      if (!_verifyPin(d.ankieter, d.pin)) return jsonResp({ status: "denied", message: "Nieprawidlowy PIN" });
       return handleUpdatePresence(d);
     }
 
     if (d.action === 'updateTrack') {
+      if (!_verifyPin(d.ankieter, d.pin)) return jsonResp({ status: "denied", message: "Nieprawidlowy PIN" });
       return handleUpdateTrack(d);
     }
 
     if (d.action === 'joinRaid') {
+      if (!_verifyPin(d.ankieter, d.pin)) return jsonResp({ status: "denied", message: "Nieprawidlowy PIN" });
       return handleJoinRaid(d);
     }
 
     if (d.action === 'mergeRanking') {
+      if (!_verifyPin(d.viewer, d.pin) || !_isAdmin(d.viewer)) return jsonResp({ status: "denied", message: "Brak uprawnien" });
       return handleMergeRanking(d);
     }
 
     if (d.action === 'saveCV') {
+      // Brak jednej powiazanej tozsamosci ankietera w tym formularzu -> token wystarcza jako brama
       return handleSaveCV(d);
     }
 
     if (d.action === 'ocrSurvey') {
+      if (_rateLimited('ocr_global_' + Math.floor(Date.now()/60000), 20, 90)) {
+        return jsonResp({ status: "error", message: "Zbyt wiele zadan OCR na raz — sprobuj za chwile" });
+      }
       return handleOcrSurvey(d);
     }
 
-    // Domyślnie: zapis ankiety
+    // Domyślnie: zapis ankiety (wymaga poprawnego PIN-u ankietera)
+    if (!_verifyPin(d.ankieter, d.pin)) return jsonResp({ status: "denied", message: "Nieprawidlowy PIN" });
     return handleSaveAnkieta(d);
 
   } catch(err) {
@@ -117,30 +222,41 @@ function doPost(e) {
 
 function doGet(e) {
   try {
-    var action = e.parameter.action || '';
+    var p = e.parameter || {};
+    if (!_hasValidToken(p)) {
+      return jsonResp({ status: "error", message: "Brak autoryzacji" });
+    }
+
+    var action = p.action || '';
     if (action === 'getRanking') {
       return handleGetRanking();
     }
     if (action === 'getPresence') {
-      return handleGetPresence(e.parameter.viewer || '', e.parameter.vlat, e.parameter.vlng);
+      if (!_verifyPin(p.viewer, p.pin)) return jsonResp({ status: "denied", message: "Nieprawidlowy PIN" });
+      return handleGetPresence(p.viewer || '', p.vlat, p.vlng);
     }
     if (action === 'getTracks') {
-      return handleGetTracks(e.parameter.date || '');
+      if (!_verifyPin(p.viewer, p.pin)) return jsonResp({ status: "denied", message: "Nieprawidlowy PIN" });
+      return handleGetTracks(p.date || '');
     }
     if (action === 'getRaid') {
-      return handleGetRaid(e.parameter.weekend || '');
+      return handleGetRaid(p.weekend || '');
     }
     if (action === 'getTeamStats') {
-      return handleGetTeamStats(e.parameter.viewer || '');
+      if (!_verifyPin(p.viewer, p.pin) || !_isAdmin(p.viewer)) return jsonResp({ status: "denied", message: "Brak uprawnien" });
+      return handleGetTeamStats(p.viewer || '');
     }
     if (action === 'mergeRanking') {
-      return handleMergeRanking({ viewer: e.parameter.viewer || '', keep: e.parameter.keep || '', drop: e.parameter.drop || '' });
+      if (!_verifyPin(p.viewer, p.pin) || !_isAdmin(p.viewer)) return jsonResp({ status: "denied", message: "Brak uprawnien" });
+      return handleMergeRanking({ viewer: p.viewer || '', keep: p.keep || '', drop: p.drop || '' });
     }
     if (action === 'getLeads') {
-      return handleGetLeads(e.parameter.viewer || '', e.parameter.limit || '200');
+      if (!_verifyPin(p.viewer, p.pin) || !_isAdmin(p.viewer)) return jsonResp({ status: "denied", message: "Brak uprawnien" });
+      return handleGetLeads(p.viewer || '', p.limit || '200');
     }
     if (action === 'getAnkietyZdjecia') {
-      return handleGetAnkietyZdjecia(e.parameter.viewer || '', e.parameter.limit || '100');
+      if (!_verifyPin(p.viewer, p.pin) || !_isAdmin(p.viewer)) return jsonResp({ status: "denied", message: "Brak uprawnien" });
+      return handleGetAnkietyZdjecia(p.viewer || '', p.limit || '100');
     }
     return jsonResp({ status: "error", message: "Nieznana akcja GET" });
   } catch(err) {
@@ -204,7 +320,7 @@ function handleSaveAnkieta(d) {
     d.zdjecie ? _saveZdjecieDoDrive(d.zdjecie, (d.ankieter||"ankieter") + "_" + (d.telefon||"tel")) : ""
   ];
 
-  sh.appendRow(row);
+  sh.appendRow(row.map(_sanitizeCell));
   var lastRow = sh.getLastRow();
 
   // Koloruj wiersz wg temperatury leada
@@ -546,7 +662,7 @@ function handleSaveCV(d) {
     if (existing[t9]) { dup++; continue; }
     existing[t9] = true;
 
-    rows.push([ts, name, addr, tel, src, "nowy"]);
+    rows.push([ts, name, addr, tel, src, "nowy"].map(_sanitizeCell));
     added++;
   }
 
@@ -861,16 +977,7 @@ function _slugify(s) {
   return (s || "").toString().replace(/[^a-zA-Z0-9]+/g, "_").substring(0, 40);
 }
 
-// Kolumny "7 pytan kwestionariusza" per typ ankiety - do liczenia kompletnosci danych
-// (ankieter czasem nie wypelnia wszystkich przy szybkim wpisywaniu z kartki - admin dopelnia recznie).
-var QUIZ_COLS_BY_TYPE = {
-  PVSKR: ["Finansowanie PV","PV od kiedy","Rachunki mimo PV","Uzyski sprawdzane","Pewność instalacji","Potrzeba klienta","Zgoda na audyt"],
-  KLIMA: ["Klima: pomieszczenia","Klima: powierzchnia","Klima: upał latem","Klima: grzanie zimą","Klima: priorytet","Klima: termin","Klima: zgoda na wycenę"]
-};
-
 // Panel admina -> zakladka "Zdjecia": lista ostatnich ankiet z dolaczonym zdjeciem kartki.
-// Dolacza numer wiersza + link do konkretnego wiersza w arkuszu oraz licznik brakujacych
-// odpowiedzi z kwestionariusza (PVSKR/KLIMA), zeby admin szybko dopelnial dane ze zdjecia.
 function handleGetAnkietyZdjecia(viewer, limitRaw) {
   if (!_isAdmin(viewer)) return jsonResp({ status: "denied", message: "Brak uprawnien" });
   var limit = Math.min(Math.max(parseInt(limitRaw, 10) || 100, 1), 500);
@@ -879,12 +986,9 @@ function handleGetAnkietyZdjecia(viewer, limitRaw) {
   var sh = ss.getSheetByName(SHEET_ANKIETY);
   var items = [];
   if (sh && sh.getLastRow() > 1) {
-    var sheetId = sh.getSheetId();
-    var spreadsheetId = ss.getId();
     var rng = sh.getDataRange().getValues();
-    var head = rng[0].map(function (h) { return (h || "").toString().trim(); });
-    var headLower = head.map(function (h) { return h.toLowerCase(); });
-    function idx(name) { return headLower.indexOf(name.toLowerCase()); }
+    var head = rng[0].map(function (h) { return (h || "").toString().trim().toLowerCase(); });
+    function idx(name) { return head.indexOf(name.toLowerCase()); }
     var iData  = idx("Data zapisu");
     var iTyp   = idx("Typ ankiety");
     var iAnk   = idx("Ankieter");
@@ -895,40 +999,19 @@ function handleGetAnkietyZdjecia(viewer, limitRaw) {
     var iZdj   = idx("Zdjęcie ankiety (URL)");
     if (iZdj === -1) return jsonResp({ status: "ok", items: [] });
 
-    function cell(rowArr, ci) {
-      // Nie uzywac "|| \"\"" - zgubi legalna wartosc liczbowa 0. Tylko null/undefined -> "".
-      var v = ci >= 0 ? rowArr[ci] : "";
-      return (v === null || v === undefined) ? "" : v.toString();
-    }
-
     for (var r = rng.length - 1; r >= 1 && items.length < limit; r--) {
       var row = rng[r];
-      var url = cell(row, iZdj);
+      var url = (row[iZdj] || "").toString();
       if (!url) continue;
-      var typ = cell(row, iTyp);
-      var quizCols = QUIZ_COLS_BY_TYPE[typ] || null;
-      var missing = 0, total = 0;
-      if (quizCols) {
-        total = quizCols.length;
-        for (var qc = 0; qc < quizCols.length; qc++) {
-          var val = cell(row, idx(quizCols[qc])).trim();
-          if (!val) missing++;
-        }
-      }
-      var sheetRow = r + 1; // r indeksuje rng (0=naglowek), sheet jest 1-based -> ta sama liczba
       items.push({
-        data: cell(row, iData),
-        typ: typ,
-        ankieter: cell(row, iAnk),
-        imie: cell(row, iImie),
-        telefon: cell(row, iTel),
-        msc: cell(row, iMsc),
-        temp: cell(row, iTemp),
-        zdjecie: url,
-        row: sheetRow,
-        missing: missing,
-        total: total,
-        sheetUrl: "https://docs.google.com/spreadsheets/d/" + spreadsheetId + "/edit#gid=" + sheetId + "&range=A" + sheetRow
+        data: iData >= 0 ? (row[iData] || "").toString() : "",
+        typ: iTyp >= 0 ? (row[iTyp] || "").toString() : "",
+        ankieter: iAnk >= 0 ? (row[iAnk] || "").toString() : "",
+        imie: iImie >= 0 ? (row[iImie] || "").toString() : "",
+        telefon: iTel >= 0 ? (row[iTel] || "").toString() : "",
+        msc: iMsc >= 0 ? (row[iMsc] || "").toString() : "",
+        temp: iTemp >= 0 ? (row[iTemp] || "").toString() : "",
+        zdjecie: url
       });
     }
   }
