@@ -1,7 +1,7 @@
 // ============================================================
 // CONFIG — stałe, poziomy, osiągnięcia
 // ============================================================
-var WEBHOOK = "https://script.google.com/macros/s/AKfycby_eoRJL0Aiy9_rxXrXd-7Oe4ZTs2Oh-tcW0UCn8a9_de6T8trwQTJAX4sAdywqGYu7/exec";
+var WEBHOOK = "https://script.google.com/macros/s/AKfycbzZGgo_HjGyuP_o7KpyUWtdPUuHBwrjujpTcpH3Igg58L7wKSkrWqwB_4btcPxphoFL/exec";
 
 // ============================================================
 // BEZPIECZENSTWO — token aplikacji + PIN wiazany z kontem (TOFU)
