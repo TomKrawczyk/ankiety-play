@@ -3,16 +3,16 @@
 // ============================================================
 
 function getStats(name) {
-  var u = getUsers()[(name||'').toLowerCase()] || {};
+  var u = getUsers()[normKey(name)] || {};
   var today = new Date().toLocaleDateString('pl-PL');
   var td = 0;
-  try { var t = JSON.parse(localStorage.getItem('4eco_td_' + (name||'').toLowerCase())) || {}; td = t.d === today ? (t.c||0) : 0; } catch(e) {}
+  try { var t = JSON.parse(localStorage.getItem('4eco_td_' + normKey(name))) || {}; td = t.d === today ? (t.c||0) : 0; } catch(e) {}
   return {xp:u.xp||0, total:u.total||0, hot:u.hot||0, streak:u.streak||0, today:td, lastDay:u.lastDay||'', achs:u.achs||[]};
 }
 
 // ── STATY TYGODNIOWE (reset wg klucza ISO) ──
 function getWeekStats(name) {
-  var k = (name||'').toLowerCase();
+  var k = normKey(name);
   var wk = getWeekKey();
   var w;
   try { w = JSON.parse(localStorage.getItem('4eco_wk_'+k)) || {}; } catch(e) { w = {}; }
@@ -30,7 +30,7 @@ function getWeekStats(name) {
 // ── Sprawdź ukończone tygodniowe wyzwania → przyznaj XP raz (claim) ──
 function checkWeekly(name) {
   if (typeof WEEKLY_CHALLENGES === 'undefined') return;
-  var k = (name||'').toLowerCase();
+  var k = normKey(name);
   var us = getUsers(); if (!us[k]) return;
   var wk = getWeekKey();
   var wkey = '4eco_wk_'+k;
@@ -58,7 +58,7 @@ function checkWeekly(name) {
 
 // ── Czysty dopływ XP (bonusy: cel dnia, raid, itp.) — NIE liczy jako ankieta ──
 function addBonusXP(name, amount){
-  var us = getUsers(), k = (name||'').toLowerCase();
+  var us = getUsers(), k = normKey(name);
   if (!us[k]) return;
   var oldLv = getLv(us[k].xp || 0).level;
   us[k].xp = (us[k].xp||0) + (amount||0);
@@ -76,7 +76,7 @@ function addBonusXP(name, amount){
 }
 
 function addXP(name, amount, isHot) {
-  var us = getUsers(), k = (name||'').toLowerCase();
+  var us = getUsers(), k = normKey(name);
   if (!us[k]) return;
   var today = new Date().toLocaleDateString('pl-PL');
   var oldLv = getLv(us[k].xp || 0).level;
@@ -146,7 +146,7 @@ function getLv(xp) {
 }
 
 function checkAchs(name) {
-  var us = getUsers(), k = (name||'').toLowerCase();
+  var us = getUsers(), k = normKey(name);
   if (!us[k]) return;
   var s = getStats(name);
   if (!us[k].achs) us[k].achs = [];
@@ -532,7 +532,7 @@ function renderKarty() {
   var panel = document.getElementById('panel_karty');
   if (!panel) return;
 
-  var k     = '4eco_cards_' + (window._user||'anon').toLowerCase();
+  var k     = '4eco_cards_' + normKey(window._user||'anon');
   var owned = [];
   try { owned = JSON.parse(localStorage.getItem(k)) || []; } catch(e) {}
   var ownedIds = owned.map(function(c){ return c.id; });

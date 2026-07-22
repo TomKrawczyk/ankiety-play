@@ -335,8 +335,8 @@ function renderMapa() {
 // Wysyłanie własnej pozycji + pobieranie kolegów co PRESENCE_EVERY ms.
 // Wyłączenie udostępniania = status "ukryty" (sygnał dla lidera, że nie pracuje).
 
-var PRESENCE_SEND_EVERY  = 120000;  // 2 min — wysyłka własnej pozycji
-var PRESENCE_FETCH_EVERY = 180000;  // 3 min — pobieranie kolegów
+var PRESENCE_SEND_EVERY  = 60000;   // 1 min — wysyłka własnej pozycji (skrócone z 2 min — margines vs TTL 3-5 min był za wąski, ludzie znikali z mapy)
+var PRESENCE_FETCH_EVERY = 90000;   // 1.5 min — pobieranie kolegów (odświeża częściej niż znikają)
 var MATE = { markers: {}, sendTimer: null, fetchTimer: null, isAdmin: false, nearbyKm: null };
 
 // ── Udostępnianie lokalizacji: domyślnie WŁĄCZONE ──
@@ -1119,7 +1119,7 @@ function collectWild(w) {
 function awardWildXp(name, amount) {
   if (!name) return;
   try {
-    var us = getUsers(), k = name.toLowerCase();
+    var us = getUsers(), k = normKey(name);
     if (!us[k]) return;
     var oldLv = (typeof getLv === 'function') ? getLv(us[k].xp || 0).level : 0;
     us[k].xp = (us[k].xp || 0) + amount;

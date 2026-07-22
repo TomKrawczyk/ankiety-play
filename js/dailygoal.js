@@ -37,7 +37,7 @@ function dgSave(name, st){
 
 // Ile ankiet zrobiono DZIŚ (z licznika dziennego gamification)
 function dgTodayCount(name){
-  var k = (name||'').toLowerCase(), today = dgTodayStr();
+  var k = normKey(name), today = dgTodayStr();
   try {
     var td = JSON.parse(localStorage.getItem('4eco_td_'+k)) || {};
     return td.d === today ? (td.c||0) : 0;

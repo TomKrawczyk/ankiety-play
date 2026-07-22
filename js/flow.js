@@ -612,26 +612,101 @@ function submitFlow(fid) {
   sendData(data, s.xpAmount, data.temp_leada==='Gorący', fid);
 }
 
+// ============================================================
+// KOLEJKA DOSTARCZANIA (retry) — apka w polu ma slaby/zrywany internet.
+// Wczesniej: blad sieci przy zapisie ankiety byl CICHO ignorowany (zakladano
+// ze to tylko "sztuczny" blad z przekierowania Apps Script) — w rzeczywistosci
+// realny brak polaczenia = dane NIGDY nie trafialy do arkusza, a ankieter i tak
+// widzial "Zapisano!". Teraz: UI dalej dziala optymistycznie (bez blokowania
+// pracy w terenie), ale kazdy nieudany zapis idzie do trwalej kolejki w
+// localStorage i jest automatycznie wysylany ponownie (przy starcie apki,
+// powrocie polaczenia i co ~45s), az serwer faktycznie potwierdzi {status:"ok"}.
+// ============================================================
+var PENDING_KEY = '4eco_pending_sends';
+
+function _getPending(){
+  try { return JSON.parse(localStorage.getItem(PENDING_KEY)) || []; } catch(e){ return []; }
+}
+function _savePending(list){
+  try { localStorage.setItem(PENDING_KEY, JSON.stringify(list)); } catch(e){}
+}
+function _queuePending(rawBody){
+  var list = _getPending();
+  list.push({ body: rawBody, ts: Date.now(), tries: 0 });
+  // limit rozrostu — max 300 wpisow, najstarsze najpierw wyleca
+  if (list.length > 300) list = list.slice(list.length - 300);
+  _savePending(list);
+  _updatePendingBadge();
+}
+function _updatePendingBadge(){
+  try {
+    var n = _getPending().length;
+    var b = document.getElementById('pendingBadge');
+    if (!b) return;
+    if (n > 0) { b.style.display = 'inline-block'; b.textContent = '⏳ ' + n + ' do wysłania'; }
+    else b.style.display = 'none';
+  } catch(e){}
+}
+var _flushingPending = false;
+function flushPendingQueue(){
+  if (_flushingPending) return;
+  var list = _getPending();
+  if (!list.length) return;
+  _flushingPending = true;
+  var remaining = list.slice();
+  var next = function(){
+    if (!remaining.length) { _flushingPending = false; _updatePendingBadge(); return; }
+    var item = remaining[0];
+    fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: item.body })
+      .then(function(r){ return r.text(); })
+      .then(function(txt){
+        var ok = false;
+        try { var res = JSON.parse(txt); ok = (res.status === 'ok'); } catch(e){}
+        if (ok) {
+          remaining.shift();
+          var all = _getPending();
+          var idx = all.findIndex(function(x){ return x.ts === item.ts && x.body === item.body; });
+          if (idx > -1) { all.splice(idx,1); _savePending(all); }
+        } else {
+          item.tries = (item.tries||0)+1;
+          remaining.shift(); // spróbuj kolejny, ten wróci w następnym cyklu
+        }
+        next();
+      })
+      .catch(function(){ remaining.shift(); next(); }); // brak sieci — spróbujemy w kolejnym cyklu
+  };
+  next();
+}
+window.addEventListener('online', flushPendingQueue);
+window.addEventListener('DOMContentLoaded', function(){ _updatePendingBadge(); setTimeout(flushPendingQueue, 2000); });
+setInterval(flushPendingQueue, 45000);
+
 function sendData(data, xp, isHot, fid) {
   var btns = document.querySelectorAll('#'+fid+' .btn-submit, #'+fid+' .btn-next');
   btns.forEach(function(b){b.disabled=true;b.textContent='Zapisuję...';});
+
+  var rawBody = JSON.stringify(authBody(data));
 
   // Content-Type: text/plain omija preflight CORS i redirect w Apps Script
   fetch(WEBHOOK, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify(authBody(data))
+    body: rawBody
   })
   .then(function(r){ return r.text(); })
   .then(function(txt){
     try {
       var res = JSON.parse(txt);
-      if(res.status === 'error') { showToast('⚠️ Błąd arkusza: ' + res.message); }
-    } catch(e) {}
+      if(res.status === 'error') { showToast('⚠️ Błąd arkusza: ' + res.message); _queuePending(rawBody); }
+    } catch(e) {
+      // odpowiedz nie jest poprawnym JSON-em — nie mamy potwierdzenia, dogrywamy w kolejce
+      _queuePending(rawBody);
+    }
     afterSave(data, xp, isHot, fid);
   })
   .catch(function(){
-    // fetch rzuca błąd przy no-cors redirect — ale dane i tak dotarły
+    // realny brak polaczenia / blad sieci — dane NIE dotarly, wsadz do kolejki retry
+    _queuePending(rawBody);
     afterSave(data, xp, isHot, fid);
   });
 }
@@ -648,11 +723,17 @@ function pushRanking(name, xp, total, hot, streak, todayCount) {
     today:   todayCount,
     date:    today
   };
+  var rawBody = JSON.stringify(authBody(payload));
   fetch(WEBHOOK, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify(authBody(payload))
-  }).catch(function(){}); // silent - nie blokujemy UI
+    body: rawBody
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(txt){
+    try { var res = JSON.parse(txt); if (res.status !== 'ok') _queuePending(rawBody); } catch(e){ _queuePending(rawBody); }
+  })
+  .catch(function(){ _queuePending(rawBody); }); // wczesniej: catch(function(){}) — ranking gubiony bez sladu
 }
 
 function afterSave(data, xp, isHot, fid) {
